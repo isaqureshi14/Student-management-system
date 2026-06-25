@@ -30,20 +30,20 @@ const notesDir   = path.join(uploadsDir, 'notes');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
-// ─── Core Middleware ──────────────────────────────────────────────────────────
-// Restrict CORS to same origin (localhost in dev, change for production)
+// ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
   : ['http://localhost:3001', 'http://127.0.0.1:3001'];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (same-origin, curl, Postman)
     if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error('CORS: origin not allowed'));
   },
   credentials: true,
 }));
+
+// ─── Core Middleware ──────────────────────────────────────────────────────────
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
@@ -53,33 +53,100 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-// ─── Rate limiting ────────────────────────────────────────────────────────────
+// ─── Rate Limiting ────────────────────────────────────────────────────────────
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20,                   // max 20 login attempts per IP per window
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many login attempts. Please try again in 15 minutes.' },
 });
 
 // ─── Static Files ─────────────────────────────────────────────────────────────
-// Serve uploaded files
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('./middleware/auth');
+
+// Simple cookie parser helper
+const parseCookies = (req) => {
+  const list = {};
+  const rc = req.headers.cookie;
+  if (rc) {
+    rc.split(';').forEach((cookie) => {
+      const parts = cookie.split('=');
+      list[parts.shift().trim()] = decodeURI(parts.join('='));
+    });
+  }
+  return list;
+};
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve the frontend HTML files from D:\$PRO2
-// Map numbered filenames to clean URLs
+// On Render, frontend files are served from the same repo root
 const frontendDir = path.join(__dirname, '..');
+
+// HTML Page Route Authorization Middleware
+app.use((req, res, next) => {
+  const filePath = req.path;
+  const isHtml = filePath.endsWith('.html') || filePath === '/';
+  if (!isHtml) {
+    return next();
+  }
+
+  const normalizedPath = filePath.replace(/^\//, '').toLowerCase();
+
+  // Public pages
+  if (normalizedPath === '' || normalizedPath === 'index.html' || normalizedPath.includes('login_page')) {
+    return next();
+  }
+
+  let requiredRole = null;
+  if (normalizedPath.includes('owner_page')) {
+    requiredRole = 'OWNER';
+  } else if (normalizedPath.includes('teacher_page')) {
+    requiredRole = 'TEACHER';
+  } else if (normalizedPath.includes('student_page')) {
+    requiredRole = 'STUDENT';
+  } else if (normalizedPath.includes('parent_page')) {
+    requiredRole = 'PARENT';
+  } else {
+    return next();
+  }
+
+  const cookies = parseCookies(req);
+  const token = cookies.token;
+
+  if (!token) {
+    return res.redirect('/login_page.html');
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.role === requiredRole) {
+      let targetFile = '';
+      if (requiredRole === 'OWNER') targetFile = '5owner_page.html';
+      else if (requiredRole === 'TEACHER') targetFile = '4teacher_page.html';
+      else if (requiredRole === 'PARENT') targetFile = '3parent_page.html';
+      else if (requiredRole === 'STUDENT') targetFile = '2student_page.html';
+      
+      return res.sendFile(path.join(frontendDir, targetFile));
+    } else {
+      return res.redirect('/login_page.html');
+    }
+  } catch (err) {
+    return res.redirect('/login_page.html');
+  }
+});
+
 app.get('/login_page.html',   (req, res) => res.sendFile(path.join(frontendDir, '1login_page.html')));
 app.get('/student_page.html', (req, res) => res.sendFile(path.join(frontendDir, '2student_page.html')));
 app.get('/parent_page.html',  (req, res) => res.sendFile(path.join(frontendDir, '3parent_page.html')));
 app.get('/teacher_page.html', (req, res) => res.sendFile(path.join(frontendDir, '4teacher_page.html')));
 app.get('/owner_page.html',   (req, res) => res.sendFile(path.join(frontendDir, '5owner_page.html')));
 
-// Also serve the original filenames and the root of D:\$PRO2 as static
 app.use(express.static(frontendDir));
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
-app.use('/api/auth/login', loginLimiter); // rate-limit login only
+app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth',       authRoutes);
 app.use('/api/students',   studentsRoutes);
 app.use('/api/teachers',   teachersRoutes);
@@ -108,12 +175,10 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
 
-  // Multer errors
   if (err.name === 'MulterError') {
     return res.status(400).json({ error: `File upload error: ${err.message}` });
   }
 
-  // SQLite constraint errors
   if (err.message && err.message.includes('UNIQUE constraint failed')) {
     return res.status(409).json({ error: 'A record with this value already exists' });
   }
@@ -124,13 +189,14 @@ app.use((err, req, res, next) => {
 // ─── Start Server ─────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n🏫 School Management System Backend`);
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`🔐 Login page: http://localhost:${PORT}/login_page.html`);
-  console.log(`\nDefault credentials:`);
-  console.log(`  Owner    → owner@school.com   / owner123`);
-  console.log(`  Students → student_<id>@school.com / student123`);
-  console.log(`  Parents  → parent_<id>@school.com  / parent123`);
-  console.log(`  Teachers → teacher_<id>@school.com / teacher123`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  if (!process.env.TURSO_DATABASE_URL) {
+    console.warn('⚠️  TURSO_DATABASE_URL is not set — database will not work!');
+  }
+  if (!process.env.TURSO_AUTH_TOKEN) {
+    console.warn('⚠️  TURSO_AUTH_TOKEN is not set — database will not work!');
+  }
 });
 
 module.exports = app;

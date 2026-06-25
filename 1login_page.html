@@ -438,6 +438,7 @@
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('role', selectedRole);
+                    document.cookie = `token=${data.token}; path=/; max-age=28800; SameSite=Strict`;
                     
                     let redirectUrl = '/login_page.html';
                     if (selectedRole === 'student') redirectUrl = '/student_page.html';
