@@ -1,14 +1,13 @@
 require('dotenv').config();
-const { createClient } = require('@libsql/client');
+const Database = require('libsql');
 const bcrypt = require('bcryptjs');
 
-const db = createClient({
-  url: process.env.TURSO_DATABASE_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN,
+const db = new Database(process.env.TURSO_DATABASE_URL, {
+  authToken: process.env.TURSO_AUTH_TOKEN
 });
 
-async function initDB() {
-  await db.executeMultiple(`
+function initDB() {
+  db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE NOT NULL,
@@ -116,22 +115,24 @@ async function initDB() {
 
   // Seed owners
   const ownerHash1 = bcrypt.hashSync(process.env.OWNER_PASSWORD_1, 10);
-  await db.execute({
-    sql: `INSERT INTO users (username, password, role) VALUES (?, ?, 'OWNER')
-          ON CONFLICT(username) DO UPDATE SET password = excluded.password`,
-    args: [process.env.OWNER_USERNAME_1, ownerHash1]
-  });
+  db.prepare(`
+    INSERT INTO users (username, password, role) VALUES (?, ?, 'OWNER')
+    ON CONFLICT(username) DO UPDATE SET password = excluded.password
+  `).run(process.env.OWNER_USERNAME_1, ownerHash1);
 
   const ownerHash2 = bcrypt.hashSync(process.env.OWNER_PASSWORD_2, 10);
-  await db.execute({
-    sql: `INSERT INTO users (username, password, role) VALUES (?, ?, 'OWNER')
-          ON CONFLICT(username) DO UPDATE SET password = excluded.password`,
-    args: [process.env.OWNER_USERNAME_2, ownerHash2]
-  });
+  db.prepare(`
+    INSERT INTO users (username, password, role) VALUES (?, ?, 'OWNER')
+    ON CONFLICT(username) DO UPDATE SET password = excluded.password
+  `).run(process.env.OWNER_USERNAME_2, ownerHash2);
 
   console.log('✅ Turso DB initialized');
 }
 
-initDB().catch(console.error);
+try {
+  initDB();
+} catch (err) {
+  console.error('Error initializing database:', err);
+}
 
 module.exports = db;
