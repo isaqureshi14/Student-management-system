@@ -3,6 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user || user.role !== 'TEACHER') {
+                    window.location.href = '/login_page.html';
+                }
+            } catch (e) {
+                window.location.href = '/login_page.html';
+            }
+        })();
+    </script>
     <title>Sunrise Public School - Unified Teacher Console</title>
     <!-- Tailwind CSS Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1581,7 +1593,7 @@
 
         async function loadTeacherData() {
             const user = getUser();
-            if (!user || !user.linked_id) { window.location.href = '/login_page.html'; return; }
+            if (!user || user.role !== 'TEACHER' || !user.linked_id) { window.location.href = '/login_page.html'; return; }
 
             try {
                 const tRes = await fetch(`${API}/teachers/${user.linked_id}`, { headers: authHeaders() });

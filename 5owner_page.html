@@ -3,6 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user || user.role !== 'OWNER') {
+                    window.location.href = '/login_page.html';
+                }
+            } catch (e) {
+                window.location.href = '/login_page.html';
+            }
+        })();
+    </script>
     <title>Sunrise Public School - Manager Portal</title>
     <!-- Tailwind CSS Engine -->
     <script src="https://cdn.tailwindcss.com"></script>

@@ -3,6 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user || user.role !== 'STUDENT') {
+                    window.location.href = '/login_page.html';
+                }
+            } catch (e) {
+                window.location.href = '/login_page.html';
+            }
+        })();
+    </script>
     <title>Sunrise Public School - Unified Student Hub</title>
     <!-- Tailwind CSS Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1305,8 +1317,8 @@
 
         async function loadStudentData() {
             const user = getUser();
-            if (!user || !user.linked_id) {
-                // Not logged in — redirect to login
+            if (!user || user.role !== 'STUDENT' || !user.linked_id) {
+                // Not logged in or incorrect role — redirect to login
                 window.location.href = '/login_page.html';
                 return;
             }
