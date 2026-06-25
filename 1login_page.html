@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunrise Access Hub — Access Management System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for clean visuals -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
+        
+        :root {
+            /* Role Colors */
+            --role-rgb-student: 99, 102, 241;   /* Indigo */
+            --role-rgb-parent: 16, 185, 129;   /* Emerald */
+            --role-rgb-teacher: 245, 158, 11;   /* Amber */
+            --role-rgb-owner: 244, 63, 94;      /* Rose */
+            
+            /* Active accent, defaults to student (indigo) */
+            --accent-color: var(--role-rgb-student);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712; /* slate-950 */
+        }
+
+        /* Accent classes dynamically mapping to --accent-color */
+        .text-accent {
+            color: rgb(var(--accent-color));
+        }
+        
+        .border-accent {
+            border-color: rgb(var(--accent-color));
+        }
+
+        .bg-accent-light {
+            background-color: rgba(var(--accent-color), 0.08);
+        }
+
+        .btn-accent {
+            background-color: rgb(var(--accent-color));
+            box-shadow: 0 4px 20px -2px rgba(var(--accent-color), 0.4);
+        }
+
+        .btn-accent:hover:not(:disabled) {
+            background-color: rgba(var(--accent-color), 0.9);
+            box-shadow: 0 6px 24px -2px rgba(var(--accent-color), 0.6);
+            transform: translateY(-1px);
+        }
+
+        .indicator-accent {
+            background-color: rgb(var(--accent-color));
+            box-shadow: 0 4px 12px 0 rgba(var(--accent-color), 0.3);
+        }
+
+        .focus-accent:focus {
+            border-color: rgb(var(--accent-color)) !important;
+            box-shadow: 0 0 0 4px rgba(var(--accent-color), 0.15) !important;
+        }
+        
+        .group-focus-accent:focus-within {
+            color: rgb(var(--accent-color)) !important;
+        }
+
+        /* Smooth transitions */
+        .transition-accent {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Animated Glowing Background Blobs */
+        .bg-glow-blob {
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(var(--accent-color), 0.12) 0%, transparent 70%);
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        @keyframes float-delayed {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(12px) rotate(-4deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+            animation: float-delayed 8s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen relative overflow-hidden transition-colors duration-300">
+
+    <!-- Glowing Background Elements -->
+    <div class="bg-glow-blob -top-20 -left-20" id="glow-1"></div>
+    <div class="bg-glow-blob -bottom-20 -right-20" id="glow-2"></div>
+
+    <div class="min-h-screen w-full flex flex-col lg:flex-row relative z-10">
+        
+        <!-- ================= LEFT DECORATIVE PANEL ================= -->
+        <aside class="hidden lg:flex lg:w-[42%] bg-slate-950/60 border-r border-slate-900 flex-col justify-between p-12 relative overflow-hidden shrink-0">
+            <!-- Decorative floating rings inside the panel -->
+            <div class="w-72 h-72 rounded-full border border-indigo-500/5 absolute -bottom-10 -left-10 animate-float pointer-events-none"></div>
+            <div class="w-96 h-96 rounded-full border border-slate-800/10 absolute top-1/4 -right-20 animate-float-delayed pointer-events-none"></div>
+
+            <!-- Header Academy Brand -->
+            <div class="flex items-center space-x-3 relative z-10">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="font-extrabold tracking-tight text-white block uppercase text-sm leading-none">SUNRISE</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 block">PUBLIC SCHOOL</span>
+                </div>
+            </div>
+
+            <!-- Central Content copying the active role context -->
+            <div class="my-auto space-y-8 relative z-10">
+                <div class="absolute -left-10 -top-12 w-64 h-64 opacity-5 pointer-events-none">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 10H100M0 30H100M0 50H100M0 70H100M0 90H100M10 0V100M30 0V100M50 0V100M70 0V100M90 0V100" stroke="white" stroke-width="0.5"/>
+                    </svg>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-bold tracking-wide transition-accent" id="brand-tag">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-accent transition-accent" id="brand-tag-icon"></i>
+                        <span class="text-accent transition-accent" id="brand-tag-text">Access Management System</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+                        One Unified Workspace for <br/>
+                        <span class="text-accent transition-accent" id="brand-accent-text">Student Portal</span>
+                    </h1>
+                    <p class="text-slate-455 text-sm leading-relaxed max-w-sm font-medium">
+                        Securely access dashboards, review academic logs, configure timetables, and audit school operations in a modern ecosystem.
+                    </p>
+                </div>
+
+                <!-- Premium feature highlight block -->
+                <div class="bg-slate-900/40 backdrop-blur-md border border-slate-900 rounded-2xl p-6 space-y-4 max-w-md shadow-sm">
+                    <div class="flex items-start gap-4">
+                        <div class="p-2.5 rounded-xl bg-accent-light text-accent transition-accent" id="feature-icon-container">
+                            <i data-lucide="book-open" class="w-5 h-5 text-accent transition-accent"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white text-sm font-bold transition-accent" id="feature-title">Student Login</h4>
+                            <p class="text-slate-400 text-xs mt-1.5 leading-relaxed font-medium transition-accent" id="feature-desc">Enter class hub, view periodic reports, and access student dashboard.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer links -->
+            <div class="text-xs text-slate-500 flex items-center justify-between relative z-10">
+                <span>&copy; 2026 Sunrise Public School.</span>
+                <a href="/" class="hover:text-white transition-colors flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-500 bg-slate-900/50 hover:bg-slate-800 text-slate-300">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to Home
+                </a>
+            </div>
+        </aside>
+
+        <!-- ================= RIGHT LOGIN FORM PANEL ================= -->
+        <main class="flex-1 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
+            <div class="w-full max-w-md space-y-8 z-10">
+                
+                <!-- Logo Brand for mobile only -->
+                <div class="flex flex-col items-center text-center space-y-3 lg:hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-white tracking-tight">SUNRISE PUBLIC SCHOOL</h2>
+                        <p class="text-xs text-slate-450 font-bold uppercase tracking-wider">Access Management System</p>
+                    </div>
+                </div>
+
+                <!-- Shared Form Glassmorphic Card -->
+                <div class="bg-slate-900/30 backdrop-blur-xl border border-slate-855 rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none transition-accent" id="card-glow"></div>
+                    
+                    <div class="space-y-6">
+                        <!-- Heading Details -->
+                        <div>
+                            <h3 id="login-title" class="text-2xl font-extrabold text-white tracking-tight transition-accent">Student Login</h3>
+                            <p id="login-hint" class="text-xs text-slate-400 mt-2 font-medium leading-relaxed transition-accent">Please enter your credentials to access the student console.</p>
+                        </div>
+
+                        <!-- Modern Segmented Tab Role Selector -->
+                        <div class="grid grid-cols-4 gap-1 p-1 bg-slate-950 border border-slate-900 rounded-2xl relative" id="role-selector-bar">
+                            <button onclick="switchRole('student')" id="btn-student" class="role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-white">
+                                <span class="block sm:hidden">Stu</span>
+                                <span class="hidden sm:block">Student</span>
+                            </button>
+                            <button onclick="switchRole('parent')" id="btn-parent" class="role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200">
+                                <span class="block sm:hidden">Par</span>
+                                <span class="hidden sm:block">Parent</span>
+                            </button>
+                            <button onclick="switchRole('teacher')" id="btn-teacher" class="role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200">
+                                <span class="block sm:hidden">Tea</span>
+                                <span class="hidden sm:block">Teacher</span>
+                            </button>
+                            <button onclick="switchRole('owner')" id="btn-owner" class="role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200">
+                                <span class="block sm:hidden">Own</span>
+                                <span class="hidden sm:block">Owner</span>
+                            </button>
+                            
+                            <!-- Sliding pill indicator -->
+                            <div class="absolute top-1 bottom-1 left-1 w-[calc(25%-6px)] indicator-accent rounded-xl transition-all duration-300 ease-out z-0" id="role-indicator-pill"></div>
+                        </div>
+
+                        <!-- Login Input Form -->
+                        <form onsubmit="handleLogin(event)" class="space-y-5">
+                            
+                            <!-- Identifier / Email Input -->
+                            <div class="space-y-2">
+                                <label class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">ID / Email Address</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 group-focus-within:text-accent transition-colors duration-300" id="id-icon-container">
+                                        <i data-lucide="mail" class="w-4 h-4 text-slate-500 group-focus-within:text-accent transition-accent" id="id-icon"></i>
+                                    </span>
+                                    <input type="text" required id="login-identifier" placeholder="Enter ID or Email Address" class="w-full bg-slate-950 border border-slate-900 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-650 focus:outline-none focus-accent transition-all duration-300">
+                                </div>
+                            </div>
+
+                            <!-- Password Input -->
+                            <div class="space-y-2">
+                                <label class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Password</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 group-focus-within:text-accent transition-colors duration-300">
+                                        <i data-lucide="lock" class="w-4 h-4 text-slate-500 group-focus-within:text-accent transition-accent" id="lock-icon"></i>
+                                    </span>
+                                    <input type="password" required id="login-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-900 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-slate-650 focus:outline-none focus-accent transition-all duration-300">
+                                    <!-- Eye toggle utility -->
+                                    <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-350 transition-colors">
+                                        <i data-lucide="eye" class="w-4 h-4" id="eye-icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Action button -->
+                            <button type="submit" id="submit-btn" class="w-full py-3.5 text-white font-bold text-sm rounded-xl transition-accent btn-accent mt-2 flex items-center justify-center gap-2">
+                                <span>Login as Student</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+
+                        </form>
+
+                        <!-- Dynamic error/status alerting -->
+                        <div id="status-message" class="hidden text-xs text-center p-3 rounded-xl border font-semibold mt-4 transition-all duration-300"></div>
+
+                    </div>
+                </div>
+
+                <!-- Back navigation helper for mobile view -->
+                <div class="text-center lg:hidden">
+                    <a href="/" class="inline-flex items-center gap-2 text-sm text-slate-200 hover:text-white transition-colors font-bold px-4 py-2 rounded-xl border border-slate-700 hover:border-slate-500 bg-slate-900/60 hover:bg-slate-800">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Homepage
+                    </a>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- ================= AUTHENTICATION & PORTAL LOGIC ================= -->
+    <script>
+        const API_BASE = window.location.origin.startsWith('file://') || !window.location.origin ? 'http://localhost:3001' : window.location.origin;
+        let selectedRole = 'student';
+
+        // Custom config mapping containing themes, layout text assets and placeholders
+        const roles = {
+            student: { 
+                title: 'Student Login', 
+                rgb: '99, 102, 241', 
+                icon: 'book-open', 
+                desc: 'Enter class hub, view periodic reports, and access student dashboard.',
+                placeholder: 'Enter ID or Email Address'
+            },
+            parent: { 
+                title: 'Parent Login', 
+                rgb: '16, 185, 129', 
+                icon: 'users', 
+                desc: 'Monitor your ward\'s academic grades, daily attendance, and request leaves.',
+                placeholder: 'Enter ID or Email Address'
+            },
+            teacher: { 
+                title: 'Teacher Login', 
+                rgb: '245, 158, 11', 
+                icon: 'award', 
+                desc: 'Log marks, edit lesson plans, configure timetables, and audit attendance.',
+                placeholder: 'Enter ID or Email Address'
+            },
+            owner: { 
+                title: 'Owner Login', 
+                rgb: '244, 63, 94', 
+                icon: 'shield', 
+                desc: 'Manage institute settings, add courses, inspect finances, and supervise users.',
+                placeholder: 'Enter ID or Email Address'
+            }
+        };
+
+        // Initialize Page
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            // Start default to Student Accent
+            document.documentElement.style.setProperty('--accent-color', roles.student.rgb);
+            // Auto-select role from query param (e.g. ?role=owner after logout)
+            const urlParams = new URLSearchParams(window.location.search);
+            const roleParam = urlParams.get('role');
+            if (roleParam && roles[roleParam]) {
+                switchRole(roleParam);
+            }
+        });
+
+        // Toggle text/password field visibility
+        function togglePassword() {
+            const pwdInput = document.getElementById('login-password');
+            const eyeIcon = document.getElementById('eye-icon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        // Switch role state and transition UI color styles
+        function switchRole(roleKey) {
+            selectedRole = roleKey;
+            const config = roles[roleKey];
+
+            // 1. Update Accent Variable
+            document.documentElement.style.setProperty('--accent-color', config.rgb);
+
+            // 2. Animate sliding pill indicator
+            const indicator = document.getElementById('role-indicator-pill');
+            const roleKeys = ['student', 'parent', 'teacher', 'owner'];
+            const index = roleKeys.indexOf(roleKey);
+            indicator.style.left = `calc(${index * 25}% + 4px)`;
+
+            // 3. Update main login card titles
+            document.getElementById('login-title').innerText = config.title;
+            document.getElementById('login-hint').innerText = `Please enter your credentials to access the ${roleKey} console.`;
+
+            // 4. Update the email identifier placeholder
+            document.getElementById('login-identifier').placeholder = config.placeholder;
+
+            // 5. Update left decorative panel info (if visible)
+            const brandAccent = document.getElementById('brand-accent-text');
+            if (brandAccent) brandAccent.innerText = config.title.replace(' Login', ' Portal');
+
+            const featureTitle = document.getElementById('feature-title');
+            if (featureTitle) featureTitle.innerText = config.title;
+
+            const featureDesc = document.getElementById('feature-desc');
+            if (featureDesc) featureDesc.innerText = config.desc;
+
+            const featureIconContainer = document.getElementById('feature-icon-container');
+            if (featureIconContainer) {
+                featureIconContainer.innerHTML = `<i data-lucide="${config.icon}" class="w-5 h-5 text-accent transition-accent"></i>`;
+            }
+
+            // Sync layout segment buttons classes
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.className = "role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200";
+            });
+            const activeBtn = document.getElementById(`btn-${roleKey}`);
+            if (activeBtn) {
+                activeBtn.className = "role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-white";
+            }
+
+            // Update submit button text based on roleKey
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.innerHTML = `<span>Login as ${roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>`;
+            }
+
+            // Clear inputs and hide status alerts
+            document.getElementById('login-identifier').value = '';
+            document.getElementById('login-password').value = '';
+            const statusMsg = document.getElementById('status-message');
+            statusMsg.classList.add('hidden');
+            statusMsg.className = "hidden text-xs text-center p-3 rounded-xl border font-semibold mt-4 transition-all duration-300";
+
+            lucide.createIcons();
+        }
+
+        // Form Submit handler communicating to the backend auth route
+        async function handleLogin(event) {
+            event.preventDefault();
+            const identifier = document.getElementById('login-identifier').value;
+            const password = document.getElementById('login-password').value;
+            const statusMsg = document.getElementById('status-message');
+            const config = roles[selectedRole];
+            const submitBtn = document.getElementById('submit-btn');
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span>Signing in...</span> <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+            statusMsg.classList.add('hidden');
+            lucide.createIcons();
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        identifier,
+                        password,
+                        role: selectedRole.toUpperCase(),
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    const displayName = data.user.name && data.user.name !== 'User' && data.user.name !== 'Guardian' ? data.user.name : null;
+                    statusMsg.innerText = displayName
+                        ? `Logged in successfully as ${displayName}`
+                        : `Logged in successfully`;
+                    statusMsg.className = `text-xs text-center p-3 rounded-xl border border-accent/25 bg-accent-light text-accent block mt-4 transition-all duration-300`;
+                    
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('role', selectedRole);
+                    
+                    let redirectUrl = '/login_page.html';
+                    if (selectedRole === 'student') redirectUrl = '/student_page.html';
+                    if (selectedRole === 'parent') redirectUrl = '/parent_page.html';
+                    if (selectedRole === 'teacher') redirectUrl = '/teacher_page.html';
+                    if (selectedRole === 'owner') redirectUrl = '/owner_page.html';
+                    
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 800);
+                } else {
+                    throw new Error(data.error || 'Invalid credentials');
+                }
+            } catch (error) {
+                statusMsg.innerText = `Error: ${error.message || 'Unable to authenticate. Make sure backend is running.'}`;
+                statusMsg.className = 'text-xs text-center p-3 rounded-xl border border-red-500/25 bg-red-500/5 text-red-400 block mt-4 transition-all duration-300';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<span>Login as ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>`;
+                lucide.createIcons();
+            }
+        }
+    </script>
+</body>
+</html>

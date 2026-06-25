@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50 dark:bg-slate-900 scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunrise Public School - Parents Portal</title>
+    <!-- Tailwind CSS Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Vector Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+    <div class="flex h-full overflow-hidden">
+        
+        <!-- Sidebar Navigation Area -->
+        <aside class="hidden md:flex flex-col w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 shrink-0">
+            <div class="flex items-center gap-2 px-6 py-5 border-b border-slate-100 dark:border-slate-700">
+                <div class="p-2 bg-primary-600 rounded-lg text-white">
+                    <i class="fa-solid fa-people-roof text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-slate-900 dark:text-white leading-tight">Sunrise Public</h1>
+                    <p class="text-xs text-primary-600 dark:text-primary-400 font-semibold uppercase tracking-wider">Parents Dashboard</p>
+                </div>
+            </div>
+
+            <!-- Profile Overview Quick Preview (Dynamically Bound) -->
+            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 text-center bg-slate-50/50 dark:bg-slate-800/40">
+                <div class="relative inline-block">
+                    <div class="w-16 h-16 rounded-full border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center mx-auto bg-slate-100 dark:bg-slate-900 overflow-hidden">
+                        <img id="sidebar-photo" src="" alt="Student Profile" class="w-full h-full object-cover hidden" onerror="this.classList.add('hidden'); document.getElementById('sidebar-photo-placeholder').classList.remove('hidden');" />
+                        <div id="sidebar-photo-placeholder" class="text-slate-400 dark:text-slate-600"><i class="fa-solid fa-user text-2xl"></i></div>
+                    </div>
+                    <span id="sidebar-status-dot" class="absolute bottom-0 right-4 w-3.5 h-3.5 bg-slate-400 border-2 border-white dark:border-slate-800 rounded-full"></span>
+                </div>
+                <h3 id="sidebar-name" class="mt-2.5 font-bold text-slate-900 dark:text-white text-base">Unassigned Profile</h3>
+                <p id="sidebar-class" class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Class -- • Roll No: --</p>
+                <div class="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider" id="portal-status-badge">
+                    Offline Registry
+                </div>
+            </div>
+
+            <!-- Sidebar Navigation Links -->
+            <nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
+                <span class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Controls & Views</span>
+                
+                <button onclick="switchPage('parent-dashboard')" id="nav-parent-dashboard" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i class="fa-solid fa-gauge text-lg"></i>
+                    <span>Dashboard Home</span>
+                </button>
+
+                <button onclick="switchPage('basic-info')" id="nav-basic-info" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i class="fa-solid fa-address-card text-lg"></i>
+                    <span>Student Profile Info</span>
+                </button>
+                
+                <button onclick="switchPage('test-report')" id="nav-test-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i class="fa-solid fa-chart-line text-lg"></i>
+                    <span>Test Marks Cards</span>
+                </button>
+
+                <button onclick="switchPage('attendance')" id="nav-attendance" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i class="fa-solid fa-clipboard-user text-lg"></i>
+                    <span>Attendance & Leaves</span>
+                </button>
+
+                <button onclick="switchPage('about-us')" id="nav-about-us" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i class="fa-solid fa-circle-info text-lg"></i>
+                    <span>School Information</span>
+                </button>
+
+                <button onclick="switchPage('settings')" id="nav-settings" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i class="fa-solid fa-gears text-lg"></i>
+                    <span>Account Settings</span>
+                </button>
+            </nav>
+
+            <!-- Theme Configuration Switcher -->
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+                <button onclick="toggleDarkMode()" class="flex items-center justify-between w-full p-2.5 bg-slate-100 dark:bg-slate-700 rounded-xl transition-all">
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Switch Theme</span>
+                    <i id="theme-icon" class="fa-solid fa-moon text-slate-600 dark:text-amber-400"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Feed -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-50 dark:bg-slate-900">
+            
+            <!-- Header -->
+            <header class="flex items-center justify-between bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-6 py-4 sticky top-0 z-30 shadow-sm transition-all duration-200">
+                <div class="flex items-center gap-3">
+                    <button class="md:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg" onclick="toggleMobileMenu()">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <div>
+                        <h2 id="header-title-text" class="text-xl font-bold text-slate-900 dark:text-white">Parents Dashboard Home</h2>
+                        <p class="text-xs text-slate-400" id="current-date-string"></p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-950/40 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-600 transition-all">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </button>
+            </header>
+
+            <!-- Custom alert/toast container -->
+            <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+            <!-- Mobile Slide-out Menu -->
+            <div id="mobile-menu" class="hidden fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-sm">
+                <div class="w-72 h-full bg-white dark:bg-slate-800 p-5 flex flex-col justify-between overflow-y-auto">
+                    <div>
+                        <div class="flex items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-700">
+                            <span class="font-bold text-lg text-primary-600">Sunrise Portal</span>
+                            <button onclick="toggleMobileMenu()" class="p-1 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        
+                        <div class="mt-6 space-y-2">
+                            <button onclick="switchPage('parent-dashboard'); toggleMobileMenu()" id="mobile-nav-parent-dashboard" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-gauge"></i>
+                                <span>Dashboard Home</span>
+                            </button>
+                            <button onclick="switchPage('basic-info'); toggleMobileMenu()" id="mobile-nav-basic-info" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-address-card"></i>
+                                <span>Student Profile Info</span>
+                            </button>
+                            <button onclick="switchPage('test-report'); toggleMobileMenu()" id="mobile-nav-test-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Test Marks Cards</span>
+                            </button>
+                            <button onclick="switchPage('attendance'); toggleMobileMenu()" id="mobile-nav-attendance" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-clipboard-user"></i>
+                                <span>Attendance & Leaves</span>
+                            </button>
+                            <button onclick="switchPage('about-us'); toggleMobileMenu()" id="mobile-nav-about-us" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-circle-info"></i>
+                                <span>School Information</span>
+                            </button>
+                            <button onclick="switchPage('settings'); toggleMobileMenu()" id="mobile-nav-settings" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-gears"></i>
+                                <span>Account Settings</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="toggleDarkMode(); toggleMobileMenu()" class="flex items-center justify-between w-full p-3 bg-slate-100 dark:bg-slate-700 rounded-xl mt-6">
+                        <span class="text-xs font-bold">Switch Theme</span>
+                        <i class="fa-solid fa-moon text-slate-600 dark:text-amber-400"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Page 0 Container: Parents Home Overview Dashboard -->
+            <div id="page-parent-dashboard" class="p-6 space-y-6">
+                <!-- Welcome Banner with key status metrics -->
+                <div class="bg-gradient-to-r from-primary-700 via-sky-800 to-indigo-800 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-primary-500/10">
+                    <div class="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 opacity-10">
+                        <i class="fa-solid fa-house-chimney-user text-[250px]"></i>
+                    </div>
+                    <div class="relative z-10 max-w-3xl space-y-3">
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Parents Portal Access Active</span>
+                        <h2 class="text-2xl sm:text-4xl font-extrabold leading-tight">Welcome, Guardian!</h2>
+                        <p class="text-primary-100 text-sm leading-relaxed">
+                            Monitor <span class="font-bold text-white underline" id="welcome-student-name">Scholar's</span> academic reports, evaluate daily subject-wise present logs, and justify unexcused absent records immediately. Ensure leave reasons are submitted to secure unexcused absent conversions.
+                        </p>
+                        <div class="flex flex-wrap gap-4 pt-2">
+                            <button onclick="switchPage('attendance')" class="px-4 py-2 bg-white text-slate-900 font-bold text-xs rounded-xl hover:bg-slate-100 transition-all shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-plus text-primary-600"></i> Log Leave Request / Explain Absences
+                            </button>
+                            <button onclick="switchPage('test-report')" class="px-4 py-2 bg-slate-900/40 text-white border border-white/20 font-bold text-xs rounded-xl hover:bg-slate-950/60 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-eye"></i> View Academic Report Cards
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Snapshot Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                        <div class="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+                            <i class="fa-solid fa-clipboard-user text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 dark:text-slate-400 block font-semibold">Attendance Ratio</span>
+                            <span id="dashboard-attendance-stat" class="text-2xl font-black text-slate-900 dark:text-white">0%</span>
+                            <span id="dashboard-attendance-status-badge" class="text-[10px] text-slate-400 font-bold block"><i class="fa-solid fa-circle-minus"></i> No Data</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                        <div class="p-3 rounded-xl bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400">
+                            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 dark:text-slate-400 block font-semibold">Unexplained Absences</span>
+                            <span id="dashboard-unexcused-stat" class="text-2xl font-black text-slate-900 dark:text-white">0 Days</span>
+                            <span class="text-[10px] text-slate-400 font-semibold block underline cursor-pointer" onclick="switchPage('attendance')"><i class="fa-solid fa-circle-check"></i> Clean Log</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                        <div class="p-3 rounded-xl bg-primary-100 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400">
+                            <i class="fa-solid fa-chart-pie text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 dark:text-slate-400 block font-semibold">Latest Term Score</span>
+                            <span id="dashboard-marks-stat" class="text-2xl font-black text-slate-900 dark:text-white">--</span>
+                            <span class="text-[10px] text-slate-400 block">Overall Score Index</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                        <div class="p-3 rounded-xl bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+                            <i class="fa-solid fa-envelope-open-text text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 dark:text-slate-400 block font-semibold">Leave Applications</span>
+                            <span id="dashboard-leaves-stat" class="text-2xl font-black text-slate-900 dark:text-white">0 Registered</span>
+                            <span class="text-[10px] text-slate-400 block">Leaves Track History</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Absence Notifications Panel -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <div>
+                            <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                                <i class="fa-solid fa-bell text-rose-500"></i>
+                                Absence Notifications
+                            </h3>
+                            <p class="text-xs text-slate-400">Absence records logged by class teachers. Click "Mark Read" to dismiss.</p>
+                        </div>
+                    </div>
+
+                    <div id="dashboard-absence-explain-container" class="space-y-2">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 1 Container: Profile Information -->
+            <div id="page-basic-info" class="hidden p-6 space-y-6">
+                <!-- Basic Information Core Grid -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4 gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-user-graduate text-primary-500"></i>
+                                Student Profile Identity Card
+                            </h3>
+                            <p class="text-xs text-slate-400">Official demographic credentials and verified guardians matrix.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Photo Element -->
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700 text-center flex flex-col items-center justify-center space-y-4">
+                            <div class="relative group">
+                                <div class="w-36 h-36 rounded-2xl border-4 border-white dark:border-slate-800 shadow-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden">
+                                    <img id="profile-student-photo" src="" alt="Student Portrait" class="w-full h-full object-cover hidden" onerror="this.classList.add('hidden'); document.getElementById('profile-photo-placeholder').classList.remove('hidden');" />
+                                    <div id="profile-photo-placeholder" class="text-slate-400 dark:text-slate-600"><i class="fa-solid fa-user-graduate text-5xl"></i></div>
+                                </div>
+                                <span id="profile-active-shield" class="absolute -bottom-2 -right-2 bg-slate-400 text-white px-2 py-1 rounded-xl text-[10px] font-bold shadow-md"><i class="fa-solid fa-shield-halved"></i> Empty State</span>
+                            </div>
+                            <div class="space-y-1.5 pt-2">
+                                <h4 id="profile-full-name" class="font-extrabold text-slate-900 dark:text-white text-lg">Unassigned Profile</h4>
+                                <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-extrabold uppercase rounded-full tracking-wider border border-slate-200 dark:border-slate-600">Pending Profile Load</span>
+                            </div>
+                        </div>
+
+                        <!-- Basic Metadata Parameters Column -->
+                        <div class="space-y-4 lg:col-span-2">
+                            <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-circle-info text-primary-500"></i> Academy Metadata
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/50 p-5 rounded-xl border border-slate-200/40 dark:border-slate-700/40">
+                                <div class="flex justify-between items-center text-sm py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                                    <span class="text-slate-500 dark:text-slate-400">Class & Section</span>
+                                    <span id="info-student-class" class="font-bold text-slate-900 dark:text-white">--</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                                    <span class="text-slate-500 dark:text-slate-400">Roll Number</span>
+                                    <span id="info-student-roll" class="font-bold text-slate-900 dark:text-white">--</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                                    <span class="text-slate-500 dark:text-slate-400">Class Instructor</span>
+                                    <span id="info-class-teacher" class="font-bold text-primary-600 dark:text-primary-400">--</span>
+                                </div>
+                            </div>
+
+                            <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-2 pt-2">
+                                <i class="fa-solid fa-people-roof text-primary-500"></i> Parent Coordinates
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/50 p-5 rounded-xl border border-slate-200/40 dark:border-slate-700/40">
+                                <div class="space-y-1">
+                                    <span class="text-[10px] uppercase text-slate-400 font-bold">Father's Name</span>
+                                    <p id="info-father-name" class="text-sm font-bold text-slate-800 dark:text-white">--</p>
+                                    <span class="text-xs font-mono text-slate-500 flex items-center gap-1 mt-1">
+                                        <i class="fa-solid fa-phone"></i> <span id="info-father-phone">--</span>
+                                    </span>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-[10px] uppercase text-slate-400 font-bold">Mother's Name</span>
+                                    <p id="info-mother-name" class="text-sm font-bold text-slate-800 dark:text-white">--</p>
+                                    <span class="text-xs font-mono text-slate-500 flex items-center gap-1 mt-1">
+                                        <i class="fa-solid fa-phone"></i> <span id="info-mother-phone">--</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Residential Address Block -->
+                        <div class="lg:col-span-3 space-y-3">
+                            <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-map-pin text-primary-500"></i> Residential Coordinates
+                            </h4>
+                            <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl flex items-start gap-3 border border-slate-200/40 dark:border-slate-700/40">
+                                <div class="p-2.5 bg-white dark:bg-slate-800 text-slate-400 rounded-lg shrink-0 border border-slate-200 dark:border-slate-700">
+                                    <i class="fa-solid fa-house-user text-slate-400" id="info-home-icon"></i>
+                                </div>
+                                <div>
+                                    <p id="info-residential-address" class="text-sm font-semibold text-slate-500 dark:text-slate-400 leading-relaxed">
+                                        No profile address loaded.
+                                    </p>
+                                    <span class="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider mt-1 block">Verified Primary Address Index</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2 Container: Test Report -->
+            <div id="page-test-report" class="hidden p-6 space-y-4">
+
+                <!-- Marks Overview with graph + class avg -->
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                            <i class="fa-solid fa-chart-column text-primary-500"></i>
+                            Test Marks Overview
+                        </h3>
+                        <div class="flex items-center gap-3 text-[10px] font-bold text-slate-400">
+                            <span class="flex items-center gap-1"><span class="inline-block w-3 h-2.5 rounded-sm bg-primary-500"></span> You</span>
+                            <span class="flex items-center gap-1"><span class="inline-block w-3 h-2.5 rounded-sm bg-violet-400"></span> Class Avg</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4 items-start">
+                        <!-- Selector boxes -->
+                        <div class="flex flex-wrap gap-2.5" id="test-selector-buttons">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <!-- Bar graph -->
+                        <div class="flex-1 min-w-0 border-l border-slate-100 dark:border-slate-700 pl-4">
+                            <div class="flex items-end gap-3 h-20 overflow-x-auto pb-1" id="test-trend-graph">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-primary-500"></i>
+                                Subject-Wise Evaluation & Performance Card
+                            </h3>
+                            <p class="text-xs text-slate-400" id="selected-test-subtitle-term">Awaiting profile load</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-extrabold rounded-lg border border-slate-200 dark:border-slate-700" id="selected-test-total-badge">
+                                Aggregate: --
+                            </span>
+                            <span class="px-3 py-1 bg-primary-100 dark:bg-primary-950 text-primary-700 dark:text-primary-300 text-xs font-extrabold rounded-lg border border-primary-200" id="selected-test-percent-badge">
+                                Overall: --
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Grid Layout for individual subjects -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="subject-cards-container">
+                        <!-- Populated dynamically via Javascript based on selected test -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 3 Container: Attendance & Leave tracker -->
+            <div id="page-attendance" class="hidden p-6 space-y-6">
+                
+                <!-- Subject attendance indicators -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-900 dark:text-white text-base">Subject-Wise Attendance Breakdown</h3>
+                                <p class="text-xs text-slate-400">Class attendance tracked directly per course.</p>
+                            </div>
+                            <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 bg-slate-100 dark:bg-slate-900/40 text-slate-600 rounded">Live Registry Sync</span>
+                        </div>
+
+                        <!-- Progress bars for dynamic subject attendance metrics -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" id="subject-attendance-bars">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+
+                        <!-- Dynamic Summary stats -->
+                        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Classes Attended</span>
+                                <span id="stat-total-attended-classes" class="text-lg font-bold text-slate-800 dark:text-slate-200">0</span>
+                            </div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Classes Held</span>
+                                <span id="stat-total-held-classes" class="text-lg font-bold text-slate-800 dark:text-slate-200">0</span>
+                            </div>
+                        </div>
+                </div>
+
+                <!-- NEW CORE FUNCTIONALITIES FOR PARENTS (Absence justification and future leaves) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Future Leave Request Form -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm space-y-4">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-plus text-primary-500"></i>
+                                Request Future Leave
+                            </h3>
+                            <p class="text-xs text-slate-400">Pre-apply for leaves with justified reasons for school records.</p>
+                        </div>
+
+                        <form id="leave-request-form" onsubmit="handleLeaveFormSubmission(event)" class="space-y-4 text-xs">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="block font-bold text-slate-500 dark:text-slate-400">From Date</label>
+                                    <input type="date" id="leave-from-date" required class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block font-bold text-slate-500 dark:text-slate-400">To Date</label>
+                                    <input type="date" id="leave-to-date" required class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block font-bold text-slate-500 dark:text-slate-400">Leave Category</label>
+                                <select id="leave-category" required class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <option value="Medical Leave">Medical Leave</option>
+                                    <option value="Casual Leave">Casual / Family Function</option>
+                                    <option value="Bereavement Leave">Bereavement Leave</option>
+                                    <option value="Exam Leave">External Exam Leave</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block font-bold text-slate-500 dark:text-slate-400">Enter Detailed Reason</label>
+                                <textarea id="leave-reason" rows="3" required placeholder="Specify details of family function, doctor appointment details etc..." class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-paper-plane"></i> Submit Leave Request
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Leaves Application Tracker List -->
+                    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm space-y-4 flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-clock-rotate-left text-primary-500"></i>
+                                    Leaves & Absences Archive Registry
+                                </h3>
+                                <p class="text-xs text-slate-400">Dynamic tracking of applied leave petitions and converted unexcused absences.</p>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs text-left">
+                                    <thead class="bg-slate-50 dark:bg-slate-900 uppercase font-bold text-slate-500">
+                                        <tr>
+                                            <th class="p-3 rounded-l-lg">Leave Window</th>
+                                            <th class="p-3">Category</th>
+                                            <th class="p-3">Reason Provided</th>
+                                            <th class="p-3">State</th>
+                                            <th class="p-3 text-right rounded-r-lg">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaves-table-body" class="divide-y divide-slate-100 dark:divide-slate-700">
+                                        <!-- Populated via Javascript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="hidden"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Page 4 Container: School Info / About us -->
+            <div id="page-about-us" class="hidden p-6 space-y-6">
+                <!-- Brand Showcase Hero Banner -->
+                <div class="bg-gradient-to-r from-sky-600 to-indigo-800 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-sky-500/10">
+                    <div class="absolute right-0 bottom-0 translate-x-12 translate-y-12 opacity-10">
+                        <i class="fa-solid fa-graduation-cap text-[280px]"></i>
+                    </div>
+                    <div class="relative z-10 max-w-2xl space-y-2">
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Established 1998</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold leading-tight">Sunrise Public School</h2>
+                        <p class="text-sky-100 text-sm leading-relaxed">
+                            Nurturing brilliant minds, shaping purposeful futures. Our integrated academic framework encourages rigorous, discovery-based inquiry with a balanced pathway for co-scholastic excellence.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Mission, Vision & Philosophies Matrix -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                        <div class="p-3 bg-primary-100 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 rounded-xl w-fit">
+                            <i class="fa-solid fa-eye text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Our Vision Statement</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                            To create an environment of holistic intellectual advancement where students learn to adapt seamlessly to global societal transitions while adhering strictly to high benchmarks of character, ethics, and innovation.
+                        </p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                        <div class="p-3 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl w-fit">
+                            <i class="fa-solid fa-bullseye text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Our Core Mission</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                            To deliver a robust scientific and humanitarian curriculum that promotes critical investigation, artistic exploration, digital competence, environmental stewardship, and empathetic communal responsibility.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Official Administrative Coordinates -->
+                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+                    <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-envelope-open-text text-primary-500"></i> Administrative Registry Coordinates
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Office Coordination</span>
+                            <p class="font-semibold text-slate-700 dark:text-slate-200">info@sunrisepublic.edu.in</p>
+                            <p class="text-xs text-slate-400">Mon - Sat (08:00 AM - 03:00 PM)</p>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Telecommunication Portal</span>
+                            <p class="font-semibold text-slate-700 dark:text-slate-200">+91 (22) 5550-1234 / 1235</p>
+                            <p class="text-xs text-slate-400">Principal's Helpdesk</p>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Verified Location Coordinates</span>
+                            <p class="font-semibold text-slate-700 dark:text-slate-200">42, Vasant Vihar, Mumbai, MH</p>
+                            <p class="text-xs text-slate-400">Postal Pin: 400 053</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 5 Container: Account Settings -->
+            <div id="page-settings" class="hidden p-6 space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm max-w-xl mx-auto space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-key text-primary-500"></i>
+                            Account Settings
+                        </h3>
+                        <p class="text-xs text-slate-400">Update your parent login credentials. Make sure to use a secure password.</p>
+                    </div>
+
+                    <form id="settings-form" onsubmit="handleSettingsFormSubmission(event)" class="space-y-4 text-xs">
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-500 dark:text-slate-400">Login ID / Username</label>
+                            <input type="text" id="settings-username" required class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-500 dark:text-slate-400">New Password (leave blank to keep current)</label>
+                            <input type="password" id="settings-password" placeholder="••••••••" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-500 dark:text-slate-400">Confirm New Password</label>
+                            <input type="password" id="settings-confirm-password" placeholder="••••••••" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dashboard Footer -->
+            <footer class="text-center text-slate-400 dark:text-slate-500 text-xs py-6 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 mt-auto">
+                Sunrise Public School · Unified Student Registry Portal · 2026
+            </footer>
+        </main>
+    </div>
+
+    <!-- Core Interactive Application Logic -->
+    <script>
+        const API_BASE = window.location.origin.startsWith('file://') || !window.location.origin ? 'http://localhost:3001' : window.location.origin;
+        // Completely cleaned state. No hardcoded names, scores, or attendances.
+        const appState = {
+            student: {
+                firstName: "",
+                lastName: "",
+                class: "",
+                rollNo: null,
+                classTeacher: "",
+                fatherName: "",
+                fatherPhone: "",
+                motherName: "",
+                motherPhone: "",
+                address: "",
+                photoUrl: "",
+                systemId: "",
+                classRank: ""
+            },
+            tests: [],
+            attendance: {
+                subjects: [],
+                calculatedTotalAttended: 0,
+                calculatedTotalClasses: 0,
+                calculatedPercentage: "0%"
+            },
+            unexcusedAbsences: [],
+            leaves: [],
+            classAvg: {},
+            selectedTestIndex: 0,
+            activePage: "parent-dashboard"
+        };
+
+        window.onload = function() {
+            // Set dynamic Date string in header
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date-string').textContent = new Date().toLocaleDateString('en-US', dateOptions);
+            
+            // Check Preference for Dark Mode
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                const themeIcon = document.getElementById('theme-icon');
+                if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-400";
+            } else {
+                document.documentElement.classList.remove('dark');
+                const themeIcon = document.getElementById('theme-icon');
+                if (themeIcon) themeIcon.className = "fa-solid fa-moon text-slate-600";
+            }
+
+            // Sync structural numbers & run initial clean renders
+            recalculateAcademicsAll();
+            recalculateAttendanceAll();
+            syncStateToUI();
+        };
+
+        /**
+         * GLOBAL API: Load Student Profile Dynamically
+         * This can be invoked by other frameworks, parents dashboard hubs, or databases.
+         */
+        window.loadStudentProfile = function(profileData, showToast = false) {
+            if (!profileData) return;
+
+            // Map demographic indices
+            if (profileData.student) {
+                Object.assign(appState.student, profileData.student);
+            }
+            
+            // Map test metrics
+            if (profileData.tests && Array.isArray(profileData.tests)) {
+                appState.tests = JSON.parse(JSON.stringify(profileData.tests));
+            }
+            
+            // Map course attendances
+            if (profileData.attendance) {
+                if (profileData.attendance.subjects) {
+                    appState.attendance.subjects = JSON.parse(JSON.stringify(profileData.attendance.subjects));
+                }
+            }
+
+            // Map absences & leaves
+            if (profileData.unexcusedAbsences) {
+                appState.unexcusedAbsences = JSON.parse(JSON.stringify(profileData.unexcusedAbsences));
+            } else {
+                appState.unexcusedAbsences = [];
+            }
+
+            if (profileData.leaves) {
+                appState.leaves = JSON.parse(JSON.stringify(profileData.leaves));
+            } else {
+                appState.leaves = [];
+            }
+
+            // Calculate aggregations & render
+            recalculateAcademicsAll();
+            recalculateAttendanceAll();
+            syncStateToUI();
+
+            if (showToast) {
+                showNotification("Profile Loaded Successfully", `${appState.student.firstName || 'Student'}'s official record index synced.`, "success");
+            }
+        };
+
+        // Recalculates metrics across academic evaluations
+        function recalculateAcademicsAll() {
+            appState.tests.forEach(test => {
+                let sumObtained = 0;
+                let sumMax = 0;
+                if (test.subjects && test.subjects.length > 0) {
+                    test.subjects.forEach(sub => {
+                        sumObtained += sub.score || 0;
+                        sumMax += sub.max || 100;
+                    });
+                    test.totalObtained = sumObtained;
+                    test.totalMax = sumMax;
+                    test.percentage = sumMax > 0 ? ((sumObtained / sumMax) * 100).toFixed(1) + "%" : "0%";
+                } else {
+                    test.totalObtained = 0;
+                    test.totalMax = 0;
+                    test.percentage = "0%";
+                }
+            });
+
+            // Update home snapshot with current index score
+            const latestTest = appState.tests[appState.selectedTestIndex];
+            const marksStat = document.getElementById('dashboard-marks-stat');
+            if (marksStat) {
+                marksStat.textContent = latestTest && latestTest.totalMax > 0 ? latestTest.percentage : "--";
+            }
+        }
+
+        // Calculates core statistics dynamically based on class attendance ratios
+        function recalculateAttendanceAll() {
+            const att = appState.attendance;
+            let totalAttended = 0;
+            let totalHeld = 0;
+
+            if (att.subjects && att.subjects.length > 0) {
+                att.subjects.forEach(sub => {
+                    totalAttended += sub.attended || 0;
+                    totalHeld += sub.total || 0;
+                });
+                att.calculatedTotalAttended = totalAttended;
+                att.calculatedTotalClasses = totalHeld;
+                att.calculatedPercentage = totalHeld > 0 ? ((totalAttended / totalHeld) * 100).toFixed(1) + "%" : "0%";
+            } else {
+                att.calculatedTotalAttended = 0;
+                att.calculatedTotalClasses = 0;
+                att.calculatedPercentage = "0%";
+            }
+
+            // Sync dashboard stat displays
+            const dashAtt = document.getElementById('dashboard-attendance-stat');
+            if (dashAtt) dashAtt.textContent = att.calculatedPercentage;
+
+            const dashUnex = document.getElementById('dashboard-unexcused-stat');
+            if (dashUnex) {
+                const readSet = new Set(getReadAbsenceIds());
+                const unreadCount = appState.unexcusedAbsences.filter(a => !readSet.has(String(a.id))).length;
+                dashUnex.textContent = `${unreadCount} Days`;
+            }
+
+            const dashLeaves = document.getElementById('dashboard-leaves-stat');
+            if (dashLeaves) dashLeaves.textContent = `${appState.leaves.length} Registered`;
+
+            // Setup Badge Rating
+            const statusBadge = document.getElementById('dashboard-attendance-status-badge');
+            if (statusBadge) {
+                const ratioNum = parseFloat(att.calculatedPercentage) || 0;
+                if (ratioNum >= 75) {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Eligible Status';
+                    statusBadge.className = "text-[10px] text-emerald-500 font-bold block";
+                } else if (ratioNum > 0) {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation animate-pulse"></i> Shortage Alert';
+                    statusBadge.className = "text-[10px] text-rose-500 font-bold block";
+                } else {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-circle-minus"></i> No Data';
+                    statusBadge.className = "text-[10px] text-slate-400 font-bold block";
+                }
+            }
+        }
+
+        // High efficiency UI Binder
+        function syncStateToUI() {
+            renderStudentInfo();
+            renderDashboardExplanations();
+            renderTestReportSelectors();
+            renderSelectedTestReport();
+            renderAttendanceData();
+            renderLeavesRegistry();
+        }
+
+        // Custom notification framework
+        function showNotification(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-xl border shadow-xl flex items-start gap-3 w-80 bg-white dark:bg-slate-800 transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-auto`;
+            
+            let iconColor = 'text-emerald-500';
+            let iconClass = 'fa-circle-check';
+            let borderColor = 'border-emerald-100 dark:border-emerald-900/60';
+            
+            if (type === 'error') {
+                iconColor = 'text-rose-500';
+                iconClass = 'fa-circle-xmark';
+                borderColor = 'border-rose-100 dark:border-rose-900/60';
+            } else if (type === 'info') {
+                iconColor = 'text-primary-500';
+                iconClass = 'fa-circle-info';
+                borderColor = 'border-primary-100 dark:border-primary-900/60';
+            }
+
+            toast.classList.add(borderColor);
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} ${iconColor} text-lg mt-0.5 shrink-0"></i>
+                <div class="flex-1 space-y-0.5">
+                    <p class="font-bold text-xs text-slate-900 dark:text-white">${title}</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xs"></i></button>
+            `;
+
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'scale-90');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Switch active pages via Navigation buttons
+        function switchPage(pageId) {
+            appState.activePage = pageId;
+            
+            const pages = ['parent-dashboard', 'basic-info', 'test-report', 'attendance', 'about-us', 'settings'];
+            const headerTitles = {
+                'parent-dashboard': "Parents Portal Dashboard",
+                'basic-info': "Student Profile Information",
+                'test-report': "Test Performance Analysis",
+                'attendance': "Attendance & Leave Panel",
+                'about-us': "School Identity Details",
+                'settings': "Account Settings"
+            };
+
+            pages.forEach(p => {
+                const pageEl = document.getElementById(`page-${p}`);
+                const navEl = document.getElementById(`nav-${p}`);
+                const mNavEl = document.getElementById(`mobile-nav-${p}`);
+
+                if (pageEl) {
+                    if (p === pageId) {
+                        pageEl.classList.remove('hidden');
+                    } else {
+                        pageEl.classList.add('hidden');
+                    }
+                }
+
+                const inactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white";
+                const activeClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-primary-50 dark:bg-primary-955/45 text-primary-600 dark:text-primary-400 border-l-4 border-primary-500 pl-3";
+                
+                const mInactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400";
+                const mActiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-primary-600 bg-primary-50";
+
+                if (navEl) navEl.className = (p === pageId) ? activeClass : inactiveClass;
+                if (mNavEl) mNavEl.className = (p === pageId) ? mActiveClass : mInactiveClass;
+            });
+
+            if (pageId === 'settings') {
+                const user = getUser();
+                const uInput = document.getElementById('settings-username');
+                if (uInput && user && user.username) {
+                    uInput.value = user.username;
+                }
+                const pInput = document.getElementById('settings-password');
+                if (pInput) pInput.value = '';
+                const cpInput = document.getElementById('settings-confirm-password');
+                if (cpInput) cpInput.value = '';
+            }
+
+            const headerText = document.getElementById('header-title-text');
+            if (headerText) headerText.textContent = headerTitles[pageId] || "Parent Portal Hub";
+        }
+
+        // Bind demographics profile card values
+        function renderStudentInfo() {
+            const s = appState.student;
+            const hasProfile = s.firstName || s.lastName;
+            const fullName = hasProfile ? `${s.firstName} ${s.lastName}` : "Unassigned Profile";
+            
+            // Sidebar Bind
+            document.getElementById('sidebar-name').textContent = fullName;
+            document.getElementById('sidebar-class').textContent = hasProfile ? `Class ${s.class || '--'} • Roll No: ${s.rollNo || '--'}` : "Class -- • Roll No: --";
+            
+            const sideDot = document.getElementById('sidebar-status-dot');
+            const portalStatus = document.getElementById('portal-status-badge');
+            if (sideDot) sideDot.className = hasProfile ? "absolute bottom-0 right-4 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full" : "absolute bottom-0 right-4 w-3.5 h-3.5 bg-slate-400 border-2 border-white dark:border-slate-800 rounded-full";
+            if (portalStatus) {
+                if (hasProfile) {
+                    portalStatus.textContent = "Verified Guardian Portal";
+                    portalStatus.className = "mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider";
+                } else {
+                    portalStatus.textContent = "Offline Registry";
+                    portalStatus.className = "mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider";
+                }
+            }
+
+            const sidebarPhoto = document.getElementById('sidebar-photo');
+            const sidebarPlaceholder = document.getElementById('sidebar-photo-placeholder');
+            if (s.photoUrl) {
+                sidebarPhoto.src = s.photoUrl.startsWith('http') || s.photoUrl.startsWith('data:') ? s.photoUrl : API_BASE + (s.photoUrl.startsWith('/') ? '' : '/') + s.photoUrl;
+                sidebarPhoto.classList.remove('hidden');
+                if (sidebarPlaceholder) sidebarPlaceholder.classList.add('hidden');
+            } else {
+                sidebarPhoto.classList.add('hidden');
+                if (sidebarPlaceholder) sidebarPlaceholder.classList.remove('hidden');
+            }
+
+            // Dashboard Bind
+            document.getElementById('welcome-student-name').textContent = s.firstName || "Scholar";
+
+            // Details Page Bind
+            document.getElementById('profile-full-name').textContent = fullName;
+            
+            const profilePhoto = document.getElementById('profile-student-photo');
+            const profilePlaceholder = document.getElementById('profile-photo-placeholder');
+            const activeShield = document.getElementById('profile-active-shield');
+            if (s.photoUrl) {
+                profilePhoto.src = s.photoUrl.startsWith('http') || s.photoUrl.startsWith('data:') ? s.photoUrl : API_BASE + (s.photoUrl.startsWith('/') ? '' : '/') + s.photoUrl;
+                profilePhoto.classList.remove('hidden');
+                if (profilePlaceholder) profilePlaceholder.classList.add('hidden');
+                if (activeShield) {
+                    activeShield.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Active';
+                    activeShield.className = "absolute -bottom-2 -right-2 bg-primary-500 text-white px-2 py-1 rounded-xl text-[10px] font-bold shadow-md";
+                }
+            } else {
+                profilePhoto.classList.add('hidden');
+                if (profilePlaceholder) profilePlaceholder.classList.remove('hidden');
+                if (activeShield) {
+                    activeShield.innerHTML = '<i class="fa-solid fa-shield"></i> Empty State';
+                    activeShield.className = "absolute -bottom-2 -right-2 bg-slate-400 text-white px-2 py-1 rounded-xl text-[10px] font-bold shadow-md";
+                }
+            }
+
+            document.getElementById('info-student-class').textContent = s.class || "--";
+            document.getElementById('info-student-roll').textContent = s.rollNo || "--";
+            document.getElementById('info-class-teacher').textContent = s.classTeacher || "--";
+            const sysIdEl = document.getElementById('info-system-id');
+            if (sysIdEl) sysIdEl.textContent = s.systemId || "--";
+            const rankBadge = document.getElementById('class-rank-badge');
+            if (rankBadge) rankBadge.textContent = s.classRank ? `Class Rank ${s.classRank}` : "Class Rank --";
+
+            document.getElementById('info-father-name').textContent = s.fatherName || "--";
+            document.getElementById('info-father-phone').textContent = s.fatherPhone || "--";
+            document.getElementById('info-mother-name').textContent = s.motherName || "--";
+            document.getElementById('info-mother-phone').textContent = s.motherPhone || "--";
+
+            document.getElementById('info-residential-address').textContent = s.address || "No profile address loaded.";
+            const homeIcon = document.getElementById('info-home-icon');
+            if (homeIcon) homeIcon.className = hasProfile ? "fa-solid fa-house-user text-primary-500" : "fa-solid fa-house-user text-slate-400";
+        }
+
+        // Renders absence notifications — simple read/dismiss cards
+        function renderDashboardExplanations() {
+            const container = document.getElementById('dashboard-absence-explain-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            // Load which absence IDs have been marked read from localStorage
+            const readIds = getReadAbsenceIds();
+
+            // Filter out already-read ones
+            const unread = appState.unexcusedAbsences.filter(a => !readIds.includes(String(a.id)));
+
+            if (unread.length === 0) {
+                container.innerHTML = `
+                    <div class="p-5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 rounded-xl border border-dashed border-emerald-200 dark:border-emerald-800 text-center text-xs space-y-1">
+                        <i class="fa-solid fa-circle-check text-xl"></i>
+                        <p class="font-bold">No new absence notifications.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            unread.forEach(abs => {
+                const dateFormatted = new Date(abs.date).toLocaleDateString('en-US', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                });
+                const card = document.createElement('div');
+                card.id = `absence-card-${abs.id}`;
+                card.className = "flex items-center justify-between gap-3 p-3.5 bg-rose-50 dark:bg-rose-950/20 rounded-xl border border-rose-100 dark:border-rose-900/40";
+                card.innerHTML = `
+                    <div class="flex items-start gap-3 min-w-0">
+                        <div class="p-2 bg-rose-100 dark:bg-rose-900/40 text-rose-500 rounded-lg shrink-0">
+                            <i class="fa-solid fa-user-xmark text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-bold text-slate-800 dark:text-white leading-snug">
+                                Your ward was absent for <span class="text-rose-600 dark:text-rose-400">${abs.subject || 'a lecture'}</span>
+                            </p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${dateFormatted}</p>
+                        </div>
+                    </div>
+                    <button onclick="markAbsenceRead('${abs.id}')"
+                        class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold rounded-lg transition-all whitespace-nowrap">
+                        Mark Read
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Returns the set of absence IDs already dismissed by the parent
+        function getReadAbsenceIds() {
+            try {
+                return JSON.parse(localStorage.getItem('readAbsences') || '[]');
+            } catch { return []; }
+        }
+
+        // Marks a single absence notification as read and removes it from view
+        function markAbsenceRead(id) {
+            const card = document.getElementById(`absence-card-${id}`);
+            if (card) {
+                card.style.transition = 'opacity 0.25s, transform 0.25s';
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(10px)';
+                setTimeout(() => {
+                    // Persist to localStorage
+                    const readIds = getReadAbsenceIds();
+                    if (!readIds.includes(String(id))) readIds.push(String(id));
+                    localStorage.setItem('readAbsences', JSON.stringify(readIds));
+                    // Re-render
+                    renderDashboardExplanations();
+                    // Update unexcused count badge
+                    const readSet = new Set(readIds);
+                    const unreadCount = appState.unexcusedAbsences.filter(a => !readSet.has(String(a.id))).length;
+                    const dashUnex = document.getElementById('dashboard-unexcused-stat');
+                    if (dashUnex) dashUnex.textContent = `${unreadCount} Days`;
+                }, 250);
+            }
+        }
+
+        // Handle Future Leave Request Form submissions
+        async function handleLeaveFormSubmission(e) {
+            e.preventDefault();
+            const fromDate = document.getElementById('leave-from-date').value;
+            const toDate = document.getElementById('leave-to-date').value;
+            const category = document.getElementById('leave-category').value;
+            const reason = document.getElementById('leave-reason').value.trim();
+
+            if (!fromDate || !toDate || !reason) {
+                showNotification("Submission Error", "Please provide correct leave windows and detailed reasons.", "error");
+                return;
+            }
+
+            if (new Date(fromDate) > new Date(toDate)) {
+                showNotification("Invalid Date Range", "The leave 'From' date cannot be set past the 'To' date.", "error");
+                return;
+            }
+
+            // Disable button while submitting
+            const submitBtn = document.querySelector('#leave-request-form button[type="submit"]');
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...'; }
+
+            try {
+                await submitLeaveRequest(fromDate, toDate, category, reason);
+            } catch (err) {
+                console.error("Submission error in handler:", err);
+            } finally {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Leave Request'; }
+                document.getElementById('leave-request-form').reset();
+            }
+        }
+
+        // Renders compact test mark boxes + dynamic line graph with class average overlay
+        function renderTestReportSelectors() {
+            const container = document.getElementById('test-selector-buttons');
+            const graphContainer = document.getElementById('test-trend-graph');
+            if (!container) return;
+            container.innerHTML = '';
+            if (graphContainer) graphContainer.innerHTML = '';
+
+            const validTests = appState.tests.filter(t => t.name !== 'No Exams Yet');
+            if (validTests.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 italic">No exams recorded yet.</p>';
+                return;
+            }
+
+            validTests.forEach((test, index) => {
+                const btn = document.createElement('button');
+                btn.onclick = function() {
+                    appState.selectedTestIndex = index;
+                    renderSelectedTestReport();
+                    renderTestReportSelectors();
+                };
+                const isSelected = index === appState.selectedTestIndex;
+                const pct = parseFloat(test.percentage) || 0;
+                const scoreColor = pct >= 75 ? 'text-emerald-600 dark:text-emerald-400' : pct >= 50 ? 'text-amber-600 dark:text-amber-400' : pct > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400';
+                btn.className = `flex flex-col items-start p-3.5 rounded-xl text-left font-bold transition-all border ${
+                    isSelected
+                        ? 'bg-primary-600 text-white border-primary-700 shadow-md'
+                        : 'bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                }`;
+                btn.innerHTML = `
+                    <span class="text-xs font-bold leading-tight max-w-[130px] truncate">${test.name}</span>
+                    <span class="text-sm font-extrabold mt-1 ${isSelected ? 'text-white' : scoreColor}">${test.percentage}</span>
+                    <span class="text-[10px] mt-0.5 ${isSelected ? 'text-white/70' : 'text-slate-400'}">${test.totalObtained}/${test.totalMax} marks</span>
+                `;
+                container.appendChild(btn);
+
+                // Graph: side-by-side student bar + class avg bar
+                if (graphContainer) {
+                    const avgPct = appState.classAvg && appState.classAvg[test.name] !== undefined ? appState.classAvg[test.name] : null;
+                    const studentBarColor = pct >= 75 ? 'bg-primary-500' : pct >= 50 ? 'bg-amber-500' : pct > 0 ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-600';
+                    const studentBarH = Math.max(Math.round(pct * 0.68), 3);
+
+                    const col = document.createElement('div');
+                    col.className = 'flex flex-col items-center gap-1 shrink-0';
+
+                    let barsHtml = `<div class="flex items-end gap-0.5">
+                        <div class="w-5 ${studentBarColor} rounded-t-sm transition-all duration-500" style="height:${studentBarH}px" title="You: ${pct}%"></div>`;
+                    if (avgPct !== null) {
+                        const avgBarH = Math.max(Math.round(avgPct * 0.68), 3);
+                        barsHtml += `<div class="w-5 bg-violet-400 rounded-t-sm transition-all duration-500 opacity-80" style="height:${avgBarH}px" title="Class avg: ${avgPct}%"></div>`;
+                    }
+                    barsHtml += `</div>`;
+
+                    col.innerHTML = `
+                        <span class="text-[9px] font-bold text-slate-500 dark:text-slate-400">${pct}%</span>
+                        ${barsHtml}
+                        <span class="text-[9px] text-slate-400 text-center max-w-[44px] truncate" title="${test.name}">${test.name.split(' ')[0]}</span>
+                    `;
+                    graphContainer.appendChild(col);
+                }
+            });
+        }
+
+        // Renders report details for all tests simultaneously
+        function renderSelectedTestReport() {
+            const container = document.getElementById('subject-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!appState.tests || appState.tests.length === 0 || appState.tests[0].name === 'No Exams Yet') {
+                document.getElementById('selected-test-subtitle-term').textContent = "Awaiting profile load";
+                document.getElementById('selected-test-total-badge').textContent = "Aggregate: --";
+                document.getElementById('selected-test-percent-badge').textContent = "Overall: --";
+                
+                container.innerHTML = `
+                    <div class="col-span-full p-8 text-center text-slate-400 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                        <i class="fa-solid fa-chart-line text-3xl mb-2 block"></i>
+                        No dynamic test scores found. Load a student profile to view.
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('selected-test-subtitle-term').textContent = "Displaying all examination report cards";
+            document.getElementById('selected-test-total-badge').classList.add('hidden');
+            document.getElementById('selected-test-percent-badge').classList.add('hidden');
+
+            appState.tests.forEach((test, idx) => {
+                if (test.name === 'No Exams Yet' || !test.subjects || test.subjects.length === 0) return;
+
+                const section = document.createElement('div');
+                section.className = "col-span-full space-y-4 mt-6 first:mt-0";
+
+                section.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2 gap-2 mt-4">
+                        <h4 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-simple text-primary-500"></i> ${test.name}
+                        </h4>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-extrabold rounded border border-slate-200 dark:border-slate-700">
+                                Aggregate: ${test.totalObtained} / ${test.totalMax}
+                            </span>
+                            <span class="px-2.5 py-0.5 bg-primary-100 dark:bg-primary-950 text-primary-700 dark:text-primary-300 text-[10px] font-extrabold rounded border border-primary-200">
+                                Overall: ${test.percentage}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2" id="parent-cards-grid-${idx}"></div>
+                `;
+                container.appendChild(section);
+
+                const cardsGrid = document.getElementById(`parent-cards-grid-${idx}`);
+                test.subjects.forEach(sub => {
+                    let barColor = "bg-primary-500";
+                    if (sub.accent === "emerald") barColor = "bg-emerald-500";
+                    if (sub.accent === "amber") barColor = "bg-amber-500";
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3";
+                    
+                    const percentage = sub.max > 0 ? ((sub.score / sub.max) * 100).toFixed(0) : 0;
+
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${sub.name}</h4>
+                                <p class="text-[10px] text-slate-400 font-semibold uppercase">Instructor: ${sub.teacher || "TBD"}</p>
+                            </div>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300 text-[10px] font-bold rounded">
+                                ${percentage >= 90 ? 'A+' : percentage >= 80 ? 'A' : percentage >= 70 ? 'B' : percentage > 0 ? 'C' : 'N/A'}
+                            </span>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-bold">
+                                <span class="text-slate-500 dark:text-slate-400">Evaluation Marks</span>
+                                <span class="text-slate-900 dark:text-white">${sub.score} / ${sub.max}</span>
+                            </div>
+                            <div class="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                    cardsGrid.appendChild(card);
+                });
+            });
+        }
+
+        // UI Rendering for Attendance Tracker calculations
+        function renderAttendanceData() {
+            const att = appState.attendance;
+            const percentageVal = parseFloat(att.calculatedPercentage) || 0;
+            
+            // No circular gauge in parent portal - just update stats
+            const attendedEl = document.getElementById('stat-total-attended-classes');
+            const heldEl = document.getElementById('stat-total-held-classes');
+            if (attendedEl) attendedEl.textContent = att.calculatedTotalAttended;
+            if (heldEl) heldEl.textContent = att.calculatedTotalClasses;
+
+            // Subject progress bars breakdown
+            const barsContainer = document.getElementById('subject-attendance-bars');
+            if (!barsContainer) return;
+            barsContainer.innerHTML = '';
+            
+            if (!att.subjects || att.subjects.length === 0) {
+                barsContainer.innerHTML = `
+                    <div class="col-span-full p-6 text-center text-slate-400">
+                        No subject breakdown attendance registered.
+                    </div>
+                `;
+                return;
+            }
+
+            att.subjects.forEach(sub => {
+                const subRatio = sub.total > 0 ? ((sub.attended / sub.total) * 100).toFixed(1) : "0.0";
+                const subRatioNum = parseFloat(subRatio);
+
+                let barColor = "bg-primary-500";
+                if (subRatioNum >= 90) {
+                    barColor = "bg-emerald-500";
+                } else if (subRatioNum > 0 && subRatioNum < 75) {
+                    barColor = "bg-rose-500";
+                } else if (subRatioNum === 0) {
+                    barColor = "bg-slate-300 dark:bg-slate-700";
+                }
+
+                const block = document.createElement('div');
+                block.className = "space-y-1 bg-slate-50 dark:bg-slate-900/30 p-3 rounded-xl border border-slate-200 dark:border-slate-700/65";
+                block.innerHTML = `
+                    <div class="flex justify-between text-xs font-bold">
+                        <span class="text-slate-700 dark:text-slate-300">${sub.name}</span>
+                        <span class="text-slate-800 dark:text-white">${sub.attended}/${sub.total} classes (${subRatio}%)</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width: ${subRatio}%"></div>
+                    </div>
+                    <div class="flex justify-between items-center pt-1 text-[10px]">
+                        <span class="text-slate-400">Class Attendance Standing</span>
+                        <span class="font-semibold ${subRatioNum >= 75 ? 'text-emerald-500' : 'text-rose-500'}">
+                            ${subRatioNum >= 75 ? '<i class="fa-solid fa-circle-check"></i> Eligible' : subRatioNum > 0 ? '<i class="fa-solid fa-triangle-exclamation"></i> Shortage' : 'Awaiting Data'}
+                        </span>
+                    </div>
+                `;
+                barsContainer.appendChild(block);
+            });
+        }
+
+        // Renders Leave Request History rows
+        function renderLeavesRegistry() {
+            const tbody = document.getElementById('leaves-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (appState.leaves.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="p-6 text-center text-slate-400 bg-slate-50/50 dark:bg-slate-900/20">No leaves logged in current session registries.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            appState.leaves.forEach(item => {
+                let statusBadge = '';
+                if (item.status === 'Approved') {
+                    statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-[10px]">Approved</span>';
+                } else if (item.status === 'Rejected') {
+                    statusBadge = '<span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 rounded-md font-bold text-[10px]">Rejected</span>';
+                } else {
+                    statusBadge = '<span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-955 text-amber-700 dark:text-amber-400 rounded-md font-bold text-[10px] animate-pulse">Pending Review</span>';
+                }
+
+                const deleteBtn = `
+                    <button onclick="deleteLeaveRequest('${item.id}')" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/20 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-lg text-[10px] font-bold transition-all shadow-sm flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> Delete
+                    </button>
+                `;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/50 dark:hover:bg-slate-800/40 text-[11px] text-slate-600 dark:text-slate-300";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold font-mono text-slate-900 dark:text-white">
+                        ${item.from === item.to ? item.from : `${item.from} to ${item.to}`}
+                    </td>
+                    <td class="p-3 font-medium">${item.category}</td>
+                    <td class="p-3 max-w-xs truncate" title="${item.reason}">${item.reason}</td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 text-right flex justify-end">${deleteBtn}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function deleteLeaveRequest(id) {
+            if (!confirm('Are you sure you want to delete this leave request permanently?')) return;
+            try {
+                const res = await fetch(`${API}/leaves/${id}`, {
+                    method: 'DELETE',
+                    headers: authHeaders()
+                });
+                if (res.ok) {
+                    showNotification('Deleted successfully', 'Leave record deleted successfully.', 'success');
+                    appState.leaves = appState.leaves.filter(l => String(l.id) !== String(id));
+                    renderLeavesRegistry();
+                    await loadParentData();
+                } else {
+                    const data = await res.json();
+                    showNotification('Deletion Failed', data.error || 'Could not delete leave request.', 'error');
+                }
+            } catch(err) {
+                console.error('Delete leave request error:', err);
+                showNotification('Network Error', 'Could not connect to server.', 'error');
+            }
+        }
+
+        async function handleSettingsFormSubmission(e) {
+            e.preventDefault();
+            const username = document.getElementById('settings-username').value.trim();
+            const password = document.getElementById('settings-password').value;
+            const confirmPassword = document.getElementById('settings-confirm-password').value;
+
+            if (!username) {
+                showNotification("Error", "Username cannot be empty.", "error");
+                return;
+            }
+
+            if (password || confirmPassword) {
+                if (password !== confirmPassword) {
+                    showNotification("Mismatch", "Passwords do not match.", "error");
+                    return;
+                }
+                if (password.length < 4) {
+                    showNotification("Security Warning", "Password should be at least 4 characters long.", "error");
+                    return;
+                }
+            }
+
+            const submitBtn = document.querySelector('#settings-form button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            }
+
+            try {
+                const res = await fetch(`${API}/auth/update-credentials`, {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ username, password: password || undefined })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showNotification("Settings Saved", "Your account settings have been updated successfully.", "success");
+                    // Update user in local storage
+                    const user = getUser();
+                    if (user) {
+                        user.username = username;
+                        localStorage.setItem('user', JSON.stringify(user));
+                    }
+                    document.getElementById('settings-password').value = '';
+                    document.getElementById('settings-confirm-password').value = '';
+                } else {
+                    showNotification("Update Failed", data.error || "Could not update credentials.", "error");
+                }
+            } catch(err) {
+                console.error("Settings update error:", err);
+                showNotification("Network Error", "Could not connect to server.", "error");
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Settings';
+                }
+            }
+        }
+
+        // ===================== BACKEND API INTEGRATION =====================
+        const API = `${API_BASE}/api`;
+        function getToken() { return localStorage.getItem('token'); }
+        function getUser()  { try { return JSON.parse(localStorage.getItem('user')); } catch(e) { return null; } }
+        function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() }; }
+
+        async function loadParentData() {
+            const user = getUser();
+            if (!user || !user.linked_id) { window.location.href = '/login_page.html'; return; }
+
+            try {
+                // Student profile
+                const res = await fetch(`${API}/students/${user.linked_id}`, { headers: authHeaders() });
+                if (res.status === 401) { window.location.href = '/login_page.html'; return; }
+                const student = await res.json();
+
+                const profileData = {
+                    student: {
+                        firstName: student.first_name, lastName: student.last_name,
+                        class: student.class, rollNo: student.roll_number,
+                        classTeacher: student.class_teacher, fatherName: student.father_name,
+                        fatherPhone: student.father_phone, motherName: student.mother_name,
+                        motherPhone: student.mother_phone, address: student.address,
+                        photoUrl: student.photo_url, systemId: `STU-${student.id}`
+                    },
+                    tests: [],
+                    attendance: { subjects: [] },
+                    leaves: [], unexcusedAbsences: []
+                };
+
+                // Fetch marks, attendance, leaves, timetable, and class averages in parallel
+                const [mRes, aRes, lRes, tRes, cAvgRes] = await Promise.all([
+                    fetch(`${API}/marks?student_id=${user.linked_id}`, { headers: authHeaders() }),
+                    fetch(`${API}/attendance?student_id=${user.linked_id}`, { headers: authHeaders() }),
+                    fetch(`${API}/leaves?student_id=${user.linked_id}`, { headers: authHeaders() }),
+                    student.class ? fetch(`${API}/timetable?class=${encodeURIComponent(student.class)}`, { headers: authHeaders() }) : Promise.resolve(null),
+                    student.class ? fetch(`${API}/marks/class-avg?class=${encodeURIComponent(student.class)}`, { headers: authHeaders() }) : Promise.resolve(null)
+                ]);
+
+                const marksData = await mRes.json();
+                const attData = await aRes.json();
+                const leavesData = await lRes.json();
+                const ttData = tRes ? await tRes.json() : [];
+
+                // Class average — try the dedicated endpoint first, fall back to computing from marksData
+                appState.classAvg = {};
+                let classAvgData = [];
+                try {
+                    if (cAvgRes && cAvgRes.ok) {
+                        classAvgData = await cAvgRes.json();
+                    }
+                } catch(e) { /* endpoint not available yet */ }
+
+                if (Array.isArray(classAvgData) && classAvgData.length > 0) {
+                    // Server returned proper class averages
+                    classAvgData.forEach(r => { appState.classAvg[r.exam_name] = r.avg_pct; });
+                } else {
+                    // Endpoint not available yet — leave classAvg empty so violet bar is hidden
+                    appState.classAvg = {};
+                }
+
+                const subjectAccents = ['emerald', 'primary', 'amber'];
+
+                // Build dynamic test list from exam_name
+                const examGroups = {};
+                marksData.forEach(m => {
+                    if (!examGroups[m.exam_name]) examGroups[m.exam_name] = [];
+                    examGroups[m.exam_name].push(m);
+                });
+                profileData.tests = Object.entries(examGroups).map(([examName, records]) => {
+                    const subjects = records.map((m, i) => ({
+                        name: m.subject, score: m.score, max: m.max_score,
+                        teacher: m.uploaded_by_username || 'Teacher', accent: subjectAccents[i % 3]
+                    }));
+                    return { id: examName, name: examName, subjects, totalObtained: 0, totalMax: 0, percentage: '0%' };
+                });
+                if (profileData.tests.length === 0) {
+                    profileData.tests = [{ id:'', name:'No Exams Yet', subjects:[], totalObtained:0, totalMax:0, percentage:'0%' }];
+                }
+
+                // Leaves
+                profileData.leaves = leavesData.map(l => {
+                    let category = 'Leave Application';
+                    let reason = l.reason || '';
+                    if (reason.startsWith('[') && reason.includes(']')) {
+                        const closeIdx = reason.indexOf(']');
+                        category = reason.substring(1, closeIdx);
+                        reason = reason.substring(closeIdx + 1).trim();
+                    }
+                    return {
+                        id: l.id,
+                        from: l.from_date, to: l.to_date,
+                        category: category,
+                        reason: reason,
+                        status: l.status === 'PENDING' ? 'Pending Approval' : l.status === 'APPROVED' ? 'Approved' : 'Rejected',
+                        ownerNote: l.owner_note
+                    };
+                });
+
+                const approvedLeaves = leavesData.filter(l => l.status === 'APPROVED');
+                const isDateWithinRange = (dateStr, fromStr, toStr) => {
+                    const d = new Date(dateStr);
+                    const from = new Date(fromStr);
+                    const to = new Date(toStr);
+                    d.setHours(0,0,0,0);
+                    from.setHours(0,0,0,0);
+                    to.setHours(0,0,0,0);
+                    return d >= from && d <= to;
+                };
+
+                // Synchronize attendance subjects with timetable subjects
+                const ttSubjects = [...new Set(ttData.map(e => e.subject).filter(sub => sub && sub.trim() !== ''))];
+                const subjectsList = ttSubjects.map((subName, i) => {
+                    return {
+                        name: subName,
+                        attended: 0,
+                        total: 0,
+                        accent: subjectAccents[i % subjectAccents.length]
+                    };
+                });
+
+                // Attendance processing
+                attData.forEach(rec => {
+                    if (rec.status === 'ABSENT') {
+                        const isExcused = approvedLeaves.some(l => isDateWithinRange(rec.date, l.from_date, l.to_date));
+                        if (isExcused) {
+                            return; // Ignore excused absence completely from metrics
+                        }
+                        profileData.unexcusedAbsences.push({ id: rec.id, date: rec.date, subject: rec.subject });
+                    }
+
+                    let idx = subjectsList.findIndex(s => s.name.toLowerCase() === rec.subject.toLowerCase());
+                    if (idx === -1) {
+                        subjectsList.push({
+                            name: rec.subject,
+                            attended: 0,
+                            total: 0,
+                            accent: subjectAccents[subjectsList.length % subjectAccents.length]
+                        });
+                        idx = subjectsList.length - 1;
+                    }
+                    subjectsList[idx].total++;
+                    if (rec.status === 'PRESENT') {
+                        subjectsList[idx].attended++;
+                    }
+                });
+
+                profileData.attendance.subjects = subjectsList;
+
+                window.loadStudentProfile(profileData);
+
+            } catch(err) { console.error('Parent data load error:', err); }
+        }
+
+        // Override leave form to use real API
+        async function submitLeaveRequest(fromDate, toDate, category, reason) {
+            const user = getUser();
+            if (!user || !user.linked_id) {
+                showNotification('Auth Error', 'You must be logged in to submit leave requests.', 'error');
+                return;
+            }
+            const fullReason = category ? `[${category}] ${reason}` : reason;
+
+            // Optimistic update — show in table immediately
+            const tempId = 'temp-' + Date.now();
+            appState.leaves.unshift({
+                id: tempId,
+                from: fromDate,
+                to: toDate,
+                category: category || 'Leave Application',
+                reason: reason,
+                status: 'Pending Approval'
+            });
+            renderLeavesRegistry();
+
+            try {
+                const res = await fetch(`${API}/leaves`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ student_id: user.linked_id, from_date: fromDate, to_date: toDate, reason: fullReason })
+                });
+                if (res.ok) {
+                    const newLeaveRaw = await res.json();
+                    
+                    let parsedCategory = 'Leave Application';
+                    let parsedReason = newLeaveRaw.reason || '';
+                    if (parsedReason.startsWith('[') && parsedReason.includes(']')) {
+                        const closeIdx = parsedReason.indexOf(']');
+                        parsedCategory = parsedReason.substring(1, closeIdx);
+                        parsedReason = parsedReason.substring(closeIdx + 1).trim();
+                    }
+                    
+                    const newLeave = {
+                        id: newLeaveRaw.id,
+                        from: newLeaveRaw.from_date,
+                        to: newLeaveRaw.to_date,
+                        category: parsedCategory,
+                        reason: parsedReason,
+                        status: newLeaveRaw.status === 'PENDING' ? 'Pending Approval' : newLeaveRaw.status === 'APPROVED' ? 'Approved' : 'Rejected',
+                        ownerNote: newLeaveRaw.owner_note
+                    };
+                    
+                    const idx = appState.leaves.findIndex(l => l.id === tempId);
+                    if (idx !== -1) {
+                        appState.leaves[idx] = newLeave;
+                    } else {
+                        appState.leaves.unshift(newLeave);
+                    }
+                    renderLeavesRegistry();
+                    
+                    showNotification('Leave Request Submitted', 'Your leave application has been sent to the owner for approval.', 'success');
+                } else {
+                    const data = await res.json();
+                    // Rollback optimistic update
+                    appState.leaves = appState.leaves.filter(l => l.id !== tempId);
+                    renderLeavesRegistry();
+                    showNotification('Submission Failed', data.error || 'Could not submit leave request. Please try again.', 'error');
+                }
+            } catch(err) {
+                console.error('Leave submission error:', err);
+                // Rollback optimistic update
+                appState.leaves = appState.leaves.filter(l => l.id !== tempId);
+                renderLeavesRegistry();
+                showNotification('Network Error', 'Could not connect to server. Please try again.', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token'); localStorage.removeItem('user'); localStorage.removeItem('role');
+            window.location.href = '/login_page.html';
+        }
+
+        const _origOnLoad = window.onload;
+        window.onload = async function() { if (_origOnLoad) _origOnLoad(); await loadParentData(); };
+        // ======================== END API INTEGRATION ========================
+
+        // Dark/Light Mode switch
+        function toggleDarkMode() {
+            const docClass = document.documentElement.classList;
+            const themeIcon = document.getElementById('theme-icon');
+
+            if (docClass.contains('dark')) {
+                docClass.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (themeIcon) themeIcon.className = "fa-solid fa-moon text-slate-600";
+            } else {
+                docClass.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-400";
+            }
+        }
+
+        // Toggle Mobile Navigation Overlay
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

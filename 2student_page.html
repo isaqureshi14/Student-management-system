@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50 dark:bg-slate-900 scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunrise Public School - Unified Student Hub</title>
+    <!-- Tailwind CSS Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Vector Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+    </style>
+    <!-- Cropper.js Image Cropping Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+</head>
+<body class="h-full text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+    <div class="flex h-full overflow-hidden">
+        
+        <!-- Sidebar Navigation Area -->
+        <aside class="hidden md:flex flex-col w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 shrink-0">
+            <div class="flex items-center gap-2 px-6 py-5 border-b border-slate-100 dark:border-slate-700">
+                <div class="p-2 bg-primary-600 rounded-lg text-white">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-slate-900 dark:text-white leading-tight">Sunrise Public</h1>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Student Profile Hub</p>
+                </div>
+            </div>
+
+            <!-- Profile Overview Quick Preview -->
+            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 text-center">
+                <div class="relative inline-block">
+                    <div id="sidebar-photo-container" class="w-16 h-16 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center mx-auto bg-slate-50 dark:bg-slate-900 overflow-hidden">
+                        <i id="sidebar-photo-placeholder" class="fa-solid fa-user text-slate-400 text-xl"></i>
+                        <img id="sidebar-photo" src="" alt="Student Profile" class="w-full h-full object-cover hidden" />
+                    </div>
+                    <span class="absolute bottom-0 right-4 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></span>
+                </div>
+                <h3 id="sidebar-name" class="mt-2.5 font-bold text-slate-900 dark:text-white text-base">Unassigned Profile</h3>
+                <p id="sidebar-class" class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Class -- • Roll No: --</p>
+            </div>
+
+            <!-- Sidebar Navigation Links -->
+            <nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
+                <span class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Navigation</span>
+                
+                <!-- Page 1 Selector -->
+                <button onclick="switchPage('basic-info')" id="nav-basic-info" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400">
+                    <i class="fa-solid fa-address-card text-lg"></i>
+                    <span>Profile Information</span>
+                </button>
+                
+                <!-- Page 2 Selector -->
+                <button onclick="switchPage('test-report')" id="nav-test-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                    <i class="fa-solid fa-chart-line text-lg"></i>
+                    <span>Test Marks Report</span>
+                </button>
+
+                <!-- Page 3 Selector -->
+                <button onclick="switchPage('attendance')" id="nav-attendance" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                    <i class="fa-solid fa-clipboard-user text-lg"></i>
+                    <span>Attendance Tracker</span>
+                </button>
+
+                <!-- New Timetable Selector -->
+                <button onclick="switchPage('timetable')" id="nav-timetable" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                    <i class="fa-solid fa-calendar-days text-lg"></i>
+                    <span>Class Timetable</span>
+                </button>
+
+                <!-- New Teacher Notes Selector -->
+                <button onclick="switchPage('notes')" id="nav-notes" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                    <i class="fa-solid fa-chalkboard-user text-lg"></i>
+                    <span>Teacher's Notes</span>
+                </button>
+
+                <!-- Page 4 Selector (About Us Extra slide item) -->
+                <button onclick="switchPage('about-us')" id="nav-about-us" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                    <i class="fa-solid fa-circle-info text-lg"></i>
+                    <span>About Us</span>
+                </button>
+            </nav>
+
+            <!-- Theme Configuration Switcher -->
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+                <button onclick="toggleDarkMode()" class="flex items-center justify-between w-full p-2.5 bg-slate-100 dark:bg-slate-700 rounded-xl transition-all">
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Switch Theme</span>
+                    <i id="theme-icon" class="fa-solid fa-moon text-slate-600 dark:text-amber-400"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Feed -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-50 dark:bg-slate-900">
+            
+            <!-- Sticky Header -->
+            <header class="flex items-center justify-between bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-6 py-4 sticky top-0 z-30 shadow-sm transition-all duration-200">
+                <div class="flex items-center gap-3">
+                    <button class="md:hidden p-2 text-slate-600 dark:text-slate-300" onclick="toggleMobileMenu()">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <div>
+                        <h2 id="header-title-text" class="text-xl font-bold text-slate-900 dark:text-white">Profile Information</h2>
+                        <p class="text-xs text-slate-400" id="current-date-string"></p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-950/40 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-600 transition-all">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </button>
+            </header>
+
+            <!-- Mobile Slide-out Menu -->
+            <div id="mobile-menu" class="hidden fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-sm">
+                <div class="w-72 h-full bg-white dark:bg-slate-800 p-5 flex flex-col justify-between overflow-y-auto">
+                    <div>
+                        <div class="flex items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-700">
+                            <span class="font-bold text-lg text-primary-600">Sunrise Public</span>
+                            <button onclick="toggleMobileMenu()" class="p-1 text-slate-600 dark:text-slate-300"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        
+                        <div class="mt-6 space-y-4">
+                            <button onclick="switchPage('basic-info'); toggleMobileMenu()" id="mobile-nav-basic-info" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-primary-600 bg-primary-50">
+                                <i class="fa-solid fa-address-card"></i>
+                                <span>Profile Information</span>
+                            </button>
+                            <button onclick="switchPage('test-report'); toggleMobileMenu()" id="mobile-nav-test-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Test Marks Report</span>
+                            </button>
+                            <button onclick="switchPage('attendance'); toggleMobileMenu()" id="mobile-nav-attendance" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-clipboard-user"></i>
+                                <span>Attendance Tracker</span>
+                            </button>
+                            <button onclick="switchPage('timetable'); toggleMobileMenu()" id="mobile-nav-timetable" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <span>Class Timetable</span>
+                            </button>
+                            <button onclick="switchPage('notes'); toggleMobileMenu()" id="mobile-nav-notes" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-chalkboard-user"></i>
+                                <span>Teacher's Notes</span>
+                            </button>
+                            <button onclick="switchPage('about-us'); toggleMobileMenu()" id="mobile-nav-about-us" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-circle-info"></i>
+                                <span>About Us</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="toggleDarkMode(); toggleMobileMenu()" class="flex items-center justify-between w-full p-3 bg-slate-100 dark:bg-slate-700 rounded-xl">
+                        <span class="text-xs font-bold">Switch Theme</span>
+                        <i class="fa-solid fa-moon text-slate-600 dark:text-amber-400"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Page 1 Container: Profile Information -->
+            <div id="page-basic-info" class="p-6 space-y-6">
+                <div class="bg-gradient-to-r from-primary-600 to-sky-700 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-primary-500/10">
+                    <div class="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 opacity-10">
+                        <i class="fa-solid fa-address-card text-[250px]"></i>
+                    </div>
+                    <div class="relative z-10 max-w-2xl space-y-2">
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Official Student Credentials</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold leading-tight">Welcome, <span id="welcome-student-name">Scholar</span>!</h2>
+                        <p class="text-primary-100 text-sm">
+                            Access student registry records, residential verification index, and parent contacts below. Click the side panel menu links to view subject-wise test progress cards or attendance metrics.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Basic Information Core Grid -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4 gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-user-graduate text-primary-500"></i>
+                                Student Profile Identity Card
+                            </h3>
+                            <p class="text-xs text-slate-400">Official demographic credentials and verified guardians matrix.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openEditProfile()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+                                <i class="fa-solid fa-user-pen"></i> Edit Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- Photo Element -->
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700 text-center flex flex-col items-center justify-center space-y-4">
+                            <div class="relative group">
+                                <div id="front-photo-container" class="w-36 h-36 rounded-2xl border-4 border-white dark:border-slate-800 shadow-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden">
+                                    <i id="front-photo-placeholder" class="fa-solid fa-user-tie text-slate-400 text-5xl animate-pulse"></i>
+                                    <img id="front-student-photo" src="" alt="Student Portrait" class="w-full h-full object-cover hidden" />
+                                </div>
+                                <span class="absolute -bottom-2 -right-2 bg-slate-400 text-white p-2 rounded-xl text-xs shadow-md"><i class="fa-solid fa-shield-halved"></i> Standby</span>
+                            </div>
+                            <div class="space-y-1.5 pt-2">
+                                <h4 class="font-extrabold text-slate-900 dark:text-white text-lg" id="profile-full-name">Unassigned Profile</h4>
+                                <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 text-[10px] font-extrabold uppercase rounded-full tracking-wider border border-slate-200 dark:border-slate-700">Primary Scholar Account</span>
+                            </div>
+                        </div>
+
+                        <!-- Basic Metadata Parameters Column -->
+                        <div class="space-y-4 lg:col-span-2">
+                            <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-circle-info text-primary-500"></i> Academy Metadata
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/50 p-5 rounded-xl border border-slate-200/40 dark:border-slate-700/40">
+                                <div class="flex justify-between items-center text-sm py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                                    <span class="text-slate-500 dark:text-slate-400">Class & Section</span>
+                                    <span id="info-student-class" class="font-bold text-slate-900 dark:text-white">--</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                                    <span class="text-slate-500 dark:text-slate-400">Roll Number</span>
+                                    <span id="info-student-roll" class="font-bold text-slate-900 dark:text-white">--</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                                    <span class="text-slate-500 dark:text-slate-400">Class Instructor</span>
+                                    <span id="info-class-teacher" class="font-bold text-primary-600 dark:text-primary-400">--</span>
+                                </div>
+                            </div>
+
+                            <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-2 pt-2">
+                                <i class="fa-solid fa-people-roof text-primary-500"></i> Parent Coordinates
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/50 p-5 rounded-xl border border-slate-200/40 dark:border-slate-700/40">
+                                <div class="space-y-1">
+                                    <span class="text-[10px] uppercase text-slate-400 font-bold">Father's Name</span>
+                                    <p id="info-father-name" class="text-sm font-bold text-slate-800 dark:text-white">--</p>
+                                    <span class="text-xs font-mono text-slate-500 flex items-center gap-1 mt-1">
+                                        <i class="fa-solid fa-phone"></i> <span id="info-father-phone">--</span>
+                                    </span>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-[10px] uppercase text-slate-400 font-bold">Mother's Name</span>
+                                    <p id="info-mother-name" class="text-sm font-bold text-slate-800 dark:text-white">--</p>
+                                    <span class="text-xs font-mono text-slate-500 flex items-center gap-1 mt-1">
+                                        <i class="fa-solid fa-phone"></i> <span id="info-mother-phone">--</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Residential Address Block -->
+                        <div class="lg:col-span-3 space-y-3">
+                            <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-map-pin text-primary-500"></i> Residential Coordinates
+                            </h4>
+                            <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl flex items-start gap-3 border border-slate-200/40 dark:border-slate-700/40">
+                                <div class="p-2.5 bg-white dark:bg-slate-800 text-slate-400 rounded-lg shrink-0 border border-slate-200 dark:border-slate-700">
+                                    <i class="fa-solid fa-house-user"></i>
+                                </div>
+                                <div>
+                                    <p id="info-residential-address" class="text-sm font-semibold text-slate-500 dark:text-slate-400 leading-relaxed">
+                                        No verified address coordinates configured.
+                                    </p>
+                                    <span class="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider mt-1 block">Verified Primary Address Index</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2 Container: Test Report -->
+            <div id="page-test-report" class="hidden p-6 space-y-4">
+                
+                <!-- Test Marks Overview -->
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                            <i class="fa-solid fa-magnifying-glass-chart text-primary-500"></i>
+                            Test Marks Overview
+                        </h3>
+                    </div>
+                    <!-- Test boxes + graph -->
+                    <div class="flex flex-col sm:flex-row gap-4 items-start">
+                        <!-- Test mark boxes -->
+                        <div class="flex flex-wrap gap-2.5" id="test-selector-buttons">
+                            <!-- Populated Dynamically via Javascript -->
+                        </div>
+                        <!-- Dynamic bar graph -->
+                        <div class="flex-1 min-w-0 border-l border-slate-100 dark:border-slate-700 pl-4">
+                            <p class="text-[10px] font-bold uppercase text-slate-400 mb-2">Performance Trend</p>
+                            <div class="flex items-end gap-2.5 h-20 overflow-x-auto pb-1" id="test-trend-graph">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-primary-500"></i>
+                                Subject-Wise Evaluation & Performance Card
+                            </h3>
+                            <p class="text-xs text-slate-400" id="selected-test-subtitle-term">Awaiting profile load</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-extrabold rounded-lg border border-slate-200 dark:border-slate-700" id="selected-test-total-badge">
+                                Aggregate: --
+                            </span>
+                            <span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-extrabold rounded-lg border border-slate-200 dark:border-slate-700" id="selected-test-percent-badge">
+                                Overall: --
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Grid Layout for individual subjects -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="subject-cards-container">
+                        <!-- Populated dynamically via Javascript based on selected test -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Page 3 Container: Attendance Tracker -->
+            <div id="page-attendance" class="hidden p-6 space-y-6">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Overall Attendance Summary Card (replaced broken SVG circle) -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-center space-y-5">
+                        <div>
+                            <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                                <i class="fa-solid fa-clock text-primary-500"></i>
+                                Overall Attendance
+                            </h3>
+                            <p class="text-xs text-slate-400">Calculated across all subjects.</p>
+                        </div>
+
+                        <!-- Big percentage display -->
+                        <div class="text-center py-2">
+                            <span id="attendance-percent-text" class="text-6xl font-extrabold text-slate-900 dark:text-white">0%</span>
+                            <p class="text-xs text-slate-400 mt-1">Attendance Ratio</p>
+                        </div>
+
+                        <!-- Progress bar -->
+                        <div>
+                            <div class="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div id="attendance-bar" class="h-full bg-primary-500 rounded-full transition-all duration-700" style="width:0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-center">
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Attended</span>
+                                <span id="stat-total-attended-classes" class="text-xl font-bold text-slate-800 dark:text-slate-200">0</span>
+                            </div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Total</span>
+                                <span id="stat-total-held-classes" class="text-xl font-bold text-slate-800 dark:text-slate-200">0</span>
+                            </div>
+                        </div>
+
+                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/40 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                            Status: <span id="attendance-aggregate-status-text" class="font-bold text-slate-400">Unassigned</span>
+                        </div>
+                    </div>
+
+                    <!-- Subject Wise Attendance Card Grid -->
+                    <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-900 dark:text-white text-base">Subject-Wise Attendance Breakdown</h3>
+                                <p class="text-xs text-slate-400">Class present statistics tracked directly per study course.</p>
+                            </div>
+                            <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 bg-primary-100 dark:bg-primary-950/40 text-primary-600 rounded">Live Registry Sync</span>
+                        </div>
+
+                        <!-- Progress bars for dynamic subject attendance metrics -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" id="subject-attendance-bars">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+
+                        <!-- Dynamic Summary stats -->
+                        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Classes Attended</span>
+                                <span id="stat-total-attended-classes" class="text-lg font-bold text-slate-800 dark:text-slate-200">0</span>
+                            </div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Classes Held</span>
+                                <span id="stat-total-held-classes" class="text-lg font-bold text-slate-800 dark:text-slate-200">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Page Container: Class Timetable -->
+            <div id="page-timetable" class="hidden p-6 space-y-6">
+                
+                <div class="bg-gradient-to-r from-sky-600 to-indigo-700 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-sky-500/10">
+                    <div class="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 opacity-10">
+                        <i class="fa-solid fa-calendar-days text-[250px]"></i>
+                    </div>
+                    <div class="relative z-10 max-w-2xl space-y-2">
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Academic Schedule Index</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold leading-tight">Class Timetable Planner</h2>
+                        <p class="text-sky-100 text-sm">
+                            Synchronize your day with your scheduled classes, room numbers, and respective subject lectures. Data populates dynamically from the registrar databases.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm space-y-6">
+                    <!-- Day Navigation Pills -->
+                    <div class="flex flex-wrap items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-4">
+                        <button onclick="switchTimetableDay('Monday')" id="btn-day-Monday" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-primary-600 text-white">Monday</button>
+                        <button onclick="switchTimetableDay('Tuesday')" id="btn-day-Tuesday" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300">Tuesday</button>
+                        <button onclick="switchTimetableDay('Wednesday')" id="btn-day-Wednesday" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300">Wednesday</button>
+                        <button onclick="switchTimetableDay('Thursday')" id="btn-day-Thursday" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300">Thursday</button>
+                        <button onclick="switchTimetableDay('Friday')" id="btn-day-Friday" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300">Friday</button>
+                    </div>
+
+                    <!-- Timetable Schedule Cards Core List -->
+                    <div class="space-y-4" id="timetable-list-container">
+                        <!-- Skeletons render here dynamically if empty -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Container: Teacher's Notes -->
+            <div id="page-notes" class="hidden p-6 space-y-6">
+                
+                <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-amber-500/10">
+                    <div class="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 opacity-10">
+                        <i class="fa-solid fa-chalkboard-user text-[250px]"></i>
+                    </div>
+                    <div class="relative z-10 max-w-2xl space-y-2">
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Teacher Communications Feed</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold leading-tight">Instructor Notes & Broadcasts</h2>
+                        <p class="text-amber-500-100 text-sm">
+                            View homework guides, specific announcements, or references transmitted directly to you from your classroom teachers.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-4" id="notes-list-container">
+                    <!-- Skeletons render here dynamically if empty -->
+                </div>
+            </div>
+
+            <!-- Page 4 Container: About Us Extra Sidebar view -->
+            <div id="page-about-us" class="hidden p-6 space-y-6">
+                <!-- Brand Showcase Hero Banner -->
+                <div class="bg-gradient-to-r from-sky-600 to-primary-800 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-sky-500/10">
+                    <div class="absolute right-0 bottom-0 translate-x-12 translate-y-12 opacity-10">
+                        <i class="fa-solid fa-graduation-cap text-[280px]"></i>
+                    </div>
+                    <div class="relative z-10 max-w-2xl space-y-2">
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Established 1998</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold leading-tight">Sunrise Public School</h2>
+                        <p class="text-sky-100 text-sm leading-relaxed">
+                            Nurturing brilliant minds, shaping purposeful futures. Our integrated academic framework encourages rigorous, discovery-based inquiry with a balanced pathway for co-scholastic excellence.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Mission, Vision & Philosophies Matrix -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                        <div class="p-3 bg-primary-100 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 rounded-xl w-fit">
+                            <i class="fa-solid fa-eye text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Our Vision Statement</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                            To create an environment of holistic intellectual advancement where students learn to adapt seamlessly to global societal transitions while adhering strictly to high benchmarks of character, ethics, and innovation.
+                        </p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                        <div class="p-3 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl w-fit">
+                            <i class="fa-solid fa-bullseye text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Our Core Mission</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                            To deliver a robust scientific and humanitarian curriculum that promotes critical investigation, artistic exploration, digital competence, environmental stewardship, and empathetic communal responsibility.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Academic Pillar Benchmarks -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm space-y-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Four Pillars of Excellence</h3>
+                        <p class="text-xs text-slate-400">Our fundamental structures guiding scholar growth year over year.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-2">
+                            <i class="fa-solid fa-brain text-primary-500 text-lg"></i>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">Intellectual Rigor</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Cultivating thorough comprehension over rote learning methodologies.</p>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-2">
+                            <i class="fa-solid fa-compass text-amber-500 text-lg"></i>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">Ethical Integrity</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Inspiring accountability, truth, honesty, and mutual honor in operations.</p>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-2">
+                            <i class="fa-solid fa-microchip text-emerald-500 text-lg"></i>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">Tech Literacy</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Providing high-grade computer, coding, and dynamic media capabilities.</p>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-2">
+                            <i class="fa-solid fa-users text-rose-500 text-lg"></i>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">Global Empathy</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Encouraging team cooperation, inclusion, and localized service initiatives.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Official Administrative Coordinates -->
+                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+                    <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-envelope-open-text text-primary-500"></i> Administrative Registry Coordinates
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Office Coordination</span>
+                            <p class="font-semibold text-slate-700 dark:text-slate-200">info@sunrisepublic.edu.in</p>
+                            <p class="text-xs text-slate-400">Mon - Sat (08:00 AM - 03:00 PM)</p>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Telecommunication Portal</span>
+                            <p class="font-semibold text-slate-700 dark:text-slate-200">+91 (22) 5550-1234 / 1235</p>
+                            <p class="text-xs text-slate-400">Principal's Helpdesk</p>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Verified Location Coordinates</span>
+                            <p class="font-semibold text-slate-700 dark:text-slate-200">42, Vasant Vihar, Mumbai, MH</p>
+                            <p class="text-xs text-slate-400">Postal Pin: 400 053</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Footer -->
+            <footer class="text-center text-slate-400 dark:text-slate-500 text-xs py-6 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 mt-auto">
+                Sunrise Public School · Unified Student Registry Portal · 2026
+            </footer>
+        </main>
+    </div>
+
+    <!-- Core Interactive Application Logic -->
+    <script>
+        const API_BASE = window.location.origin.startsWith('file://') || !window.location.origin ? 'http://localhost:3001' : window.location.origin;
+        const appState = {
+            student: {
+                firstName: "",
+                lastName: "",
+                class: "",
+                rollNo: null,
+                classTeacher: "",
+                fatherName: "",
+                fatherPhone: "",
+                motherName: "",
+                motherPhone: "",
+                address: "",
+                photoUrl: ""
+            },
+            tests: [],
+            attendance: {
+                subjects: [],
+                calculatedTotalAttended: 0,
+                calculatedTotalClasses: 0,
+                calculatedPercentage: "0%"
+            },
+            
+            // Timetable day selection storage and blank arrays to receive future dynamic imports
+            selectedTimetableDay: "Monday",
+            timetable: [], // SKELETON: No hardcoded entries. Intended to be streamed.
+            
+            // Notes array storage to collect data transmitted from classroom teachers
+            notes: [],     // SKELETON: No hardcoded entries. Designed for instructor broadcasts.
+
+            selectedTestIndex: 1, // Default Midterm selection
+            activePage: "basic-info"
+        };
+
+        window.onload = function() {
+            // Set dynamic Date string in header
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date-string').textContent = new Date().toLocaleDateString('en-US', dateOptions);
+            
+            // Check LocalStorage / Preference for Dark Mode
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                const themeIcon = document.getElementById('theme-icon');
+                if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-400";
+            } else {
+                document.documentElement.classList.remove('dark');
+                const themeIcon = document.getElementById('theme-icon');
+                if (themeIcon) themeIcon.className = "fa-solid fa-moon text-slate-600";
+            }
+
+            // Sync baseline empty values
+            recalculateAcademicsAll();
+            recalculateAttendanceAll();
+            renderStudentInfo();
+            renderTestReportSelectors();
+            renderSelectedTestReport();
+            renderAttendanceData();
+            
+            // Render the loading / empty skeleton configurations
+            renderTimetableData();
+            renderNotesData();
+        };
+
+        // Recalculates aggregate scores and percentages dynamically across all registered tests
+        function recalculateAcademicsAll() {
+            appState.tests.forEach(test => {
+                let sumObtained = 0;
+                let sumMax = 0;
+                test.subjects.forEach(sub => {
+                    sumObtained += sub.score;
+                    sumMax += sub.max;
+                });
+                test.totalObtained = sumObtained;
+                test.totalMax = sumMax;
+                test.percentage = sumMax > 0 ? ((sumObtained / sumMax) * 100).toFixed(1) + "%" : "0.0%";
+            });
+        }
+
+        // Dynamically calculates general attendance metrics from course values
+        function recalculateAttendanceAll() {
+            const att = appState.attendance;
+            let totalAttended = 0;
+            let totalHeld = 0;
+
+            att.subjects.forEach(sub => {
+                totalAttended += parseInt(sub.attended) || 0;
+                totalHeld += parseInt(sub.total) || 0;
+            });
+
+            att.calculatedTotalAttended = totalAttended;
+            att.calculatedTotalClasses = totalHeld;
+            
+            if (totalHeld > 0) {
+                att.calculatedPercentage = ((totalAttended / totalHeld) * 100).toFixed(1) + "%";
+            } else {
+                att.calculatedPercentage = "0%";
+            }
+        }
+
+        // Switch active pages via Navigation buttons (Scales for multi-page toggle cleanly)
+        function switchPage(pageId) {
+            appState.activePage = pageId;
+            
+            const pages = ['basic-info', 'test-report', 'attendance', 'timetable', 'notes', 'about-us'];
+            const headerTitles = {
+                'basic-info': "Profile Information",
+                'test-report': "Test Marks Report",
+                'attendance': "Attendance Tracker",
+                'timetable': "Class Timetable",
+                'notes': "Teacher Announcements",
+                'about-us': "About Sunrise Public"
+            };
+
+            pages.forEach(p => {
+                const pageEl = document.getElementById(`page-${p}`);
+                const navEl = document.getElementById(`nav-${p}`);
+                const mNavEl = document.getElementById(`mobile-nav-${p}`);
+
+                if (pageEl) {
+                    if (p === pageId) {
+                        pageEl.classList.remove('hidden');
+                    } else {
+                        pageEl.classList.add('hidden');
+                    }
+                }
+
+                // Layout styling selectors
+                const inactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white";
+                const activeClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400";
+                
+                const mInactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400";
+                const mActiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-primary-600 bg-primary-50";
+
+                if (navEl) navEl.className = (p === pageId) ? activeClass : inactiveClass;
+                if (mNavEl) mNavEl.className = (p === pageId) ? mActiveClass : mInactiveClass;
+            });
+
+            const headerText = document.getElementById('header-title-text');
+            if (headerText) headerText.textContent = headerTitles[pageId] || "Profile Information";
+
+            // Trigger specific page data render loops
+            if (pageId === "test-report") {
+                renderSelectedTestReport();
+                renderTestReportSelectors();
+            } else if (pageId === "attendance") {
+                renderAttendanceData();
+            } else if (pageId === "timetable") {
+                renderTimetableData();
+            } else if (pageId === "notes") {
+                renderNotesData();
+            }
+        }
+
+        // Renders student demographics into view binders
+        function renderStudentInfo() {
+            const s = appState.student;
+            const fullName = s.firstName ? `${s.firstName} ${s.lastName}` : "Unassigned Profile";
+
+            // Sidebar elements
+            document.getElementById('sidebar-name').textContent = fullName;
+            document.getElementById('sidebar-class').textContent = s.class ? `Class ${s.class} • Roll No: ${s.rollNo}` : "Class -- • Roll No: --";
+
+            const sidePhoto = document.getElementById('sidebar-photo');
+            const sidePlaceholder = document.getElementById('sidebar-photo-placeholder');
+            if (s.photoUrl) {
+                sidePhoto.src = s.photoUrl.startsWith('http') || s.photoUrl.startsWith('data:') ? s.photoUrl : API_BASE + (s.photoUrl.startsWith('/') ? '' : '/') + s.photoUrl;
+                sidePhoto.classList.remove('hidden');
+                sidePlaceholder.classList.add('hidden');
+            } else {
+                sidePhoto.classList.add('hidden');
+                sidePlaceholder.classList.remove('hidden');
+            }
+
+            // Profile view elements
+            document.getElementById('welcome-student-name').textContent = s.firstName || "Scholar";
+            document.getElementById('profile-full-name').textContent = fullName;
+            
+            const frontPhoto = document.getElementById('front-student-photo');
+            const frontPlaceholder = document.getElementById('front-photo-placeholder');
+            if (s.photoUrl) {
+                frontPhoto.src = s.photoUrl.startsWith('http') || s.photoUrl.startsWith('data:') ? s.photoUrl : API_BASE + (s.photoUrl.startsWith('/') ? '' : '/') + s.photoUrl;
+                frontPhoto.classList.remove('hidden');
+                frontPlaceholder.classList.add('hidden');
+            } else {
+                frontPhoto.classList.add('hidden');
+                frontPlaceholder.classList.remove('hidden');
+            }
+
+            document.getElementById('info-student-class').textContent = s.class ? `Class ${s.class}` : "--";
+            document.getElementById('info-student-roll').textContent = s.rollNo || "--";
+            document.getElementById('info-class-teacher').textContent = s.classTeacher || "--";
+
+            document.getElementById('info-father-name').textContent = s.fatherName || "--";
+            document.getElementById('info-father-phone').textContent = s.fatherPhone || "--";
+            document.getElementById('info-mother-name').textContent = s.motherName || "--";
+            document.getElementById('info-mother-phone').textContent = s.motherPhone || "--";
+
+            document.getElementById('info-residential-address').textContent = s.address || "No verified address coordinates configured.";
+        }
+
+        // Renders compact test mark boxes + dynamic line graph
+        function renderTestReportSelectors() {
+            const container = document.getElementById('test-selector-buttons');
+            const graphContainer = document.getElementById('test-trend-graph');
+            if (!container) return;
+            container.innerHTML = '';
+            if (graphContainer) graphContainer.innerHTML = '';
+
+            const validTests = appState.tests.filter(t => t.name !== 'No Exams Yet');
+            if (validTests.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 italic">No exams recorded yet.</p>';
+                return;
+            }
+
+            validTests.forEach((test, index) => {
+                // Test box button
+                const btn = document.createElement('button');
+                btn.onclick = function() {
+                    appState.selectedTestIndex = index;
+                    renderSelectedTestReport();
+                    renderTestReportSelectors();
+                };
+                const isSelected = index === appState.selectedTestIndex;
+                const pct = parseFloat(test.percentage) || 0;
+                const scoreColor = pct >= 75 ? 'text-emerald-600 dark:text-emerald-400' : pct >= 50 ? 'text-amber-600 dark:text-amber-400' : pct > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400';
+                btn.className = `flex flex-col items-start p-3.5 rounded-xl text-left font-bold transition-all border ${
+                    isSelected
+                        ? 'bg-primary-600 text-white border-primary-700 shadow-md'
+                        : 'bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                }`;
+                btn.innerHTML = `
+                    <span class="text-xs font-bold leading-tight max-w-[130px] truncate">${test.name}</span>
+                    <span class="text-sm font-extrabold mt-1 ${isSelected ? 'text-white' : scoreColor}">${test.percentage}</span>
+                    <span class="text-[10px] mt-0.5 ${isSelected ? 'text-white/70' : 'text-slate-400'}">${test.totalObtained}/${test.totalMax} marks</span>
+                `;
+                container.appendChild(btn);
+
+                // Graph bar
+                if (graphContainer) {
+                    const barColor = pct >= 75 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : pct > 0 ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-600';
+                    const bar = document.createElement('div');
+                    bar.className = 'flex flex-col items-center gap-1 shrink-0';
+                    const barH = Math.max(Math.round(pct * 0.68), 3);
+                    bar.innerHTML = `
+                        <span class="text-[9px] font-bold text-slate-500 dark:text-slate-400">${pct}%</span>
+                        <div class="w-8 ${barColor} rounded-t-md transition-all duration-500" style="height:${barH}px"></div>
+                        <span class="text-[9px] text-slate-400 text-center max-w-[36px] truncate" title="${test.name}">${test.name.split(' ')[0]}</span>
+                    `;
+                    graphContainer.appendChild(bar);
+                }
+            });
+        }
+
+        // Renders report details for all test indexes simultaneously
+        function renderSelectedTestReport() {
+            const container = document.getElementById('subject-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!appState.tests || appState.tests.length === 0) {
+                document.getElementById('selected-test-subtitle-term').textContent = "Awaiting profile load";
+                document.getElementById('selected-test-total-badge').textContent = "Aggregate: --";
+                document.getElementById('selected-test-percent-badge').textContent = "Overall: --";
+                
+                container.innerHTML = `
+                    <div class="col-span-full p-8 text-center text-slate-400 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                        <i class="fa-solid fa-chart-line text-3xl mb-2 block"></i>
+                        No dynamic test scores found. Load student profile to view.
+                    </div>
+                `;
+                return;
+            }
+
+            // Hide overall header indicators since we show them per-section
+            document.getElementById('selected-test-subtitle-term').textContent = "Displaying all examination report cards";
+            document.getElementById('selected-test-total-badge').classList.add('hidden');
+            document.getElementById('selected-test-percent-badge').classList.add('hidden');
+
+            appState.tests.forEach((test, idx) => {
+                if (test.name === 'No Exams Yet' || !test.subjects || test.subjects.length === 0) return;
+
+                const section = document.createElement('div');
+                section.className = "col-span-full space-y-4 mt-6 first:mt-0";
+
+                section.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2 gap-2 mt-4">
+                        <h4 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-simple text-primary-500"></i> ${test.name}
+                        </h4>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-extrabold rounded border border-slate-200 dark:border-slate-700">
+                                Aggregate: ${test.totalObtained} / ${test.totalMax}
+                            </span>
+                            <span class="px-2.5 py-0.5 bg-primary-100 dark:bg-primary-950 text-primary-700 dark:text-primary-300 text-[10px] font-extrabold rounded border border-primary-200">
+                                Overall: ${test.percentage}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2" id="student-cards-grid-${idx}"></div>
+                `;
+                container.appendChild(section);
+
+                const cardsGrid = document.getElementById(`student-cards-grid-${idx}`);
+                test.subjects.forEach(sub => {
+                    let barColor = "bg-primary-500";
+                    if (sub.accent === "emerald") barColor = "bg-emerald-500";
+                    if (sub.accent === "amber") barColor = "bg-amber-500";
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3";
+                    
+                    const percentage = sub.max > 0 ? ((sub.score / sub.max) * 100).toFixed(0) : 0;
+
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${sub.name}</h4>
+                                <p class="text-[10px] text-slate-400 dark:text-slate-400 font-semibold uppercase">Instructor: ${sub.teacher || "TBD"}</p>
+                            </div>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300 text-[10px] font-bold rounded">
+                                ${percentage >= 90 ? 'A+' : percentage >= 80 ? 'A' : percentage >= 70 ? 'B' : percentage > 0 ? 'C' : 'N/A'}
+                            </span>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-bold">
+                                <span class="text-slate-500 dark:text-slate-400">Evaluation Marks</span>
+                                <span class="text-slate-900 dark:text-white">${sub.score} / ${sub.max}</span>
+                            </div>
+                            <div class="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                    cardsGrid.appendChild(card);
+                });
+            });
+        }
+
+        // Calculations and UI Rendering for Attendance Tracker page
+        function renderAttendanceData() {
+            const att = appState.attendance;
+            const percentageVal = parseFloat(att.calculatedPercentage) || 0;
+
+            // Update percentage text
+            document.getElementById('attendance-percent-text').textContent = att.calculatedPercentage || '0%';
+
+            // Update progress bar
+            const bar = document.getElementById('attendance-bar');
+            if (bar) {
+                bar.style.width = percentageVal + '%';
+                bar.className = 'h-full rounded-full transition-all duration-700 ' +
+                    (percentageVal >= 75 ? 'bg-emerald-500' : percentageVal > 0 ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-600');
+            }
+
+            // Stats
+            document.getElementById('stat-total-attended-classes').textContent = att.calculatedTotalAttended;
+            document.getElementById('stat-total-held-classes').textContent = att.calculatedTotalClasses;
+
+            // Status text
+            const statusTextEl = document.getElementById('attendance-aggregate-status-text');
+            if (percentageVal >= 90) {
+                statusTextEl.textContent = "Excellent (A+)";
+                statusTextEl.className = "text-emerald-500 font-bold";
+            } else if (percentageVal >= 75) {
+                statusTextEl.textContent = "Satisfactory — Eligible";
+                statusTextEl.className = "text-primary-500 font-bold";
+            } else if (percentageVal > 0) {
+                statusTextEl.textContent = "Low — Shortage Alert";
+                statusTextEl.className = "text-rose-500 font-bold animate-pulse";
+            } else {
+                statusTextEl.textContent = "No data yet";
+                statusTextEl.className = "text-slate-400 font-bold";
+            }
+
+            // Subject-wise progress cards
+            const barsContainer = document.getElementById('subject-attendance-bars');
+            barsContainer.innerHTML = '';
+            
+            att.subjects.forEach(sub => {
+                const subRatio = sub.total > 0 ? ((sub.attended / sub.total) * 100).toFixed(1) : "0.0";
+                const subRatioNum = parseFloat(subRatio);
+
+                let barColor = "bg-primary-500";
+                if (subRatioNum >= 90) {
+                    barColor = "bg-emerald-500";
+                } else if (subRatioNum > 0 && subRatioNum < 75) {
+                    barColor = "bg-rose-500";
+                } else if (subRatioNum === 0) {
+                    barColor = "bg-slate-300 dark:bg-slate-700";
+                }
+
+                const block = document.createElement('div');
+                block.className = "space-y-1 bg-slate-50 dark:bg-slate-900/30 p-3 rounded-xl border border-slate-200 dark:border-slate-700/65";
+                block.innerHTML = `
+                    <div class="flex justify-between text-xs font-bold">
+                        <span class="text-slate-700 dark:text-slate-300">${sub.name}</span>
+                        <span class="text-slate-800 dark:text-white">${sub.attended}/${sub.total} classes (${subRatio}%)</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width: ${subRatio}%"></div>
+                    </div>
+                    <div class="flex justify-between items-center pt-1 text-[10px]">
+                        <span class="text-slate-400 dark:text-slate-400">Class Attendance Standing</span>
+                        <span class="font-semibold ${subRatioNum >= 75 ? 'text-emerald-500' : 'text-rose-500'}">
+                            ${subRatioNum >= 75 ? '<i class="fa-solid fa-circle-check"></i> Eligible' : subRatioNum > 0 ? '<i class="fa-solid fa-triangle-exclamation"></i> Below Limit' : 'Awaiting Data'}
+                        </span>
+                    </div>
+                `;
+                barsContainer.appendChild(block);
+            });
+        }
+
+        // Handles switching between Monday to Friday and filtering timetable cards
+        function switchTimetableDay(dayName) {
+            appState.selectedTimetableDay = dayName;
+            
+            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+            days.forEach(day => {
+                const btn = document.getElementById(`btn-day-${day}`);
+                if (btn) {
+                    if (day === dayName) {
+                        btn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-primary-600 text-white shadow";
+                    } else {
+                        btn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300";
+                    }
+                }
+            });
+
+            renderTimetableData();
+        }
+
+        // Renders timetable information. Includes stylized loading state skeletons if no data is present.
+        function renderTimetableData() {
+            const container = document.getElementById('timetable-list-container');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            // Filter timetable items assigned to the currently selected active weekday
+            const filteredLectures = appState.timetable.filter(lecture => lecture.day === appState.selectedTimetableDay);
+
+            // SKELETON RENDER MODE: When data is unpopulated, present a beautiful layout structure
+            if (filteredLectures.length === 0) {
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3 text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4 rounded-xl">
+                            <i class="fa-solid fa-cloud-arrow-down text-lg animate-pulse text-primary-500"></i>
+                            <div class="flex-1">
+                                <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Awaiting External Timetable Dispatch</h4>
+                                <p class="text-[10px] text-slate-400 dark:text-slate-500">No calendar items currently set. This skeleton is awaiting data stream from the administrative controller page.</p>
+                            </div>
+                        </div>
+
+                        <!-- Stylized Pulse Skeletons -->
+                        <div class="border border-slate-200 dark:border-slate-700/60 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 opacity-60">
+                            <div class="flex items-center gap-3 w-full sm:w-2/3">
+                                <div class="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-700 animate-pulse shrink-0"></div>
+                                <div class="space-y-2 w-full">
+                                    <div class="h-3.5 w-1/3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+                                    <div class="h-2.5 w-2/3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+                                </div>
+                            </div>
+                            <div class="h-6 w-24 bg-slate-100 dark:bg-slate-700 rounded-lg animate-pulse self-end sm:self-auto"></div>
+                        </div>
+
+                        <div class="border border-slate-200 dark:border-slate-700/60 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 opacity-40">
+                            <div class="flex items-center gap-3 w-full sm:w-2/3">
+                                <div class="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-700 animate-pulse shrink-0"></div>
+                                <div class="space-y-2 w-full">
+                                    <div class="h-3.5 w-1/4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+                                    <div class="h-2.5 w-1/2 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+                                </div>
+                            </div>
+                            <div class="h-6 w-24 bg-slate-100 dark:bg-slate-700 rounded-lg animate-pulse self-end sm:self-auto"></div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Real timetable list compilation (Renders beautifully once data has arrived)
+            filteredLectures.forEach(lecture => {
+                const item = document.createElement('div');
+                item.className = "border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/10 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-150";
+                
+                let accentColor = "text-primary-600 bg-primary-100 dark:bg-primary-950/40 dark:text-primary-400";
+                if (lecture.accent === "emerald") accentColor = "text-emerald-600 bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-400";
+                if (lecture.accent === "amber") accentColor = "text-amber-600 bg-amber-100 dark:bg-amber-950/40 dark:text-amber-400";
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-3.5">
+                        <div class="p-3 rounded-xl shrink-0 ${accentColor}">
+                            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${lecture.subject}</h4>
+                            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider flex items-center gap-1.5 mt-0.5">
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-user-tie"></i> ${lecture.teacher || "Staff Member"}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-3 py-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-extrabold shadow-sm flex items-center gap-1.5">
+                        <i class="fa-regular fa-clock text-primary-500"></i> ${lecture.time}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Compiles notes sent from classroom instructors. Renders fallback pulse cards if empty.
+        function renderNotesData() {
+            const container = document.getElementById('notes-list-container');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            // SKELETON RENDER MODE: Fallback loading blocks for teacher communications
+            if (appState.notes.length === 0) {
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3 text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 p-5 rounded-2xl shadow-sm">
+                            <i class="fa-solid fa-tower-broadcast text-lg animate-pulse text-amber-500"></i>
+                            <div class="flex-1">
+                                <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Awaiting Teacher Note Transmission</h4>
+                                <p class="text-[10px] text-slate-400 dark:text-slate-500">Currently listening for updates. No digital announcements have been dispatched yet from your school instructors.</p>
+                            </div>
+                        </div>
+
+                        <!-- Teacher card loader templates -->
+                        <div class="bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/65 rounded-2xl p-5 space-y-3 opacity-60 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 animate-pulse"></div>
+                                    <div class="space-y-1.5">
+                                        <div class="h-2.5 w-24 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+                                        <div class="h-2 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+                                    </div>
+                                </div>
+                                <div class="h-4 w-12 bg-slate-100 dark:bg-slate-700 rounded animate-pulse"></div>
+                            </div>
+                            <div class="space-y-2 pt-1">
+                                <div class="h-2.5 w-full bg-slate-100 dark:bg-slate-700 rounded animate-pulse"></div>
+                                <div class="h-2.5 w-5/6 bg-slate-100 dark:bg-slate-700 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Avatar generator helpers
+            const getInitials = (name) => {
+                if (!name) return "TR";
+                const parts = name.trim().split(/\s+/);
+                if (parts.length >= 2) {
+                    return (parts[0][0] + parts[1][0]).toUpperCase();
+                }
+                return name.substring(0, 2).toUpperCase();
+            };
+
+            const colors = [
+                'from-primary-500 to-indigo-650',
+                'from-emerald-500 to-teal-600',
+                'from-amber-500 to-orange-600',
+                'from-rose-500 to-red-650',
+                'from-violet-500 to-fuchsia-600'
+            ];
+
+            const getAvatarColor = (name) => {
+                let hash = 0;
+                for (let i = 0; i < name.length; i++) {
+                    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                return colors[Math.abs(hash) % colors.length];
+            };
+
+            // Real Teacher Notes compiler (Renders beautifully once data has arrived)
+            appState.notes.forEach(note => {
+                const card = document.createElement('div');
+                
+                let highlightBar = "border-l-4 border-l-primary-500 dark:border-l-primary-400";
+                let tagColor = "bg-primary-50 text-primary-650 dark:bg-primary-950/40 dark:text-primary-400 border border-primary-100 dark:border-primary-900/50";
+                
+                if (note.tag === "Homework") {
+                    highlightBar = "border-l-4 border-l-emerald-500 dark:border-l-emerald-450";
+                    tagColor = "bg-emerald-50 text-emerald-650 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50";
+                }
+                if (note.tag === "Exam Alert") {
+                    highlightBar = "border-l-4 border-l-rose-500 dark:border-l-rose-450";
+                    tagColor = "bg-rose-50 text-rose-650 dark:bg-rose-955/45 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50";
+                }
+
+                card.className = `bg-gradient-to-br from-white to-slate-50/20 dark:from-slate-800/95 dark:to-slate-850 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 shadow-sm space-y-4 flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 ${highlightBar}`;
+
+                // File attachment display
+                let fileHtml = '';
+                if (note.fileUrl) {
+                    const ext = note.fileUrl.split('.').pop().toLowerCase();
+                    let fileIcon = 'fa-file-lines';
+                    let fileColorTheme = 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200 dark:bg-slate-900/40 dark:text-slate-350 dark:border-slate-800';
+                    
+                    if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                        fileIcon = 'fa-file-image';
+                        fileColorTheme = 'bg-emerald-50/60 text-emerald-600 hover:bg-emerald-100/80 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/40';
+                    } else if (ext === 'pdf') {
+                        fileIcon = 'fa-file-pdf';
+                        fileColorTheme = 'bg-rose-50/60 text-rose-600 hover:bg-rose-100/80 border-rose-100 dark:bg-rose-955/20 dark:text-rose-400 dark:border-rose-900/40';
+                    } else if (['doc','docx'].includes(ext)) {
+                        fileIcon = 'fa-file-word';
+                        fileColorTheme = 'bg-blue-50/60 text-blue-600 hover:bg-blue-100/80 border-blue-100 dark:bg-blue-955/20 dark:text-blue-400 dark:border-blue-900/40';
+                    } else if (ext === 'zip' || ext === 'rar') {
+                        fileIcon = 'fa-file-zipper';
+                        fileColorTheme = 'bg-amber-50/60 text-amber-605 hover:bg-amber-100/80 border-amber-100 dark:bg-amber-955/20 dark:text-amber-400 dark:border-amber-900/40';
+                    }
+                    
+                    fileHtml = `
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                            <a href="${note.fileUrl}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${fileColorTheme} shadow-sm">
+                                <i class="fa-solid ${fileIcon} text-sm"></i>
+                                <span class="truncate max-w-[200px]">${note.fileName || 'Attachment'}</span>
+                                <i class="fa-solid fa-arrow-down-to-line text-[10px] opacity-70"></i>
+                            </a>
+                        </div>
+                    `;
+                }
+
+                const senderName = note.sender || "Subject Instructor";
+                const initials = getInitials(senderName);
+                const avatarColor = getAvatarColor(senderName);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br ${avatarColor} flex items-center justify-center text-white text-xs font-black shadow-sm">
+                                ${initials}
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-xs text-slate-800 dark:text-slate-200">${senderName}</h4>
+                                <p class="text-[9px] text-slate-450 dark:text-slate-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-book-open text-[8px]"></i> ${note.subject || "General Study"}
+                                </p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg text-[9.5px] font-bold font-mono bg-slate-100/80 dark:bg-slate-700/50 text-slate-550 dark:text-slate-400 border border-slate-200/40 dark:border-slate-700/30">
+                            ${note.date}
+                        </span>
+                    </div>
+
+                    <div class="pt-1">
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium break-words whitespace-pre-wrap">${note.message || ''}</p>
+                    </div>
+
+                    ${fileHtml}
+
+                    ${note.tag ? `
+                    <div class="pt-1.5 flex items-center justify-between">
+                        <span class="px-2.5 py-1 rounded-lg text-[9px] font-extrabold tracking-wider uppercase ${tagColor}">
+                            # ${note.tag}
+                        </span>
+                    </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // These global window-level setter targets let other portal frames/windows insert direct live schedules/notes
+        
+        /**
+         * Streams a live timetable array into the hub page state
+         * @param {Array} timetableArray - Expected schema: [{ day: "Monday", subject: "Maths", teacher: "Mrs. Smith", room: "302B", time: "09:00 AM", accent: "emerald" }]
+         */
+        window.updateTimetableData = function(timetableArray) {
+            if (Array.isArray(timetableArray)) {
+                appState.timetable = timetableArray;
+                renderTimetableData();
+            }
+        };
+
+        /**
+         * Streams notes dispatched from classroom teachers into the bulletin state
+         * @param {Array} notesArray - Expected schema: [{ sender: "Mr. Dave", subject: "Science", message: "Bring your lab record files tomorrow", date: "15 Jun", tag: "Homework" }]
+         */
+        window.updateTeacherNotes = function(notesArray) {
+            if (Array.isArray(notesArray)) {
+                appState.notes = notesArray;
+                renderNotesData();
+            }
+        };
+
+        // ===================== BACKEND API INTEGRATION =====================
+        const API = `${API_BASE}/api`;
+
+        function getToken() { return localStorage.getItem('token'); }
+        function getUser()  { try { return JSON.parse(localStorage.getItem('user')); } catch(e) { return null; } }
+
+        function authHeaders() {
+            return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() };
+        }
+
+        async function loadStudentData() {
+            const user = getUser();
+            if (!user || !user.linked_id) {
+                // Not logged in — redirect to login
+                window.location.href = '/login_page.html';
+                return;
+            }
+            try {
+                // Load student profile
+                const res = await fetch(`${API}/students/${user.linked_id}`, { headers: authHeaders() });
+                if (res.status === 401) { window.location.href = '/login_page.html'; return; }
+                const student = await res.json();
+
+                appState.student.firstName    = student.first_name || '';
+                appState.student.lastName     = student.last_name  || '';
+                appState.student.class        = student.class      || '';
+                appState.student.rollNo       = student.roll_number || '';
+                appState.student.classTeacher = student.class_teacher || '';
+                appState.student.fatherName   = student.father_name  || '';
+                appState.student.fatherPhone  = student.father_phone || '';
+                appState.student.motherName   = student.mother_name  || '';
+                appState.student.motherPhone  = student.mother_phone || '';
+                appState.student.address      = student.address      || '';
+                appState.student.photoUrl     = student.photo_url    || '';
+                appState.student.pendingFatherName   = student.pending_father_name;
+                appState.student.pendingFatherPhone  = student.pending_father_phone;
+                appState.student.pendingMotherName   = student.pending_mother_name;
+                appState.student.pendingMotherPhone  = student.pending_mother_phone;
+                appState.student.pendingAddress      = student.pending_address;
+                appState.student.pendingPhotoUrl     = student.pending_photo_url;
+
+                // Show profile approval status
+                const shieldEl = document.querySelector('.absolute.-bottom-2.-right-2');
+                if (shieldEl) {
+                    if (student.profile_status === 'APPROVED') {
+                        shieldEl.className = 'absolute -bottom-2 -right-2 bg-emerald-500 text-white p-2 rounded-xl text-xs shadow-md';
+                        shieldEl.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Verified';
+                    } else {
+                        shieldEl.className = 'absolute -bottom-2 -right-2 bg-amber-500 text-white p-2 rounded-xl text-xs shadow-md';
+                        shieldEl.innerHTML = '<i class="fa-solid fa-clock"></i> Pending';
+                    }
+                }
+
+                renderStudentInfo();
+
+                // Load marks — build dynamic test list from exam_name
+                const mRes = await fetch(`${API}/marks?student_id=${user.linked_id}`, { headers: authHeaders() });
+                const marksData = await mRes.json();
+
+                // Group marks by exam_name to build dynamic tests array
+                const examGroups = {};
+                marksData.forEach(m => {
+                    if (!examGroups[m.exam_name]) examGroups[m.exam_name] = [];
+                    examGroups[m.exam_name].push(m);
+                });
+
+                const accentsArr = ['emerald', 'primary', 'amber', 'primary', 'emerald'];
+                if (Object.keys(examGroups).length > 0) {
+                    appState.tests = Object.entries(examGroups).map(([examName, records]) => ({
+                        id: examName,
+                        name: examName,
+                        subjects: records.map((r, i) => ({
+                            name: r.subject, score: r.score, max: r.max_score,
+                            accent: accentsArr[i % accentsArr.length], teacher: r.uploaded_by_username || 'Teacher'
+                        })),
+                        totalObtained: 0, totalMax: 0, percentage: '0%'
+                    }));
+                }
+                recalculateAcademicsAll();
+                renderTestReportSelectors();
+                renderSelectedTestReport();
+
+                // Load attendance, leaves, and timetable in parallel
+                const [aRes, lRes, tRes] = await Promise.all([
+                    fetch(`${API}/attendance?student_id=${user.linked_id}`, { headers: authHeaders() }),
+                    fetch(`${API}/leaves?student_id=${user.linked_id}`, { headers: authHeaders() }),
+                    student.class ? fetch(`${API}/timetable?class=${encodeURIComponent(student.class)}`, { headers: authHeaders() }) : Promise.resolve(null)
+                ]);
+
+                const attData = await aRes.json();
+                const leavesData = await lRes.json();
+                const ttData = tRes ? await tRes.json() : [];
+
+                const approvedLeaves = leavesData.filter(l => l.status === 'APPROVED');
+                const isDateWithinRange = (dateStr, fromStr, toStr) => {
+                    const d = new Date(dateStr);
+                    const from = new Date(fromStr);
+                    const to = new Date(toStr);
+                    d.setHours(0,0,0,0);
+                    from.setHours(0,0,0,0);
+                    to.setHours(0,0,0,0);
+                    return d >= from && d <= to;
+                };
+
+                // Map timetable
+                const accents = ['primary', 'emerald', 'amber'];
+                appState.timetable = ttData.map((entry, i) => ({
+                    day:     entry.day,
+                    subject: entry.subject,
+                    teacher: entry.teacher_name || 'Staff',
+                    room:    `P${entry.period}`,
+                    time:    (entry.start_time && entry.end_time) ? `${entry.start_time} - ${entry.end_time}` : `Period ${entry.period}`,
+                    accent:  accents[i % 3]
+                }));
+                renderTimetableData();
+
+                // Synchronize attendance subjects with timetable subjects
+                const ttSubjects = [...new Set(ttData.map(e => e.subject).filter(sub => sub && sub.trim() !== ''))];
+                const subjectsList = ttSubjects.map((subName, i) => {
+                    const accs = ['emerald', 'primary', 'amber'];
+                    return {
+                        name: subName,
+                        attended: 0,
+                        total: 0,
+                        accent: accs[i % accs.length]
+                    };
+                });
+
+                // Group attendance by subject, skipping dates that fall under approved leaves
+                attData.forEach(rec => {
+                    const isExcused = approvedLeaves.some(l => isDateWithinRange(rec.date, l.from_date, l.to_date));
+                    if (isExcused) {
+                        return; // Ignore excused absence completely from metrics
+                    }
+
+                    let idx = subjectsList.findIndex(s => s.name.toLowerCase() === rec.subject.toLowerCase());
+                    if (idx === -1) {
+                        const accs = ['emerald', 'primary', 'amber'];
+                        subjectsList.push({
+                            name: rec.subject,
+                            attended: 0,
+                            total: 0,
+                            accent: accs[subjectsList.length % accs.length]
+                        });
+                        idx = subjectsList.length - 1;
+                    }
+                    subjectsList[idx].total++;
+                    if (rec.status === 'PRESENT') {
+                        subjectsList[idx].attended++;
+                    }
+                });
+
+                appState.attendance.subjects = subjectsList;
+                recalculateAttendanceAll();
+                renderAttendanceData();
+
+                // Load notes for this student's class
+                if (student.class) {
+                    const nRes = await fetch(`${API}/notes?class=${encodeURIComponent(student.class)}`, { headers: authHeaders() });
+                    const notesData = await nRes.json();
+                    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    appState.notes = notesData.map(n => {
+                        const d = new Date(n.uploaded_at);
+                        return {
+                            sender:  n.uploaded_by_username || 'Instructor',
+                            subject: n.subject || 'General',
+                            message: n.content || n.title,
+                            date:    `${d.getDate()} ${months[d.getMonth()]}`,
+                            tag:     n.title,
+                            fileUrl: n.file_url || null
+                        };
+                    });
+                    renderNotesData();
+                }
+
+            } catch(err) {
+                console.error('Failed to load student data:', err);
+            }
+        }
+
+        // Profile edit modal
+        function openEditProfile() {
+            appState.croppedPhotoBlob = null;
+            const s = appState.student;
+
+            // Prefer pending changes if they exist so student sees their currently proposed data
+            const fatherName = s.pendingFatherName !== null && s.pendingFatherName !== undefined ? s.pendingFatherName : s.fatherName;
+            const fatherPhone = s.pendingFatherPhone !== null && s.pendingFatherPhone !== undefined ? s.pendingFatherPhone : s.fatherPhone;
+            const motherName = s.pendingMotherName !== null && s.pendingMotherName !== undefined ? s.pendingMotherName : s.motherName;
+            const motherPhone = s.pendingMotherPhone !== null && s.pendingMotherPhone !== undefined ? s.pendingMotherPhone : s.motherPhone;
+            const address = s.pendingAddress !== null && s.pendingAddress !== undefined ? s.pendingAddress : s.address;
+
+            const modal = document.createElement('div');
+            modal.id = 'edit-profile-modal';
+            modal.className = 'fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 w-full max-w-lg space-y-4 border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-pen text-primary-500"></i> Edit Profile
+                    </h3>
+                    <p class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-955/30 p-2 rounded-lg">
+                        <i class="fa-solid fa-info-circle"></i> After editing, your profile will need owner approval.
+                    </p>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><label class="text-xs font-bold text-slate-400 uppercase">Father Name</label>
+                            <input id="ep-father-name" value="${fatherName}" class="mt-1 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500" /></div>
+                        <div><label class="text-xs font-bold text-slate-400 uppercase">Father Phone</label>
+                            <input id="ep-father-phone" value="${fatherPhone}" class="mt-1 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500" /></div>
+                        <div><label class="text-xs font-bold text-slate-400 uppercase">Mother Name</label>
+                            <input id="ep-mother-name" value="${motherName}" class="mt-1 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500" /></div>
+                        <div><label class="text-xs font-bold text-slate-400 uppercase">Mother Phone</label>
+                            <input id="ep-mother-phone" value="${motherPhone}" class="mt-1 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500" /></div>
+                        <div class="col-span-2"><label class="text-xs font-bold text-slate-400 uppercase">Address</label>
+                            <textarea id="ep-address" rows="2" class="mt-1 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500">${address}</textarea></div>
+                        <div class="col-span-2">
+                            <label class="text-xs font-bold text-slate-400 uppercase">Profile Photo</label>
+                            <div class="flex items-center gap-4 mt-1.5">
+                                <input type="file" id="ep-photo" accept="image/*" onchange="handlePhotoSelect(this)" class="flex-1 text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary-50 dark:file:bg-primary-950/40 file:text-primary-700 dark:file:text-primary-400 hover:file:bg-primary-100 cursor-pointer" />
+                                <div id="cropped-preview-container" class="hidden flex-shrink-0">
+                                    <img id="cropped-preview-img" class="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 justify-end pt-2">
+                        <button onclick="document.getElementById('edit-profile-modal').remove()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold">Cancel</button>
+                        <button onclick="saveProfileEdit()" class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-bold">Save Changes</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        async function saveProfileEdit() {
+            const user = getUser();
+            try {
+                const fatherPhone = document.getElementById('ep-father-phone').value.trim();
+                const motherPhone = document.getElementById('ep-mother-phone').value.trim();
+                const phoneRegex = /^\d{10}$/;
+                if (!phoneRegex.test(fatherPhone) || !phoneRegex.test(motherPhone)) {
+                    alert("Mobile number must be exactly 10 digits.");
+                    return;
+                }
+
+                const body = {
+                    father_name:  document.getElementById('ep-father-name').value,
+                    father_phone: fatherPhone,
+                    mother_name:  document.getElementById('ep-mother-name').value,
+                    mother_phone: motherPhone,
+                    address:      document.getElementById('ep-address').value
+                };
+                const res = await fetch(`${API}/students/${user.linked_id}`, {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify(body)
+                });
+                
+                // If they cropped a photo, upload it as a blob
+                if (appState.croppedPhotoBlob) {
+                    const formData = new FormData();
+                    formData.append('photo', appState.croppedPhotoBlob, 'profile_avatar.jpg');
+                    const headers = authHeaders();
+                    delete headers['Content-Type'];
+                    await fetch(`${API}/students/${user.linked_id}/photo`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: formData
+                    });
+                } else {
+                    // Fallback to raw file if they selected it but didn't crop
+                    const fileEl = document.getElementById('ep-photo');
+                    if (fileEl && fileEl.files.length > 0) {
+                        const formData = new FormData();
+                        formData.append('photo', fileEl.files[0]);
+                        const headers = authHeaders();
+                        delete headers['Content-Type'];
+                        await fetch(`${API}/students/${user.linked_id}/photo`, {
+                            method: 'POST',
+                            headers: headers,
+                            body: formData
+                        });
+                    }
+                }
+                
+                if (res.ok) {
+                    document.getElementById('edit-profile-modal').remove();
+                    await loadStudentData();
+                }
+            } catch(err) { console.error(err); }
+        }
+
+        let cropper = null;
+
+        function handlePhotoSelect(input) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                input.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                openCropperModal(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function openCropperModal(imageSrc) {
+            const oldModal = document.getElementById('cropper-modal');
+            if (oldModal) oldModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'cropper-modal';
+            modal.className = 'fixed inset-0 z-[60] bg-slate-955/80 backdrop-blur-sm flex flex-col items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-md flex flex-col justify-between space-y-4 border border-slate-200 dark:border-slate-700 max-h-[90vh]">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-700/80">
+                        <h3 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-crop text-primary-500"></i> Adjust Avatar Selection
+                        </h3>
+                        <p class="text-[9px] text-slate-400 font-semibold">Drag to adjust / Square Crop</p>
+                    </div>
+                    
+                    <div class="flex-1 overflow-hidden bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700 min-h-[250px] max-h-[45vh]">
+                        <img id="cropper-image" src="${imageSrc}" class="max-w-full max-h-full block" />
+                    </div>
+                    
+                    <div class="flex gap-2.5 justify-end pt-2 border-t border-slate-100 dark:border-slate-700/80">
+                        <button type="button" onclick="cancelCropper()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all">Cancel</button>
+                        <button type="button" onclick="applyCrop()" class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-bold transition-all shadow shadow-primary-500/10">Apply Crop</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            const image = document.getElementById('cropper-image');
+            cropper = new Cropper(image, {
+                aspectRatio: 1, // 1:1 ratio
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.95,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false
+            });
+        }
+
+        function cancelCropper() {
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            const modal = document.getElementById('cropper-modal');
+            if (modal) modal.remove();
+            
+            const input = document.getElementById('ep-photo');
+            if (input) input.value = "";
+            
+            const previewContainer = document.getElementById('cropped-preview-container');
+            if (previewContainer && !appState.croppedPhotoBlob) previewContainer.classList.add('hidden');
+        }
+
+        function applyCrop() {
+            if (!cropper) return;
+            
+            const canvas = cropper.getCroppedCanvas({
+                width: 256,
+                height: 256
+            });
+            
+            canvas.toBlob((blob) => {
+                appState.croppedPhotoBlob = blob;
+                
+                const previewImg = document.getElementById('cropped-preview-img');
+                const previewContainer = document.getElementById('cropped-preview-container');
+                if (previewImg && previewContainer) {
+                    previewImg.src = URL.createObjectURL(blob);
+                    previewContainer.classList.remove('hidden');
+                }
+                
+                cropper.destroy();
+                cropper = null;
+                const modal = document.getElementById('cropper-modal');
+                if (modal) modal.remove();
+            }, 'image/jpeg', 0.85);
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('role');
+            window.location.href = '/login_page.html';
+        }
+
+        // Override window.onload to also trigger API load
+        const _origOnLoad = window.onload;
+        window.onload = async function() {
+            if (_origOnLoad) _origOnLoad();
+            await loadStudentData();
+        };
+        // ======================== END API INTEGRATION ========================
+
+        // Dark mode switch handler
+        function toggleDarkMode() {
+            const docClass = document.documentElement.classList;
+            const themeIcon = document.getElementById('theme-icon');
+
+            if (docClass.contains('dark')) {
+                docClass.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (themeIcon) themeIcon.className = "fa-solid fa-moon text-slate-600";
+            } else {
+                docClass.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-400";
+            }
+        }
+
+        // Mobile Hamburger Switcher helper
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

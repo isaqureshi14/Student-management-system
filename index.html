@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunrise Public School — Nurturing Brilliant Minds</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for clean visuals -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col md:flex-row transition-colors duration-200">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="w-full md:w-64 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 p-6 transition-colors duration-200">
+        <div>
+            <!-- Logo Header -->
+            <div class="flex items-center space-x-3 group mb-8">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
+                    <i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="font-extrabold tracking-tight text-slate-900 dark:text-white block uppercase text-sm leading-none">SUNRISE</span>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1 block">PUBLIC SCHOOL</span>
+                </div>
+            </div>
+            
+            <!-- Navigation Options -->
+            <nav class="space-y-1">
+                <button onclick="switchTab('home')" id="tab-btn-home" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                    <span>Home</span>
+                </button>
+                <button onclick="switchTab('features')" id="tab-btn-features" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    <span>Features</span>
+                </button>
+                <button onclick="switchTab('academics')" id="tab-btn-academics" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                    <span>Academics</span>
+                </button>
+                <button onclick="switchTab('about')" id="tab-btn-about" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                    <span>About Us</span>
+                </button>
+                <button onclick="switchTab('contact')" id="tab-btn-contact" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200">
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                    <span>Contact</span>
+                </button>
+            </nav>
+        </div>
+        <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-8 font-medium">
+            &copy; 2026 Sunrise Public School.
+        </div>
+    </aside>
+
+    <!-- ================= MAIN WORKSPACE ================= -->
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <!-- Top Bar Header -->
+        <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 h-20 flex items-center justify-between px-6 md:px-8 shrink-0 transition-colors duration-200">
+            <h2 id="header-title-text" class="text-lg font-bold text-slate-900 dark:text-white">Institute Home</h2>
+            <div class="flex items-center space-x-4">
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-xl transition-all border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Content Area -->
+        <main class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8">
+
+            <!-- ================= TAB 1: HOME (HERO) ================= -->
+            <div id="page-home" class="space-y-8">
+                <section class="relative overflow-hidden py-16 px-6 sm:px-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm transition-colors duration-200">
+                    <!-- Background Glow -->
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(245,158,11,0.08),transparent_40%)]"></div>
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(244,63,94,0.06),transparent_40%)]"></div>
+ 
+                    <div class="max-w-3xl mx-auto text-center relative z-10 space-y-6 py-8">
+                        <!-- Tag -->
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-rose-500/10 border border-rose-500/20 dark:border-rose-500/30 rounded-full text-rose-605 dark:text-rose-400 text-xs font-bold uppercase tracking-wider">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                            <span>Nurturing Excellence Since 1998</span>
+                        </div>
+ 
+                        <!-- Main Title -->
+                        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight text-slate-900 dark:text-white">
+                            Shaping Brilliant Minds For a <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-rose-500 to-violet-600 dark:from-amber-400 dark:via-rose-400 dark:to-violet-400">Better Tomorrow</span>
+                        </h1>
+ 
+                        <!-- Subtitle -->
+                        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-xl mx-auto font-medium leading-relaxed">
+                            Sunrise Public School offers an integrated curriculum focusing on academic rigor, character development, and future-ready innovation for student achievement.
+                        </p>
+ 
+                        <!-- CTAs -->
+                        <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+                            <a href="/login_page.html" class="px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm rounded-xl transition-all shadow-md shadow-rose-600/10 hover:shadow-rose-600/20 hover:-translate-y-0.5 flex items-center gap-2">
+                                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                                <span>Access Management System</span>
+                            </a>
+                            <button onclick="switchTab('features')" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-250/60 dark:border-slate-700 font-bold text-sm rounded-xl transition-all hover:-translate-y-0.5">
+                                Explore Features
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ================= TAB 2: FEATURES ================= -->
+            <div id="page-features" class="hidden space-y-8">
+                <div class="max-w-2xl mx-auto text-center space-y-2 mb-4">
+                    <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">Modern Management Infrastructure</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold">Fully integrated school information ecosystem designed for administrators, teachers, parents, and scholars.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                    <!-- Feature 1 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-4 hover:border-amber-500/30 transition-all group shadow-sm">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="calendar" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Dynamic Timetables</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">Owners can configure class schedules dynamically with real-time subject teacher updates.</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-4 hover:border-rose-500/30 transition-all group shadow-sm">
+                        <div class="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="book-open" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Gradebook Console</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">Bulk marks management and instant student result sheets stacked by exam cycles.</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-4 hover:border-emerald-500/30 transition-all group shadow-sm">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Attendance Logs</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">Daily periodic session attendance audits integrated with parent leaves excuse mapping.</p>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-4 hover:border-violet-500/30 transition-all group shadow-sm">
+                        <div class="w-12 h-12 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Parent Portal Sync</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">Direct transparency portal for guardians to track attendance metrics, scores, and log requests.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 3: ACADEMICS ================= -->
+            <div id="page-academics" class="hidden space-y-8">
+                <div class="max-w-2xl mx-auto text-center space-y-2 mb-4">
+                    <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">Curriculum Pathways</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold">Fostering critical thinking, collaboration, and individual learning growth.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                    <!-- Academic Block 1 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-3xl flex flex-col justify-between space-y-6 shadow-sm">
+                        <div class="space-y-4">
+                            <span class="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold rounded-lg uppercase tracking-wider">Primary & Middle</span>
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Foundational Academic Base</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed font-medium">Developing essential reading, logical analysis, science concepts, and mathematical literacy. Empowering young learners to build solid scholastic habits.</p>
+                        </div>
+                        <ul class="text-xs font-semibold text-slate-600 dark:text-slate-300 space-y-2.5">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-amber-500"></i> Activity-Based Learning Modules</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-amber-500"></i> Interactive Science Experiments</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-amber-500"></i> Language & Expression Labs</li>
+                        </ul>
+                    </div>
+
+                    <!-- Academic Block 2 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-3xl flex flex-col justify-between space-y-6 shadow-sm">
+                        <div class="space-y-4">
+                            <span class="px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-lg uppercase tracking-wider">Secondary & Senior</span>
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Advanced Specializations</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed font-medium">Specialized coaching across Science, Mathematics, Commerce, and Humanities. Mentoring scholars to excel in board exam challenges and competitive placements.</p>
+                        </div>
+                        <ul class="text-xs font-semibold text-slate-600 dark:text-slate-300 space-y-2.5">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-rose-500"></i> Intensive Board Exam Preparation</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-rose-500"></i> Career counseling & mentorship</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-rose-500"></i> Digital classroom integration</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 4: ABOUT US ================= -->
+            <div id="page-about" class="hidden space-y-8">
+                <div class="max-w-2xl mx-auto text-center space-y-2 mb-4">
+                    <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">Our Institute Credentials</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold">Decades of educational excellence and academic growth metrics.</p>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+                    <!-- Stat 1 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl text-center space-y-2 shadow-sm">
+                        <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">500+</h3>
+                        <p class="text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">Active Scholars</p>
+                    </div>
+                    <!-- Stat 2 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl text-center space-y-2 shadow-sm">
+                        <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">40+</h3>
+                        <p class="text-rose-600 dark:text-rose-400 text-xs font-bold uppercase tracking-wider">Faculty</p>
+                    </div>
+                    <!-- Stat 3 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl text-center space-y-2 shadow-sm">
+                        <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">98%</h3>
+                        <p class="text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">Board Pass Rate</p>
+                    </div>
+                    <!-- Stat 4 -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl text-center space-y-2 shadow-sm">
+                        <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">1998</h3>
+                        <p class="text-rose-605 dark:text-rose-400 text-xs font-bold uppercase tracking-wider">Established</p>
+                    </div>
+                </div>
+
+                <!-- Developer Credits -->
+                <div class="max-w-3xl mx-auto space-y-6 mt-12">
+                    <div class="flex flex-col items-center justify-center text-center space-y-2">
+                        <h3 class="text-xl font-extrabold text-slate-900 dark:text-white">DEVELOPERS
+
+                        </h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                        <!-- Rehan Ansari -->
+                        <a href="https://www.linkedin.com/in/rehan-ansari-1820363a5" target="_blank" rel="noopener noreferrer" 
+                           class="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl flex items-center gap-4 transition-all duration-300 hover:border-rose-500/30 hover:shadow-lg hover:shadow-rose-500/5 hover:-translate-y-1">
+                            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-tr from-amber-500/5 to-rose-500/5 rounded-full blur-2xl group-hover:scale-150 transition-all duration-500"></div>
+                            
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center text-white font-extrabold text-base shadow-md shadow-rose-500/10 shrink-0 group-hover:rotate-6 transition-transform duration-300">
+                                RA
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-extrabold text-slate-900 dark:text-white text-sm group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Rehan Ansari</h4>
+                                <span class="inline-flex items-center gap-1 text-[11px] text-rose-500 dark:text-rose-400 font-bold mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="linkedin" class="w-3.5 h-3.5"></i>
+                                    <span>Connect on LinkedIn</span>
+                                </span>
+                            </div>
+                        </a>
+
+                        <!-- Isa Qureshi -->
+                        <a href="https://www.linkedin.com/in/isa-qureshi-90088b38a?utm_source=share_via&amp;utm_content=profile&amp;utm_medium=member_android" target="_blank" rel="noopener noreferrer" 
+                           class="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl flex items-center gap-4 transition-all duration-300 hover:border-rose-500/30 hover:shadow-lg hover:shadow-rose-500/5 hover:-translate-y-1">
+                            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-tr from-rose-500/5 to-violet-500/5 rounded-full blur-2xl group-hover:scale-150 transition-all duration-500"></div>
+                            
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-base shadow-md shadow-rose-500/10 shrink-0 group-hover:rotate-6 transition-transform duration-300">
+                                IQ
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-extrabold text-slate-900 dark:text-white text-sm group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Isa Qureshi</h4>
+                                <span class="inline-flex items-center gap-1 text-[11px] text-rose-500 dark:text-rose-400 font-bold mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="linkedin" class="w-3.5 h-3.5"></i>
+                                    <span>Connect on LinkedIn</span>
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 5: CONTACT ================= -->
+            <div id="page-contact" class="hidden space-y-8">
+                <div class="max-w-2xl mx-auto text-center space-y-2 mb-4">
+                    <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">Ready to Connect?</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold">Reach out directly to our administrative office for admission guidelines and scheduling visits.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto pt-4 text-left">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-2 shadow-sm">
+                        <i data-lucide="phone" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                        <h4 class="font-bold text-slate-900 dark:text-white text-sm">Call Office</h4>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-bold">+91 22 2673 4800</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-2 shadow-sm">
+                        <i data-lucide="mail" class="w-5 h-5 text-rose-600 dark:text-rose-400"></i>
+                        <h4 class="font-bold text-slate-900 dark:text-white text-sm">Email</h4>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-bold">admissions@sunrise.edu.in</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-2 shadow-sm">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                        <h4 class="font-bold text-slate-900 dark:text-white text-sm">Campus</h4>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-bold">Vasant Vihar, Mumbai, MH</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- Dashboard Footer -->
+        <footer class="text-center text-slate-400 dark:text-slate-500 text-xs py-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors duration-200 shrink-0">
+            Sunrise Public School · Administrative Home Console · 2026
+        </footer>
+    </div>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // Global State
+        const homeState = {
+            activeTab: 'home'
+        };
+
+        // Initialize Icons
+        window.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme on load
+            const currentTheme = localStorage.getItem('theme');
+            const htmlEl = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+
+            if (currentTheme === 'dark' || (!currentTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                htmlEl.classList.add('dark');
+                themeIcon.setAttribute('data-lucide', 'sun');
+            } else {
+                htmlEl.classList.remove('dark');
+                themeIcon.setAttribute('data-lucide', 'moon');
+            }
+
+            // Sync layout navigation
+            switchTab('home');
+            lucide.createIcons();
+        });
+
+        // Tab Switcher
+        function switchTab(tabId) {
+            homeState.activeTab = tabId;
+            const tabs = ['home', 'features', 'academics', 'about', 'contact'];
+
+            tabs.forEach(tab => {
+                const btn = document.getElementById(`tab-btn-${tab}`);
+                const pageEl = document.getElementById(`page-${tab}`);
+
+                const inactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white text-left";
+                const activeClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-405 text-left";
+
+                if (btn) {
+                    btn.className = (tab === tabId) ? activeClass : inactiveClass;
+                }
+
+                if (pageEl) {
+                    if (tab === tabId) {
+                        pageEl.classList.remove('hidden');
+                    } else {
+                        pageEl.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Update topbar header text
+            const headerTitles = {
+                'home': 'Institute Home',
+                'features': 'Modern Infrastructure Features',
+                'academics': 'Curriculum Pathways',
+                'about': 'Institute Credentials & Stats',
+                'contact': 'Office Coordination Contacts'
+            };
+            const headerEl = document.getElementById('header-title-text');
+            if (headerEl) {
+                headerEl.textContent = headerTitles[tabId] || 'Sunrise Public';
+            }
+        }
+
+        // Dark/Light Theme Handler
+        function toggleTheme() {
+            const htmlEl = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.setAttribute('data-lucide', 'moon');
+            } else {
+                htmlEl.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
