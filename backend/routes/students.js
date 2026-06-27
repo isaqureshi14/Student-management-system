@@ -44,7 +44,7 @@ router.get('/:id', authenticate, (req, res) => {
   const { role, linked_id } = req.user;
 
   const student = db.prepare('SELECT * FROM students WHERE id = ?').get(id);
-  if (!student) return res.status(404).json({ error: 'Student not found' });
+  if (!student) return res.status(404).json({ error: 'Record not found' });
 
   if (role === 'OWNER' || role === 'TEACHER') {
     return res.json(student);
@@ -73,19 +73,19 @@ router.post('/', authenticate, requireRole('OWNER'), (req, res) => {
   if (!first_name || !last_name || !cls) {
     return res.status(400).json({ error: 'first_name, last_name, and class are required' });
   }
+  if (!temp_password || !temp_password.trim()) {
+    return res.status(400).json({ error: 'temp_password is required' });
+  }
 
   // If email provided, make sure it isn't already taken
   if (email) {
     const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(email);
     if (existing) {
-      return res.status(409).json({ error: `Email "${email}" is already registered to another account` });
+      return res.status(409).json({ error: 'This email is already in use' });
     }
   }
 
-  // Generate a random 8-char password if none supplied
-  const rawPassword = (temp_password && temp_password.trim())
-    ? temp_password.trim()
-    : Math.random().toString(36).slice(-8).toUpperCase().replace(/[^A-Z0-9]/g, 'X').padEnd(8, '0');
+  const rawPassword = temp_password.trim();
 
   const insertStudent = db.prepare(`
     INSERT INTO students
@@ -132,7 +132,7 @@ router.put('/:id', authenticate, (req, res) => {
   const { role, linked_id } = req.user;
 
   const student = db.prepare('SELECT * FROM students WHERE id = ?').get(id);
-  if (!student) return res.status(404).json({ error: 'Student not found' });
+  if (!student) return res.status(404).json({ error: 'Record not found' });
 
   // OWNER can update any field including profile_status
   if (role === 'OWNER') {
@@ -148,7 +148,7 @@ router.put('/:id', authenticate, (req, res) => {
       const existing = db.prepare("SELECT id FROM users WHERE username = ? AND NOT (role = 'STUDENT' AND linked_id = ?)")
         .get(trimmedEmail, id);
       if (existing) {
-        return res.status(409).json({ error: `Email "${trimmedEmail}" is already registered to another account` });
+        return res.status(409).json({ error: 'This email is already in use' });
       }
       db.prepare("UPDATE users SET username = ? WHERE role = 'STUDENT' AND linked_id = ?")
         .run(trimmedEmail, id);
@@ -224,7 +224,7 @@ router.put('/:id', authenticate, (req, res) => {
 router.post('/:id/approve', authenticate, requireRole('OWNER'), (req, res) => {
   const { id } = req.params;
   const student = db.prepare('SELECT id FROM students WHERE id = ?').get(id);
-  if (!student) return res.status(404).json({ error: 'Student not found' });
+  if (!student) return res.status(404).json({ error: 'Record not found' });
 
   db.prepare(`
     UPDATE students SET
@@ -252,7 +252,7 @@ router.post('/:id/approve', authenticate, requireRole('OWNER'), (req, res) => {
 router.delete('/:id', authenticate, requireRole('OWNER'), (req, res) => {
   const { id } = req.params;
   const student = db.prepare('SELECT id FROM students WHERE id = ?').get(id);
-  if (!student) return res.status(404).json({ error: 'Student not found' });
+  if (!student) return res.status(404).json({ error: 'Record not found' });
 
   db.prepare('DELETE FROM students WHERE id = ?').run(id);
   // Also remove linked user accounts
@@ -266,7 +266,7 @@ router.post('/:id/photo', authenticate, uploadPhoto.single('photo'), (req, res) 
   const { role, linked_id } = req.user;
 
   const student = db.prepare('SELECT id FROM students WHERE id = ?').get(id);
-  if (!student) return res.status(404).json({ error: 'Student not found' });
+  if (!student) return res.status(404).json({ error: 'Record not found' });
 
   // Only OWNER or the student themselves
   if (role !== 'OWNER' && !(role === 'STUDENT' && linked_id === student.id)) {

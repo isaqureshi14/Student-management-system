@@ -18,7 +18,7 @@ router.post('/', authenticate, requireRole('OWNER'), (req, res) => {
   }
   const existing = db.prepare('SELECT id FROM classes WHERE name = ?').get(name.trim());
   if (existing) {
-    return res.status(409).json({ error: `Class "${name.trim()}" already exists` });
+    return res.status(409).json({ error: 'A class with this name already exists' });
   }
   const result = db.prepare('INSERT INTO classes (name, section) VALUES (?, ?)').run(name.trim(), section || null);
   const cls = db.prepare('SELECT * FROM classes WHERE id = ?').get(result.lastInsertRowid);
@@ -28,7 +28,7 @@ router.post('/', authenticate, requireRole('OWNER'), (req, res) => {
 // DELETE /api/classes/:id — owner only
 router.delete('/:id', authenticate, requireRole('OWNER'), (req, res) => {
   const cls = db.prepare('SELECT * FROM classes WHERE id = ?').get(req.params.id);
-  if (!cls) return res.status(404).json({ error: 'Class not found' });
+  if (!cls) return res.status(404).json({ error: 'Record not found' });
   db.prepare('DELETE FROM classes WHERE id = ?').run(req.params.id);
   return res.json({ message: 'Class deleted' });
 });

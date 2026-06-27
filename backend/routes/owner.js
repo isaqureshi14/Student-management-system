@@ -139,7 +139,7 @@ router.post('/reset-password', authenticate, requireRole('OWNER'), (req, res) =>
 
   const user = db.prepare('SELECT * FROM users WHERE username = ? OR username = ?').get(username, username + '@school.com');
   if (!user) {
-    return res.status(404).json({ error: 'User account not found' });
+    return res.status(404).json({ error: 'Record not found' });
   }
 
   const bcrypt = require('bcryptjs');

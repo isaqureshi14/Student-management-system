@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sunrise Public School — Nurturing Brilliant Minds</title>
+    <title>Student Management System</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons for clean visuals -->
@@ -17,13 +17,84 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            50: '#f5f8fc',    // Light Mode: Frosty background
+                            100: '#e2e8f0',   // Light Mode: Border
+                            200: '#cbd5e1',
+                            300: '#94a3b8',
+                            400: '#64748b',
+                            500: '#475569',
+                            600: '#334155',
+                            700: '#151b2c',   // Dark Mode: Gemini border
+                            800: '#0a0f1d',   // Dark Mode: Gemini glassmorphic card bg
+                            900: '#060a15',   // Dark Mode: Gemini header/sidebar bg
+                            950: '#03050b',   // Dark Mode: Gemini obsidian main bg
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check theme preference early to prevent flash of light theme
+        if (localStorage.getItem('theme') !== 'light') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
     </script>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col md:flex-row transition-colors duration-200">
 
-    <!-- ================= SIDEBAR ================= -->
-    <aside class="w-full md:w-64 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 p-6 transition-colors duration-200">
+    <!-- ================= MOBILE TOP NAV (mobile only) ================= -->
+    <div id="mobile-nav" class="md:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center justify-between px-4 h-14">
+            <!-- Mobile Logo -->
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center shadow shadow-rose-500/20">
+                    <i data-lucide="graduation-cap" class="w-4 h-4 text-white"></i>
+                </div>
+                <span class="font-extrabold text-sm text-slate-900 dark:text-white uppercase tracking-tight">SMS</span>
+            </div>
+            <!-- Right controls -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="w-9 h-9 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <i id="theme-icon-mobile" data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+                <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="w-9 h-9 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <i id="mobile-hamburger-icon" data-lucide="menu" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Dropdown Menu -->
+        <div id="mobile-menu-dropdown" class="hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 space-y-1">
+            <button onclick="switchTab('home'); closeMobileMenu()" id="mob-tab-btn-home" class="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-left">
+                <i data-lucide="home" class="w-4 h-4 shrink-0"></i>
+                <span>Home</span>
+            </button>
+            <button onclick="switchTab('features'); closeMobileMenu()" id="mob-tab-btn-features" class="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-left">
+                <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
+                <span>Features</span>
+            </button>
+            <button onclick="switchTab('academics'); closeMobileMenu()" id="mob-tab-btn-academics" class="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-left">
+                <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
+                <span>Academics</span>
+            </button>
+            <button onclick="switchTab('about'); closeMobileMenu()" id="mob-tab-btn-about" class="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-left">
+                <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
+                <span>About Us</span>
+            </button>
+            <button onclick="switchTab('contact'); closeMobileMenu()" id="mob-tab-btn-contact" class="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-left">
+                <i data-lucide="mail" class="w-4 h-4 shrink-0"></i>
+                <span>Contact</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= SIDEBAR (desktop only) ================= -->
+    <aside class="hidden md:flex w-full md:w-64 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex-col justify-between shrink-0 p-6 transition-colors duration-200">
         <div>
             <!-- Logo Header -->
             <div class="flex items-center space-x-3 group mb-8">
@@ -31,8 +102,8 @@
                     <i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
-                    <span class="font-extrabold tracking-tight text-slate-900 dark:text-white block uppercase text-sm leading-none">SUNRISE</span>
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1 block">PUBLIC SCHOOL</span>
+                    <span class="font-extrabold tracking-tight text-slate-900 dark:text-white block uppercase text-sm leading-none">STUDENT</span>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1 block">MANAGEMENT SYSTEM</span>
                 </div>
             </div>
             
@@ -61,26 +132,26 @@
             </nav>
         </div>
         <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-8 font-medium">
-            &copy; 2026 Sunrise Public School.
+            &copy; 2026 Student Management System.
         </div>
     </aside>
 
     <!-- ================= MAIN WORKSPACE ================= -->
     <div class="flex-1 flex flex-col min-w-0">
         
-        <!-- Top Bar Header -->
-        <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 h-20 flex items-center justify-between px-6 md:px-8 shrink-0 transition-colors duration-200">
+        <!-- Top Bar Header (desktop only) -->
+        <header class="hidden md:flex bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 h-20 items-center justify-between px-6 md:px-8 shrink-0 transition-colors duration-200">
             <h2 id="header-title-text" class="text-lg font-bold text-slate-900 dark:text-white">Institute Home</h2>
             <div class="flex items-center space-x-4">
-                <!-- Theme Toggle -->
-                <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-xl transition-all border border-slate-200 dark:border-slate-700 shadow-sm">
+                <!-- Theme Toggle (desktop, Tactile 44x44px hitbox) -->
+                <button onclick="toggleTheme()" class="w-11 h-11 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-xl transition-all border border-slate-200 dark:border-slate-700 shadow-sm" style="min-width: 44px; min-height: 44px;">
                     <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
                 </button>
             </div>
         </header>
 
         <!-- Main Scrollable Content Area -->
-        <main class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8">
+        <main class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 mt-14 md:mt-0">
 
             <!-- ================= TAB 1: HOME (HERO) ================= -->
             <div id="page-home" class="space-y-8">
@@ -103,7 +174,7 @@
  
                         <!-- Subtitle -->
                         <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-xl mx-auto font-medium leading-relaxed">
-                            Sunrise Public School offers an integrated curriculum focusing on academic rigor, character development, and future-ready innovation for student achievement.
+                            Student Management System offers an integrated platform focusing on academic management, student tracking, and future-ready innovation for educational excellence.
                         </p>
  
                         <!-- CTAs -->
@@ -134,7 +205,7 @@
                             <i data-lucide="calendar" class="w-6 h-6"></i>
                         </div>
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white">Dynamic Timetables</h3>
-                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">Owners can configure class schedules dynamically with real-time subject teacher updates.</p>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">Managers can configure class schedules dynamically with real-time subject teacher updates.</p>
                     </div>
 
                     <!-- Feature 2 -->
@@ -244,38 +315,44 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                         <!-- Rehan Ansari -->
-                        <a href="https://www.linkedin.com/in/rehan-ansari-1820363a5" target="_blank" rel="noopener noreferrer" 
-                           class="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl flex items-center gap-4 transition-all duration-300 hover:border-rose-500/30 hover:shadow-lg hover:shadow-rose-500/5 hover:-translate-y-1">
+                        <div class="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl flex items-center gap-4 transition-all duration-300 hover:border-rose-500/30 hover:shadow-lg hover:shadow-rose-500/5 hover:-translate-y-1">
                             <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-tr from-amber-500/5 to-rose-500/5 rounded-full blur-2xl group-hover:scale-150 transition-all duration-500"></div>
                             
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center text-white font-extrabold text-base shadow-md shadow-rose-500/10 shrink-0 group-hover:rotate-6 transition-transform duration-300">
                                 RA
                             </div>
                             <div class="flex-1 min-w-0">
-                                <h4 class="font-extrabold text-slate-900 dark:text-white text-sm group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Rehan Ansari</h4>
-                                <span class="inline-flex items-center gap-1 text-[11px] text-rose-500 dark:text-rose-400 font-bold mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                                    <i data-lucide="linkedin" class="w-3.5 h-3.5"></i>
-                                    <span>Connect on LinkedIn</span>
-                                </span>
+                                <h4 class="font-extrabold text-slate-900 dark:text-white text-sm transition-colors">
+                                    <a href="https://www.linkedin.com/in/rehan-ansari-1820363a5" target="_blank" rel="noopener noreferrer" class="hover:text-rose-600 dark:hover:text-rose-400">Rehan Ansari</a>
+                                </h4>
+                                <div class="grid grid-cols-1 gap-1.5 mt-2">
+                                    <a href="mailto:ansarirehan0044@gmail.com" class="flex items-center gap-1 text-sm text-emerald-500 dark:text-emerald-400 font-bold opacity-80 hover:opacity-100 transition-opacity">
+                                        <i data-lucide="mail" class="w-4 h-4"></i>
+                                        <span>ansarirehan0044@gmail.com</span>
+                                    </a>
+                                </div>
                             </div>
-                        </a>
+                        </div>
 
                         <!-- Isa Qureshi -->
-                        <a href="https://www.linkedin.com/in/isa-qureshi-90088b38a?utm_source=share_via&amp;utm_content=profile&amp;utm_medium=member_android" target="_blank" rel="noopener noreferrer" 
-                           class="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl flex items-center gap-4 transition-all duration-300 hover:border-rose-500/30 hover:shadow-lg hover:shadow-rose-500/5 hover:-translate-y-1">
+                        <div class="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl flex items-center gap-4 transition-all duration-300 hover:border-rose-500/30 hover:shadow-lg hover:shadow-rose-500/5 hover:-translate-y-1">
                             <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-tr from-rose-500/5 to-violet-500/5 rounded-full blur-2xl group-hover:scale-150 transition-all duration-500"></div>
                             
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-base shadow-md shadow-rose-500/10 shrink-0 group-hover:rotate-6 transition-transform duration-300">
                                 IQ
                             </div>
                             <div class="flex-1 min-w-0">
-                                <h4 class="font-extrabold text-slate-900 dark:text-white text-sm group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Isa Qureshi</h4>
-                                <span class="inline-flex items-center gap-1 text-[11px] text-rose-500 dark:text-rose-400 font-bold mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                                    <i data-lucide="linkedin" class="w-3.5 h-3.5"></i>
-                                    <span>Connect on LinkedIn</span>
-                                </span>
+                                <h4 class="font-extrabold text-slate-900 dark:text-white text-sm transition-colors">
+                                    <a href="https://www.linkedin.com/in/isa-qureshi-90088b38a?utm_source=share_via&amp;utm_content=profile&amp;utm_medium=member_android" target="_blank" rel="noopener noreferrer" class="hover:text-rose-600 dark:hover:text-rose-400">Isa Qureshi</a>
+                                </h4>
+                                <div class="grid grid-cols-1 gap-1.5 mt-2">
+                                    <a href="mailto:isatanvirqureshi@gmail.com" class="flex items-center gap-1 text-sm text-emerald-500 dark:text-emerald-400 font-bold opacity-80 hover:opacity-100 transition-opacity">
+                                        <i data-lucide="mail" class="w-4 h-4"></i>
+                                        <span>isatanvirqureshi@gmail.com</span>
+                                    </a>
+                                </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -310,7 +387,7 @@
         
         <!-- Dashboard Footer -->
         <footer class="text-center text-slate-400 dark:text-slate-500 text-xs py-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors duration-200 shrink-0">
-            Sunrise Public School · Administrative Home Console · 2026
+            Student Management System · Administrative Home Console · 2026
         </footer>
     </div>
 
@@ -321,6 +398,54 @@
             activeTab: 'home'
         };
 
+        // Persistent Form State Utility
+        const PersistState = {
+            key: `persist_form_${window.location.pathname}`,
+            init() {
+                this.restore();
+                document.addEventListener('input', (e) => {
+                    if (e.target.id && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                        if (e.target.type === 'password') return;
+                        this.saveField(e.target.id, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+                    }
+                });
+                document.addEventListener('change', (e) => {
+                    if (e.target.id && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                        if (e.target.type === 'password') return;
+                        this.saveField(e.target.id, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+                    }
+                });
+            },
+            saveField(id, value) {
+                let data = {};
+                try {
+                    data = JSON.parse(sessionStorage.getItem(this.key)) || {};
+                } catch(e) {}
+                data[id] = value;
+                sessionStorage.setItem(this.key, JSON.stringify(data));
+            },
+            restore() {
+                let data = {};
+                try {
+                    data = JSON.parse(sessionStorage.getItem(this.key)) || {};
+                } catch(e) { return; }
+                for (const [id, value] of Object.entries(data)) {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.type === 'checkbox') {
+                            el.checked = (value === 'true' || value === true);
+                        } else {
+                            el.value = value;
+                        }
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            },
+            clear() {
+                sessionStorage.removeItem(this.key);
+            }
+        };
+
         // Initialize Icons
         window.addEventListener('DOMContentLoaded', () => {
             // Apply saved theme on load
@@ -328,17 +453,24 @@
             const htmlEl = document.documentElement;
             const themeIcon = document.getElementById('theme-icon');
 
-            if (currentTheme === 'dark' || (!currentTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            if (currentTheme !== 'light') {
                 htmlEl.classList.add('dark');
-                themeIcon.setAttribute('data-lucide', 'sun');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
+                const mobileIcon = document.getElementById('theme-icon-mobile');
+                if (mobileIcon) mobileIcon.setAttribute('data-lucide', 'sun');
             } else {
                 htmlEl.classList.remove('dark');
-                themeIcon.setAttribute('data-lucide', 'moon');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
+                const mobileIcon = document.getElementById('theme-icon-mobile');
+                if (mobileIcon) mobileIcon.setAttribute('data-lucide', 'moon');
             }
 
             // Sync layout navigation
             switchTab('home');
             lucide.createIcons();
+            
+            // Initialize form state persistence
+            PersistState.init();
         });
 
         // Tab Switcher
@@ -348,13 +480,18 @@
 
             tabs.forEach(tab => {
                 const btn = document.getElementById(`tab-btn-${tab}`);
+                const mobBtn = document.getElementById(`mob-tab-btn-${tab}`);
                 const pageEl = document.getElementById(`page-${tab}`);
-
-                const inactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white text-left";
-                const activeClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-405 text-left";
+                const inactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-500 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white text-left";
+                const activeClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-rose-50/70 border-l-4 border-rose-500 text-rose-600 dark:bg-rose-800/60 dark:text-white dark:border-rose-500 text-left";
+                const mobInactiveClass = "flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-left text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800";
+                const mobActiveClass = "flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-left bg-rose-50 text-rose-600 dark:bg-rose-900/50 dark:text-rose-400";
 
                 if (btn) {
                     btn.className = (tab === tabId) ? activeClass : inactiveClass;
+                }
+                if (mobBtn) {
+                    mobBtn.className = (tab === tabId) ? mobActiveClass : mobInactiveClass;
                 }
 
                 if (pageEl) {
@@ -376,23 +513,48 @@
             };
             const headerEl = document.getElementById('header-title-text');
             if (headerEl) {
-                headerEl.textContent = headerTitles[tabId] || 'Sunrise Public';
+                headerEl.textContent = headerTitles[tabId] || 'Student Management System';
             }
+        }
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const dropdown = document.getElementById('mobile-menu-dropdown');
+            const icon = document.getElementById('mobile-hamburger-icon');
+            if (!dropdown) return;
+            const isOpen = !dropdown.classList.contains('hidden');
+            if (isOpen) {
+                dropdown.classList.add('hidden');
+                if (icon) { icon.setAttribute('data-lucide', 'menu'); lucide.createIcons(); }
+            } else {
+                dropdown.classList.remove('hidden');
+                if (icon) { icon.setAttribute('data-lucide', 'x'); lucide.createIcons(); }
+            }
+        }
+
+        function closeMobileMenu() {
+            const dropdown = document.getElementById('mobile-menu-dropdown');
+            const icon = document.getElementById('mobile-hamburger-icon');
+            if (dropdown) dropdown.classList.add('hidden');
+            if (icon) { icon.setAttribute('data-lucide', 'menu'); lucide.createIcons(); }
         }
 
         // Dark/Light Theme Handler
         function toggleTheme() {
             const htmlEl = document.documentElement;
             const themeIcon = document.getElementById('theme-icon');
+            const mobileIcon = document.getElementById('theme-icon-mobile');
             
             if (htmlEl.classList.contains('dark')) {
                 htmlEl.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
-                themeIcon.setAttribute('data-lucide', 'moon');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
+                if (mobileIcon) mobileIcon.setAttribute('data-lucide', 'moon');
             } else {
                 htmlEl.classList.add('dark');
                 localStorage.setItem('theme', 'dark');
-                themeIcon.setAttribute('data-lucide', 'sun');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
+                if (mobileIcon) mobileIcon.setAttribute('data-lucide', 'sun');
             }
             lucide.createIcons();
         }

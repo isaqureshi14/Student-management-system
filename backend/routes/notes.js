@@ -88,7 +88,7 @@ router.delete('/:id', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) 
   const { role, id: userId } = req.user;
 
   const note = db.prepare('SELECT * FROM notes WHERE id = ?').get(id);
-  if (!note) return res.status(404).json({ error: 'Note not found' });
+   if (!note) return res.status(404).json({ error: 'Record not found' });
 
   // TEACHER can only delete their own notes; OWNER can delete any
   if (role === 'TEACHER' && note.uploaded_by !== userId) {

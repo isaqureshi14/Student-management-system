@@ -67,7 +67,7 @@ router.post('/', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) => {
     return res.status(400).json({ error: 'student_id, exam_name, subject, and score are required' });
   }
   const student = db.prepare('SELECT id FROM students WHERE id = ?').get(student_id);
-  if (!student) return res.status(404).json({ error: 'Student not found' });
+   if (!student) return res.status(404).json({ error: 'Record not found' });
 
   const result = db.prepare(`
     INSERT INTO marks (student_id, exam_name, subject, score, max_score, remarks, uploaded_by)
@@ -110,7 +110,7 @@ router.post('/bulk', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) =
 // PUT /api/marks/:id
 router.put('/:id', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) => {
   const mark = db.prepare('SELECT * FROM marks WHERE id = ?').get(req.params.id);
-  if (!mark) return res.status(404).json({ error: 'Mark not found' });
+   if (!mark) return res.status(404).json({ error: 'Record not found' });
 
   const { exam_name, subject, score, max_score, remarks } = req.body;
   db.prepare(`UPDATE marks SET

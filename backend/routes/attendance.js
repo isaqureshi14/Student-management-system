@@ -59,8 +59,8 @@ router.post('/', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) => {
     return res.status(400).json({ error: 'status must be PRESENT, ABSENT, or LATE' });
   }
 
-  const student = db.prepare('SELECT id FROM students WHERE id = ?').get(student_id);
-  if (!student) return res.status(404).json({ error: 'Student not found' });
+   const student = db.prepare('SELECT id FROM students WHERE id = ?').get(student_id);
+   if (!student) return res.status(404).json({ error: 'Record not found' });
 
   try {
     const existing = db.prepare('SELECT id FROM attendance WHERE student_id = ? AND subject = ? AND date = ?')
@@ -94,8 +94,8 @@ router.post('/', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) => {
 // ─── PUT /api/attendance/:id ──────────────────────────────────────────────────
 router.put('/:id', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) => {
   const { id } = req.params;
-  const record = db.prepare('SELECT * FROM attendance WHERE id = ?').get(id);
-  if (!record) return res.status(404).json({ error: 'Attendance record not found' });
+   const record = db.prepare('SELECT * FROM attendance WHERE id = ?').get(id);
+   if (!record) return res.status(404).json({ error: 'Record not found' });
 
   const { subject, date, status } = req.body;
 

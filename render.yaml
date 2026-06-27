@@ -1,0 +1,27 @@
+# Render deployment configuration
+# https://render.com/docs/render-yaml-spec
+#
+# This file tells Render how to build and run your app.
+# Commit this file to your GitHub repo — Render reads it automatically.
+
+services:
+  - type: web
+    name: school-management-system
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free               # Change to "starter" ($7/mo) for persistent disk
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000          # Render's default internal port
+      - key: JWT_SECRET
+        generateValue: true  # Render auto-generates a secure random value
+      - key: ALLOWED_ORIGINS
+        sync: false          # You will set this manually in the Render dashboard
+                             # after you know your app URL
+      - key: DB_PATH
+        value: /opt/render/project/src/school.db

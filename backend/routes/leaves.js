@@ -61,8 +61,8 @@ router.post('/', authenticate, requireRole('PARENT'), (req, res) => {
     return res.status(403).json({ error: 'You can only submit leave requests for your linked student' });
   }
 
-  const student = db.prepare('SELECT id FROM students WHERE id = ?').get(student_id);
-  if (!student) return res.status(404).json({ error: 'Student not found' });
+   const student = db.prepare('SELECT id FROM students WHERE id = ?').get(student_id);
+   if (!student) return res.status(404).json({ error: 'Record not found' });
 
   const result = db.prepare(`
     INSERT INTO leave_requests (student_id, parent_user_id, from_date, to_date, reason)
@@ -76,8 +76,8 @@ router.post('/', authenticate, requireRole('PARENT'), (req, res) => {
 // ─── PUT /api/leaves/:id ──────────────────────────────────────────────────────
 router.put('/:id', authenticate, requireRole('OWNER'), (req, res) => {
   const { id } = req.params;
-  const leave = db.prepare('SELECT * FROM leave_requests WHERE id = ?').get(id);
-  if (!leave) return res.status(404).json({ error: 'Leave request not found' });
+   const leave = db.prepare('SELECT * FROM leave_requests WHERE id = ?').get(id);
+   if (!leave) return res.status(404).json({ error: 'Record not found' });
 
   const { status, owner_note } = req.body;
 
@@ -107,8 +107,8 @@ router.delete('/:id', authenticate, (req, res) => {
   const { id } = req.params;
   const { role, id: userId, linked_id } = req.user;
 
-  const leave = db.prepare('SELECT * FROM leave_requests WHERE id = ?').get(id);
-  if (!leave) return res.status(404).json({ error: 'Leave request not found' });
+   const leave = db.prepare('SELECT * FROM leave_requests WHERE id = ?').get(id);
+   if (!leave) return res.status(404).json({ error: 'Record not found' });
 
   // Access control: OWNER can delete any leave request. PARENT can only delete requests for their linked student.
   if (role === 'OWNER') {

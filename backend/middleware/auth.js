@@ -1,6 +1,13 @@
 const jwt = require('jsonwebtoken');
 
-// Use environment variable for secret; fall back to a long random default for dev
+// In production, JWT_SECRET MUST be set via environment variable.
+// The hardcoded fallback is only for local development.
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.error('❌ FATAL: JWT_SECRET env variable is not set in production.');
+  console.error('   Generate one with: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"');
+  process.exit(1);
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'sr_sch_2026_k9#mPqL@vXn!zTw8$cRdYeH5jBuFoA3sN6gI1';
 
 /**

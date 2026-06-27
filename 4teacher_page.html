@@ -3,19 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        (function() {
-            try {
-                const user = JSON.parse(localStorage.getItem('user'));
-                if (!user || user.role !== 'TEACHER') {
-                    window.location.href = '/login_page.html';
-                }
-            } catch (e) {
-                window.location.href = '/login_page.html';
-            }
-        })();
-    </script>
-    <title>Sunrise Public School - Unified Teacher Console</title>
+    <title>Student Management System - Unified Teacher Console</title>
     <!-- Tailwind CSS Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -25,20 +13,40 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        },
+                        slate: {
+                            50: '#f5f8fc',    // Light Mode: Frosty background
+                            100: '#e2e8f0',   // Light Mode: Border
+                            200: '#cbd5e1',
+                            300: '#94a3b8',
+                            400: '#64748b',
+                            500: '#475569',
+                            600: '#334155',
+                            700: '#151b2c',   // Dark Mode: Gemini border
+                            800: '#0a0f1d',   // Dark Mode: Gemini glassmorphic card bg
+                            900: '#060a15',   // Dark Mode: Gemini header/sidebar bg
+                            950: '#03050b',   // Dark Mode: Gemini obsidian main bg
                         }
                     }
                 }
             }
+        }
+
+        // Check theme preference early to prevent flash of light theme
+        if (localStorage.getItem('theme') !== 'light') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
     </script>
     <!-- FontAwesome Vector Icons -->
@@ -103,45 +111,45 @@
                 <span class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Navigation</span>
                 
                 <!-- Page 1 Selector -->
-                <button onclick="switchPage('roster-dashboard')" id="nav-roster-dashboard" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400">
+                <button onclick="switchPage('roster-dashboard')" id="nav-roster-dashboard" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-primary-50 dark:bg-primary-800/60 text-primary-600 dark:text-white">
                     <i class="fa-solid fa-users-viewfinder text-lg"></i>
                     <span>Dashboard & Roster</span>
                 </button>
                 
                 <!-- Page 2b Selector: Bulk Marks -->
-                <button onclick="switchPage('bulk-marks')" id="nav-bulk-marks" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchPage('bulk-marks')" id="nav-bulk-marks" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-list-check text-lg"></i>
                     <span id="nav-label-gradebook">Marks</span>
                 </button>
 
                 <!-- Page 3b Selector: Bulk Attendance -->
-                <button onclick="switchPage('bulk-attendance')" id="nav-bulk-attendance" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchPage('bulk-attendance')" id="nav-bulk-attendance" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-users-line text-lg"></i>
                     <span id="nav-label-attendance">Attendance</span>
                 </button>
 
                 <!-- Page 4 Selector (New: Timetable) -->
-                <button onclick="switchPage('timetable')" id="nav-timetable" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchPage('timetable')" id="nav-timetable" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-calendar-days text-lg"></i>
                     <span id="nav-label-timetable">Subject Timetable</span>
                 </button>
 
                 <!-- Page 5 Selector (New: Notes) -->
-                <button onclick="switchPage('notes')" id="nav-notes" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchPage('notes')" id="nav-notes" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-note-sticky text-lg"></i>
                     <span>Teacher Notes</span>
                 </button>
 
                 <!-- Page 6 Selector -->
-                <button onclick="switchPage('about-us')" id="nav-about-us" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchPage('about-us')" id="nav-about-us" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-circle-info text-lg"></i>
                     <span>About Us</span>
                 </button>
             </nav>
 
-            <!-- Theme Configuration Switcher -->
+            <!-- Theme Configuration Switcher (minimum height 44px) -->
             <div class="p-4 border-t border-slate-100 dark:border-slate-700">
-                <button onclick="toggleDarkMode()" class="flex items-center justify-between w-full p-2.5 bg-slate-100 dark:bg-slate-700 rounded-xl transition-all">
+                <button onclick="toggleDarkMode()" class="flex items-center justify-between w-full py-3 px-4 bg-slate-100 dark:bg-slate-700 rounded-xl transition-all min-h-[44px]" style="min-height: 44px;">
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Switch Theme</span>
                     <i id="theme-icon" class="fa-solid fa-moon text-slate-600 dark:text-amber-400"></i>
                 </button>
@@ -188,27 +196,27 @@
                         </div>
                         
                         <div class="mt-6 space-y-4">
-                            <button onclick="switchPage('roster-dashboard'); toggleMobileMenu()" id="mobile-nav-roster-dashboard" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-primary-600 bg-primary-50">
+                            <button onclick="switchPage('roster-dashboard'); toggleMobileMenu()" id="mobile-nav-roster-dashboard" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-primary-600 bg-primary-50 dark:bg-primary-800/60 dark:text-white">
                                 <i class="fa-solid fa-users-viewfinder"></i>
                                 <span>Dashboard & Roster</span>
                             </button>
-                            <button onclick="switchPage('bulk-marks'); toggleMobileMenu()" id="mobile-nav-bulk-marks" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                            <button onclick="switchPage('bulk-marks'); toggleMobileMenu()" id="mobile-nav-bulk-marks" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
                                 <i class="fa-solid fa-list-check"></i>
                                 <span class="mobile-label-gradebook">Marks</span>
                             </button>
-                            <button onclick="switchPage('bulk-attendance'); toggleMobileMenu()" id="mobile-nav-bulk-attendance" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                            <button onclick="switchPage('bulk-attendance'); toggleMobileMenu()" id="mobile-nav-bulk-attendance" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
                                 <i class="fa-solid fa-users-line"></i>
                                 <span class="mobile-label-attendance">Attendance</span>
                             </button>
-                            <button onclick="switchPage('timetable'); toggleMobileMenu()" id="mobile-nav-timetable" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                            <button onclick="switchPage('timetable'); toggleMobileMenu()" id="mobile-nav-timetable" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
                                 <i class="fa-solid fa-calendar-days"></i>
                                 <span class="mobile-label-timetable">Subject Timetable</span>
                             </button>
-                            <button onclick="switchPage('notes'); toggleMobileMenu()" id="mobile-nav-notes" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                            <button onclick="switchPage('notes'); toggleMobileMenu()" id="mobile-nav-notes" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
                                 <i class="fa-solid fa-note-sticky"></i>
                                 <span>Teacher Notes</span>
                             </button>
-                            <button onclick="switchPage('about-us'); toggleMobileMenu()" id="mobile-nav-about-us" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
+                            <button onclick="switchPage('about-us'); toggleMobileMenu()" id="mobile-nav-about-us" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
                                 <i class="fa-solid fa-circle-info"></i>
                                 <span>About Us</span>
                             </button>
@@ -523,7 +531,7 @@
                     </div>
                     <div class="relative z-10 max-w-2xl space-y-2">
                         <span class="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Established 1998</span>
-                        <h2 class="text-2xl sm:text-3xl font-extrabold leading-tight">Sunrise Public School</h2>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold leading-tight">Student Management System</h2>
                         <p class="text-sky-100 text-sm leading-relaxed">
                             Nurturing brilliant minds, shaping purposeful futures. Our integrated academic framework encourages rigorous, discovery-based inquiry with a balanced pathway for co-scholastic excellence.
                         </p>
@@ -615,7 +623,7 @@
 
             <!-- Dashboard Footer -->
             <footer class="text-center text-slate-400 dark:text-slate-500 text-xs py-6 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 mt-auto">
-                Sunrise Public School · Unified Teacher Console · 2026
+                Student Management System · Unified Teacher Console · 2026
             </footer>
         </main>
     </div>
@@ -623,6 +631,55 @@
     <!-- Core Interactive Application Logic -->
     <script>
         const API_BASE = window.location.origin.startsWith('file://') || !window.location.origin ? 'http://localhost:3001' : window.location.origin;
+
+        // Persistent Form State Utility
+        const PersistState = {
+            key: `persist_form_${window.location.pathname}`,
+            init() {
+                this.restore();
+                document.addEventListener('input', (e) => {
+                    if (e.target.id && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                        if (e.target.type === 'password') return;
+                        this.saveField(e.target.id, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+                    }
+                });
+                document.addEventListener('change', (e) => {
+                    if (e.target.id && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                        if (e.target.type === 'password') return;
+                        this.saveField(e.target.id, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+                    }
+                });
+            },
+            saveField(id, value) {
+                let data = {};
+                try {
+                    data = JSON.parse(sessionStorage.getItem(this.key)) || {};
+                } catch(e) {}
+                data[id] = value;
+                sessionStorage.setItem(this.key, JSON.stringify(data));
+            },
+            restore() {
+                let data = {};
+                try {
+                    data = JSON.parse(sessionStorage.getItem(this.key)) || {};
+                } catch(e) { return; }
+                for (const [id, value] of Object.entries(data)) {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.type === 'checkbox') {
+                            el.checked = (value === 'true' || value === true);
+                        } else {
+                            el.value = value;
+                        }
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            },
+            clear() {
+                sessionStorage.removeItem(this.key);
+            }
+        };
+
         // Clean layout state, waiting entirely to be hydrated by window.loadTeacherProfile configuration API
         const teacherDb = {
             teacherInfo: {
@@ -651,7 +708,7 @@
             document.getElementById('current-date-string').textContent = new Date().toLocaleDateString('en-US', dateOptions);
             
             // Check LocalStorage / Preference for Dark Mode
-            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            if (localStorage.getItem('theme') !== 'light') {
                 document.documentElement.classList.add('dark');
                 const themeIcon = document.getElementById('theme-icon');
                 if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-400";
@@ -663,6 +720,9 @@
 
             // Sync baseline empty values
             updateConsoleState();
+
+            // Initialize form state persistence
+            PersistState.init();
         };
 
         /**
@@ -1558,12 +1618,12 @@
 
                 if (pageEl) pageEl.classList.toggle('hidden', p !== pageId);
 
-                const inactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white";
-                const activeClass   = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400";
+                const inactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white";
+                const activeClass   = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-primary-50/70 border-l-4 border-primary-600 text-primary-600 dark:bg-primary-800/60 dark:text-white dark:border-primary-500";
                 if (navEl)  navEl.className  = (p === pageId) ? activeClass   : inactiveClass;
                 if (mNavEl) mNavEl.className = (p === pageId)
-                    ? "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-primary-600 bg-primary-50"
-                    : "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400";
+                    ? "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-primary-600 bg-primary-50/70 border-l-4 border-primary-600 dark:bg-primary-800/60 dark:text-white dark:border-primary-500"
+                    : "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white";
             });
 
             const headerText = document.getElementById('header-title-text');
@@ -1581,7 +1641,7 @@
         function applyDefaultStatus(status) {
             teacherDb.students.filter(s => s.class === teacherDb.selectedClass).forEach(s => {
                 const el = document.getElementById(`bulk-att-${s.id}`);
-                if (el) el.value = status;
+                if (el) el.checked = (status === 'PRESENT');
             });
         }
 
@@ -1593,7 +1653,7 @@
 
         async function loadTeacherData() {
             const user = getUser();
-            if (!user || user.role !== 'TEACHER' || !user.linked_id) { window.location.href = '/login_page.html'; return; }
+            if (!user || !user.linked_id) { window.location.href = '/login_page.html'; return; }
 
             try {
                 const tRes = await fetch(`${API}/teachers/${user.linked_id}`, { headers: authHeaders() });
@@ -1776,6 +1836,7 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
+                    PersistState.clear();
                     triggerToast(`Saved marks for ${data.saved} students!`);
                     await loadTeacherData();
                 } else { triggerToast(data.error || 'Failed.', 'warning'); }
@@ -1823,12 +1884,10 @@
                                     <td class="py-2 px-3 font-semibold text-slate-800 dark:text-white">
                                         Roll #${s.rollNo} — ${s.firstName} ${s.lastName}
                                     </td>
-                                    <td class="py-2 px-3">
-                                        <select id="bulk-att-${s.id}" class="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary-500 text-slate-900 dark:text-white">
-                                            <option value="PRESENT" ${currentStatus === 'PRESENT' ? 'selected' : ''}>Present</option>
-                                            <option value="ABSENT" ${currentStatus === 'ABSENT' ? 'selected' : ''}>Absent</option>
-                                            <option value="LATE" ${currentStatus === 'LATE' ? 'selected' : ''}>Late</option>
-                                        </select>
+                                    <td class="py-2 px-3 text-center">
+                                        <div class="flex items-center justify-center">
+                                            <input type="checkbox" id="bulk-att-${s.id}" ${currentStatus === 'PRESENT' ? 'checked' : ''} class="w-4 h-4 text-emerald-600 bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-700 rounded focus:ring-emerald-500 focus:ring-2 focus:ring-offset-0 cursor-pointer">
+                                        </div>
                                     </td>
                                     <td class="py-2 px-3 text-center text-xs font-bold ${parseFloat(s.attendance.calculatedPercentage) >= 75 ? 'text-emerald-500' : 'text-rose-500'}">
                                         ${s.attendance.calculatedPercentage}
@@ -1852,15 +1911,17 @@
             for (const s of students) {
                 const statusEl = document.getElementById(`bulk-att-${s.id}`);
                 if (!statusEl) continue;
+                const status = statusEl.checked ? 'PRESENT' : 'ABSENT';
                 try {
                     const res = await fetch(`${API}/attendance`, {
                         method: 'POST', headers: authHeaders(),
-                        body: JSON.stringify({ student_id: parseInt(s.id), subject: teacherDb.teacherInfo.subject, date, status: statusEl.value })
+                        body: JSON.stringify({ student_id: parseInt(s.id), subject: teacherDb.teacherInfo.subject, date, status })
                     });
                     if (res.ok) saved++;
                     else failed++;
                 } catch(_) { failed++; }
             }
+            PersistState.clear();
             triggerToast(`Attendance saved: ${saved} students.${failed > 0 ? ` (${failed} skipped/duplicate)` : ''}`);
             await loadTeacherData();
         }
@@ -2065,7 +2126,6 @@
 
         function logout() {
             localStorage.removeItem('token'); localStorage.removeItem('user'); localStorage.removeItem('role');
-            document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
             window.location.href = '/login_page.html';
         }
 

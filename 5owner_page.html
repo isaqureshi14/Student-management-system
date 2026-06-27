@@ -3,19 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        (function() {
-            try {
-                const user = JSON.parse(localStorage.getItem('user'));
-                if (!user || user.role !== 'OWNER') {
-                    window.location.href = '/login_page.html';
-                }
-            } catch (e) {
-                window.location.href = '/login_page.html';
-            }
-        })();
-    </script>
-    <title>Sunrise Public School - Manager Portal</title>
+    <title>Student Management System - Manager Portal</title>
     <!-- Tailwind CSS Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -25,20 +13,40 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1137',
+                            900: '#881337',
+                        },
+                        slate: {
+                            50: '#f5f8fc',    // Light Mode: Frosty background
+                            100: '#e2e8f0',   // Light Mode: Border
+                            200: '#cbd5e1',
+                            300: '#94a3b8',
+                            400: '#64748b',
+                            500: '#475569',
+                            600: '#334155',
+                            700: '#151b2c',   // Dark Mode: Gemini border
+                            800: '#0a0f1d',   // Dark Mode: Gemini glassmorphic card bg
+                            900: '#060a15',   // Dark Mode: Gemini header/sidebar bg
+                            950: '#03050b',   // Dark Mode: Gemini obsidian main bg
                         }
                     }
                 }
             }
+        }
+
+        // Check theme preference early to prevent flash of light theme
+        if (localStorage.getItem('theme') !== 'light') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
     </script>
     <!-- FontAwesome Vector Icons -->
@@ -101,58 +109,58 @@
                 <span class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Management</span>
                 
                 <!-- Tab 0: Institute Home Page -->
-                <button onclick="switchTab('home')" id="tab-btn-home" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchTab('home')" id="tab-btn-home" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-hotel text-lg"></i>
                     <span>Institute Home</span>
                 </button>
 
                 <!-- Tab 1: Scholar Directory -->
-                <button onclick="switchTab('directory')" id="tab-btn-directory" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchTab('directory')" id="tab-btn-directory" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-users text-lg"></i>
                     <span>Scholar Directory</span>
                 </button>
                 
                 <!-- Tab 2: Scholar Profile Manager -->
-                <button onclick="switchTab('manager')" id="tab-btn-manager" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchTab('manager')" id="tab-btn-manager" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-user-plus text-lg"></i>
                     <span>Add/Modify Scholar</span>
                 </button>
 
                 <!-- Tab 3: Teacher Directory & Class Allotment -->
-                <button onclick="switchTab('teachers')" id="tab-btn-teachers" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchTab('teachers')" id="tab-btn-teachers" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-chalkboard-user text-lg"></i>
                     <span>Teacher Directory</span>
                 </button>
 
                 <!-- Tab 4: Timetable Grid Scheduler -->
-                <button onclick="switchTab('timetable-sched')" id="tab-btn-timetable-sched" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchTab('timetable-sched')" id="tab-btn-timetable-sched" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-calendar-days text-lg"></i>
                     <span>Class Timetables</span>
                 </button>
 
                 <!-- Tab 5: Parent Leaves & Excuse Approvals -->
-                <button onclick="switchTab('approvals')" id="tab-btn-approvals" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchTab('approvals')" id="tab-btn-approvals" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-envelope-open-text text-lg"></i>
                     <span>Leave & Excuses</span>
                 </button>
 
                 <!-- Tab 6: All Students Marks Report -->
-                <button onclick="switchTab('marks-report')" id="tab-btn-marks-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchTab('marks-report')" id="tab-btn-marks-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-chart-bar text-lg"></i>
                     <span>Marks Report</span>
                 </button>
 
                 <!-- Tab 7: All Students Attendance Report -->
-                <button onclick="switchTab('attendance-report')" id="tab-btn-attendance-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
+                <button onclick="switchTab('attendance-report')" id="tab-btn-attendance-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-clipboard-check text-lg"></i>
                     <span>Attendance Report</span>
                 </button>
 
             </nav>
 
-            <!-- Theme Configuration Switcher -->
+            <!-- Theme Configuration Switcher (minimum height 44px) -->
             <div class="p-4 border-t border-slate-100 dark:border-slate-700">
-                <button onclick="toggleDarkMode()" class="flex items-center justify-between w-full p-2.5 bg-slate-100 dark:bg-slate-700 rounded-xl transition-all">
+                <button onclick="toggleDarkMode()" class="flex items-center justify-between w-full py-3 px-4 bg-slate-100 dark:bg-slate-700 rounded-xl transition-all min-h-[44px]" style="min-height: 44px;">
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Switch Theme</span>
                     <i id="theme-icon" class="fa-solid fa-moon text-slate-600 dark:text-amber-400"></i>
                 </button>
@@ -193,38 +201,38 @@
                         </div>
                         
                         <div class="mt-6 space-y-4">
-                            <button onclick="switchTab('home'); toggleMobileMenu()" id="mob-tab-btn-home" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40">
+                            <button onclick="switchTab('home'); toggleMobileMenu()" id="mob-tab-btn-home" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-rose-600 bg-rose-50 dark:bg-rose-800/60 dark:text-white">
                                 <i class="fa-solid fa-hotel"></i>
                                 <span>Institute Home</span>
                             </button>
-                            <button onclick="switchTab('directory'); toggleMobileMenu()" id="mob-tab-btn-directory" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
-                                <i class="fa-solid fa-users"></i>
-                                <span>Scholar Directory</span>
-                            </button>
-                            <button onclick="switchTab('manager'); toggleMobileMenu()" id="mob-tab-btn-manager" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
-                                <i class="fa-solid fa-user-plus"></i>
-                                <span>Add/Modify Scholar</span>
-                            </button>
-                            <button onclick="switchTab('teachers'); toggleMobileMenu()" id="mob-tab-btn-teachers" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
-                                <i class="fa-solid fa-chalkboard-user"></i>
-                                <span>Teacher Directory</span>
-                            </button>
-                            <button onclick="switchTab('timetable-sched'); toggleMobileMenu()" id="mob-tab-btn-timetable-sched" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
-                                <i class="fa-solid fa-calendar-days"></i>
-                                <span>Class Timetables</span>
-                            </button>
-                            <button onclick="switchTab('approvals'); toggleMobileMenu()" id="mob-tab-btn-approvals" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
-                                <i class="fa-solid fa-envelope-open-text"></i>
-                                <span>Leave & Excuses</span>
-                            </button>
-                            <button onclick="switchTab('marks-report'); toggleMobileMenu()" id="mob-tab-btn-marks-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
-                                <i class="fa-solid fa-chart-bar"></i>
-                                <span>Marks Report</span>
-                            </button>
-                            <button onclick="switchTab('attendance-report'); toggleMobileMenu()" id="mob-tab-btn-attendance-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400">
-                                <i class="fa-solid fa-clipboard-check"></i>
-                                <span>Attendance Report</span>
-                            </button>
+                             <button onclick="switchTab('directory'); toggleMobileMenu()" id="mob-tab-btn-directory" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
+                                 <i class="fa-solid fa-users"></i>
+                                 <span>Scholar Directory</span>
+                             </button>
+                             <button onclick="switchTab('manager'); toggleMobileMenu()" id="mob-tab-btn-manager" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
+                                 <i class="fa-solid fa-user-plus"></i>
+                                 <span>Add/Modify Scholar</span>
+                             </button>
+                             <button onclick="switchTab('teachers'); toggleMobileMenu()" id="mob-tab-btn-teachers" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
+                                 <i class="fa-solid fa-chalkboard-user"></i>
+                                 <span>Teacher Directory</span>
+                             </button>
+                             <button onclick="switchTab('timetable-sched'); toggleMobileMenu()" id="mob-tab-btn-timetable-sched" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
+                                 <i class="fa-solid fa-calendar-days"></i>
+                                 <span>Class Timetables</span>
+                             </button>
+                             <button onclick="switchTab('approvals'); toggleMobileMenu()" id="mob-tab-btn-approvals" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
+                                 <i class="fa-solid fa-envelope-open-text"></i>
+                                 <span>Leave & Excuses</span>
+                             </button>
+                             <button onclick="switchTab('marks-report'); toggleMobileMenu()" id="mob-tab-btn-marks-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
+                                 <i class="fa-solid fa-chart-bar"></i>
+                                 <span>Marks Report</span>
+                             </button>
+                             <button onclick="switchTab('attendance-report'); toggleMobileMenu()" id="mob-tab-btn-attendance-report" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white">
+                                 <i class="fa-solid fa-clipboard-check"></i>
+                                 <span>Attendance Report</span>
+                             </button>
                         </div>
                     </div>
                     <button onclick="toggleDarkMode(); toggleMobileMenu()" class="flex items-center justify-between w-full p-3 bg-slate-100 dark:bg-slate-700 rounded-xl">
@@ -242,7 +250,7 @@
                         <i class="fa-solid fa-school text-[240px]"></i>
                     </div>
                     <div class="relative z-10 max-w-2xl space-y-3">
-                        <span class="px-3 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-wider">Sunrise Public School</span>
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-wider">Student Management System</span>
                         <h2 class="text-3xl sm:text-4xl font-extrabold leading-tight">Administrator Control Console</h2>
                         <p class="text-rose-100 text-sm leading-relaxed">
                             The central intelligence core for school management. Coordinate scholar profiles, certified teacher registries, class timetables, and approve leave requests dynamically.
@@ -452,14 +460,11 @@
                                         <p class="text-[10px] text-slate-400 mt-1">This ID will be used for logging in.</p>
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Temporary Password</label>
-                                        <div class="mt-1 flex gap-2">
-                                            <input id="form-temp-password" type="text" placeholder="Auto-generated if left blank" class="flex-1 min-w-0 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 text-sm font-semibold text-slate-900 dark:text-white font-mono">
-                                            <button type="button" onclick="generateTempPassword('form-temp-password')" title="Generate random password" class="px-3 py-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold hover:bg-rose-100 transition-all shrink-0">
-                                                <i class="fa-solid fa-rotate"></i>
-                                            </button>
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Temporary Password <span class="text-rose-500">*</span></label>
+                                        <div class="mt-1">
+                                            <input id="form-temp-password" type="text" placeholder="Enter temporary password" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 text-sm font-semibold text-slate-900 dark:text-white font-mono">
                                         </div>
-                                        <p class="text-[10px] text-slate-400 mt-1">Leave blank to auto-generate. Share with the student securely.</p>
+                                        <p class="text-[10px] text-slate-400 mt-1">Share with the student securely.</p>
                                     </div>
                                 </div>
                             </div>
@@ -569,14 +574,11 @@
                                     <p class="text-[10px] text-slate-400 mt-1">Used as the teacher's login ID.</p>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Temporary Password</label>
-                                    <div class="mt-1 flex gap-2">
-                                        <input id="teacher-password-input" type="text" placeholder="Auto-generated if left blank" class="flex-1 min-w-0 px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 text-xs font-bold text-slate-900 dark:text-white font-mono">
-                                        <button type="button" onclick="generateTempPassword('teacher-password-input')" title="Generate random password" class="px-3 py-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold hover:bg-rose-100 transition-all shrink-0">
-                                            <i class="fa-solid fa-rotate"></i>
-                                        </button>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Temporary Password <span class="text-rose-500">*</span></label>
+                                    <div class="mt-1">
+                                        <input id="teacher-password-input" type="text" placeholder="Enter temporary password" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 text-xs font-bold text-slate-900 dark:text-white font-mono">
                                     </div>
-                                    <p class="text-[10px] text-slate-400 mt-1">Leave blank to auto-generate.</p>
+                                    <p class="text-[10px] text-slate-400 mt-1">Provide a temporary login password.</p>
                                 </div>
                             </div>
 
@@ -722,6 +724,56 @@
                     <div class="pt-2">
                         <!-- Day Tabs Selector -->
                         <div class="flex flex-wrap gap-2 border-b border-slate-100 dark:border-slate-700 pb-3" id="tt-day-tabs"></div>
+
+                        <!-- Easy Timetable Inputs Toolbar -->
+                        <div id="tt-helper-toolbar" class="hidden flex flex-col xl:flex-row xl:items-end justify-between gap-4 p-5 mt-4 bg-slate-50 dark:bg-slate-900/40 border border-slate-150 dark:border-slate-800 rounded-2xl">
+                            <!-- Section 1: Auto timings generator -->
+                            <div class="flex flex-wrap items-end gap-4">
+                                <span class="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider pb-3.5 flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles text-rose-500"></i> Auto Timings:</span>
+                                <div class="flex flex-wrap items-end gap-3">
+                                    <div class="flex flex-col">
+                                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Start Time</label>
+                                        <input id="tt-auto-start" type="time" value="08:00" class="px-3.5 py-2 min-h-[44px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 w-28">
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Duration (m)</label>
+                                        <input id="tt-auto-duration" type="number" value="50" min="5" class="px-3.5 py-2 min-h-[44px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 w-20">
+                                    </div>
+                                    <div>
+                                        <button type="button" onclick="generateAutoTimings()" class="px-5 py-2 min-h-[44px] bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm flex items-center justify-center">
+                                            Fill Times
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Section 2: Replication & copy-paste actions -->
+                            <div class="flex flex-wrap items-end gap-4">
+                                <span class="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider pb-3.5 flex items-center gap-1.5"><i class="fa-solid fa-copy text-rose-500"></i> Replication:</span>
+                                <div class="flex flex-wrap items-end gap-3">
+                                    <button type="button" onclick="applyTimingsToAllDays()" class="px-5 py-2 min-h-[44px] bg-slate-250 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-extrabold rounded-xl border border-slate-200 dark:border-slate-700 transition-all flex items-center justify-center">
+                                        Apply Timings to All Days
+                                    </button>
+                                    <div class="flex flex-col">
+                                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Copy To</label>
+                                        <select id="tt-copy-target" class="px-3.5 py-2 min-h-[44px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 w-28">
+                                            <option value="all">All Days</option>
+                                            <option value="Monday">Monday</option>
+                                            <option value="Tuesday">Tuesday</option>
+                                            <option value="Wednesday">Wednesday</option>
+                                            <option value="Thursday">Thursday</option>
+                                            <option value="Friday">Friday</option>
+                                            <option value="Saturday">Saturday</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <button type="button" onclick="copyCurrentDaySchedule()" class="px-5 py-2 min-h-[44px] bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm flex items-center justify-center">
+                                            Copy Day
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Desktop Header -->
                         <div id="tt-desktop-header" class="hidden md:grid grid-cols-12 gap-4 px-4 py-2.5 text-[10px] font-extrabold uppercase text-slate-400 border-b border-slate-100 dark:border-slate-700/60 mt-4">
@@ -905,7 +957,7 @@
 
             <!-- Dashboard Footer -->
             <footer class="text-center text-slate-400 dark:text-slate-500 text-xs py-6 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 mt-auto">
-                Sunrise Public School · Administrative Manager Hub · 2026
+                Student Management System · Administrative Manager Hub · 2026
             </footer>
         </main>
     </div>
@@ -914,6 +966,66 @@
     <!-- Core Interactive Application Logic -->
     <script>
         const API_BASE = window.location.origin.startsWith('file://') || !window.location.origin ? 'http://localhost:3001' : window.location.origin;
+
+        // Persistent Form State Utility
+        const PersistState = {
+            key: `persist_form_${window.location.pathname}`,
+            init() {
+                try {
+                    let d = JSON.parse(sessionStorage.getItem(this.key)) || {};
+                    if (d['tt-class-selector'] || d['tt-periods-count']) {
+                        delete d['tt-class-selector'];
+                        delete d['tt-periods-count'];
+                        sessionStorage.setItem(this.key, JSON.stringify(d));
+                    }
+                } catch(e) {}
+                this.restore();
+                document.addEventListener('input', (e) => {
+                    if (e.target.id && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                        if (e.target.type === 'password') return;
+                        if (e.target.id === 'tt-class-selector' || e.target.id === 'tt-periods-count') return;
+                        this.saveField(e.target.id, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+                    }
+                });
+                document.addEventListener('change', (e) => {
+                    if (e.target.id && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                        if (e.target.type === 'password') return;
+                        if (e.target.id === 'tt-class-selector' || e.target.id === 'tt-periods-count') return;
+                        this.saveField(e.target.id, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+                    }
+                });
+            },
+            saveField(id, value) {
+                let data = {};
+                try {
+                    data = JSON.parse(sessionStorage.getItem(this.key)) || {};
+                } catch(e) {}
+                data[id] = value;
+                sessionStorage.setItem(this.key, JSON.stringify(data));
+            },
+            restore() {
+                let data = {};
+                try {
+                    data = JSON.parse(sessionStorage.getItem(this.key)) || {};
+                } catch(e) { return; }
+                for (const [id, value] of Object.entries(data)) {
+                    if (id === 'tt-class-selector' || id === 'tt-periods-count') continue;
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.type === 'checkbox') {
+                            el.checked = (value === 'true' || value === true);
+                        } else {
+                            el.value = value;
+                        }
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            },
+            clear() {
+                sessionStorage.removeItem(this.key);
+            }
+        };
+
         // Store base64 data temporarily during editing
         let formImageBase64 = "";
 
@@ -1059,14 +1171,14 @@
                 const btn = document.getElementById(`tab-btn-${tab}`);
                 const mobBtn = document.getElementById(`mob-tab-btn-${tab}`);
                 
-                const inactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white";
-                const activeClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-455";
+                const inactiveClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white";
+                const activeClass = "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 bg-rose-50/70 border-l-4 border-rose-600 text-rose-600 dark:bg-rose-800/60 dark:text-white dark:border-rose-500";
 
                 if (btn) btn.className = (tab === tabId) ? activeClass : inactiveClass;
                 if (mobBtn) {
                     mobBtn.className = (tab === tabId) 
-                        ? "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40"
-                        : "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400";
+                        ? "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-rose-600 bg-rose-50/70 border-l-4 border-rose-600 dark:bg-rose-800/60 dark:text-white dark:border-rose-500"
+                        : "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white";
                 }
 
                 const pageEl = document.getElementById(`page-${tab}`);
@@ -1159,7 +1271,10 @@
             const emailEl = document.getElementById('form-student-email');
             const passEl  = document.getElementById('form-temp-password');
             if (emailEl) emailEl.value = '';
-            if (passEl)  passEl.value  = '';
+            if (passEl)  {
+                passEl.value  = '';
+                passEl.required = true;
+            }
             // Always show credential section for new students
             const credSection = document.getElementById('student-credential-section');
             if (credSection) credSection.classList.remove('hidden');
@@ -1264,6 +1379,8 @@
             // Hide credential section when editing — login is already created
             const credSection = document.getElementById('student-credential-section');
             if (credSection) credSection.classList.add('hidden');
+            const passEl  = document.getElementById('form-temp-password');
+            if (passEl) passEl.required = false;
 
             // Show reset password section
             const resetSection = document.getElementById('student-reset-password-section');
@@ -1523,11 +1640,11 @@
                 
                 let statusBadge = '';
                 if (item.status === 'Approved') {
-                    statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-[10px]">Approved</span>';
+                    statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-[10px]">Approved</span>';
                 } else if (item.status === 'Rejected') {
-                    statusBadge = '<span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 rounded-md font-bold text-[10px]">Rejected</span>';
+                    statusBadge = '<span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 rounded-md font-bold text-[10px]">Rejected</span>';
                 } else {
-                    statusBadge = '<span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-955 text-amber-700 dark:text-amber-400 rounded-md font-bold text-[10px] animate-pulse">Pending Review</span>';
+                    statusBadge = '<span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-md font-bold text-[10px] animate-pulse">Pending Review</span>';
                 }
 
                 const actionButtons = (item.status === 'Pending Approval' || item.status === 'Pending Review' || item.status === 'Pending' || item.status === 'PENDING') ? `
@@ -1736,6 +1853,8 @@
             // Hide credentials section, show reset section
             const credSection = document.getElementById('teacher-credential-section');
             if (credSection) credSection.classList.add('hidden');
+            const passEl = document.getElementById('teacher-password-input');
+            if (passEl) passEl.required = false;
             const resetSection = document.getElementById('teacher-reset-password-section');
             if (resetSection) resetSection.classList.remove('hidden');
             const resetInput = document.getElementById('teacher-reset-password-input');
@@ -1755,6 +1874,8 @@
             document.getElementById('teacher-config-form').reset();
             const credSection = document.getElementById('teacher-credential-section');
             if (credSection) credSection.classList.remove('hidden');
+            const passEl = document.getElementById('teacher-password-input');
+            if (passEl) passEl.required = true;
             const resetSection = document.getElementById('teacher-reset-password-section');
             if (resetSection) resetSection.classList.add('hidden');
         }
@@ -1842,7 +1963,10 @@
                     body: JSON.stringify({ class: activeClass, entries })
                 });
                 const data = await res.json();
-                if (res.ok) triggerToastNotification(`Timetable saved (${data.saved} slots).`, 'emerald');
+                if (res.ok) {
+                    PersistState.clear();
+                    triggerToastNotification(`Timetable saved (${data.saved} slots).`, 'emerald');
+                }
                 else triggerToastNotification(data.error || 'Failed.', 'rose');
             } catch(err) { triggerToastNotification(err.message, 'rose'); }
         }
@@ -1924,6 +2048,17 @@
         function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() }; }
 
         async function loadOwnerData() {
+            // Sync theme icons and class
+            const currentTheme = localStorage.getItem('theme');
+            const themeIcon = document.getElementById('theme-icon');
+            if (currentTheme !== 'light') {
+                document.documentElement.classList.add('dark');
+                if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-400";
+            } else {
+                document.documentElement.classList.remove('dark');
+                if (themeIcon) themeIcon.className = "fa-solid fa-moon text-slate-600";
+            }
+
             const user = getUser();
             if (!user || user.role !== 'OWNER') { window.location.href = '/login_page.html'; return; }
 
@@ -2205,6 +2340,7 @@
                     if (!res.ok) { triggerToastNotification(data.error || 'Failed.', 'rose'); return; }
                     triggerToastNotification('Student updated.', 'emerald');
                 }
+                PersistState.clear();
                 managerState.activeEditingStudentId = null;
                 formImageBase64 = '';
                 await loadOwnerData();
@@ -2281,6 +2417,7 @@
                     if (!res.ok) { triggerToastNotification(data.error || 'Failed.', 'rose'); return; }
                     triggerToastNotification('Teacher updated.', 'emerald');
                 }
+                PersistState.clear();
                 managerState.activeEditingTeacherId = null;
                 document.getElementById('teacher-config-form').reset();
                 await loadOwnerData();
@@ -2336,8 +2473,23 @@
                     body: JSON.stringify({ class: activeClass, entries })
                 });
                 const data = await res.json();
-                if (res.ok) triggerToastNotification(`Timetable saved (${data.saved} slots).`, 'emerald');
-                else triggerToastNotification(data.error || 'Failed.', 'rose');
+                if (res.ok) {
+                    triggerToastNotification(`Timetable saved (${data.saved} slots).`, 'emerald');
+                    // Clear tt- keys from sessionStorage
+                    try {
+                        const key = PersistState.key;
+                        let d = JSON.parse(sessionStorage.getItem(key)) || {};
+                        let cleaned = {};
+                        for (const [k, v] of Object.entries(d)) {
+                            if (!k.startsWith('tt-')) {
+                                cleaned[k] = v;
+                            }
+                        }
+                        sessionStorage.setItem(key, JSON.stringify(cleaned));
+                    } catch(e) {}
+                } else {
+                    triggerToastNotification(data.error || 'Failed.', 'rose');
+                }
             } catch(err) { triggerToastNotification(err.message, 'rose'); }
         };
 
@@ -2379,20 +2531,126 @@
             endEl.value = `${endHStr}:${endMStr}`;
         };
 
+        window.generateAutoTimings = function() {
+            const startVal = document.getElementById('tt-auto-start').value;
+            const durationVal = parseInt(document.getElementById('tt-auto-duration').value) || 50;
+            
+            if (!startVal) { triggerToastNotification('Specify a start time first.', 'rose'); return; }
+            const periodCount = parseInt(document.getElementById('tt-periods-count')?.value || '6');
+            
+            let [h, m] = startVal.split(':').map(Number);
+            for (let p = 1; p <= periodCount; p++) {
+                const startEl = document.getElementById(`tt-${activeTTDay}-P${p}-start`);
+                const endEl = document.getElementById(`tt-${activeTTDay}-P${p}-end`);
+                if (!startEl || !endEl) continue;
+                
+                const startHStr = String(h).padStart(2, '0');
+                const startMStr = String(m).padStart(2, '0');
+                startEl.value = `${startHStr}:${startMStr}`;
+                
+                let endTotalMin = h * 60 + m + durationVal;
+                let endH = Math.floor(endTotalMin / 60) % 24;
+                let endM = endTotalMin % 60;
+                
+                const endHStr = String(endH).padStart(2, '0');
+                const endMStr = String(endM).padStart(2, '0');
+                endEl.value = `${endHStr}:${endMStr}`;
+                
+                h = endH;
+                m = endM;
+            }
+            triggerToastNotification(`Generated timings for ${activeTTDay}!`, 'emerald');
+        };
+
+        window.applyTimingsToAllDays = function() {
+            const periodCount = parseInt(document.getElementById('tt-periods-count')?.value || '6');
+            const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            days.forEach(day => {
+                if (day === activeTTDay) return;
+                for (let p = 1; p <= periodCount; p++) {
+                    const srcStart = document.getElementById(`tt-${activeTTDay}-P${p}-start`);
+                    const srcEnd = document.getElementById(`tt-${activeTTDay}-P${p}-end`);
+                    const dstStart = document.getElementById(`tt-${day}-P${p}-start`);
+                    const dstEnd = document.getElementById(`tt-${day}-P${p}-end`);
+                    
+                    if (srcStart && dstStart) dstStart.value = srcStart.value;
+                    if (srcEnd && dstEnd) dstEnd.value = srcEnd.value;
+                }
+            });
+            triggerToastNotification('Applied active day timings to all other days.', 'emerald');
+        };
+
+        window.copyCurrentDaySchedule = function() {
+            const target = document.getElementById('tt-copy-target').value;
+            const periodCount = parseInt(document.getElementById('tt-periods-count')?.value || '6');
+            const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            const copyTo = target === 'all' ? days.filter(d => d !== activeTTDay) : [target];
+            
+            copyTo.forEach(day => {
+                for (let p = 1; p <= periodCount; p++) {
+                    const srcSub = document.getElementById(`tt-${activeTTDay}-P${p}-subject`);
+                    const srcStart = document.getElementById(`tt-${activeTTDay}-P${p}-start`);
+                    const srcEnd = document.getElementById(`tt-${activeTTDay}-P${p}-end`);
+                    const srcPreset = document.getElementById(`tt-${activeTTDay}-P${p}-preset`);
+                    
+                    const dstSub = document.getElementById(`tt-${day}-P${p}-subject`);
+                    const dstStart = document.getElementById(`tt-${day}-P${p}-start`);
+                    const dstEnd = document.getElementById(`tt-${day}-P${p}-end`);
+                    const dstPreset = document.getElementById(`tt-${day}-P${p}-preset`);
+                    
+                    if (srcSub && dstSub) dstSub.value = srcSub.value;
+                    if (srcStart && dstStart) dstStart.value = srcStart.value;
+                    if (srcEnd && dstEnd) dstEnd.value = srcEnd.value;
+                    if (srcPreset && dstPreset) dstPreset.value = srcPreset.value;
+                }
+            });
+            triggerToastNotification(`Copied schedule from ${activeTTDay} to ${target === 'all' ? 'all other days' : target}!`, 'emerald');
+        };
+
         window.loadTimetableSchedulerGrid = async function() {
             const activeClass = document.getElementById('tt-class-selector').value;
             const container = document.getElementById('tt-vertical-container');
             const tabsContainer = document.getElementById('tt-day-tabs');
             const desktopHeader = document.getElementById('tt-desktop-header');
+            const toolbar = document.getElementById('tt-helper-toolbar');
+            
+            // If class changed, clear timetable-specific sessionStorage keys
+            if (window.lastTTClass !== activeClass) {
+                window.lastTTClass = activeClass;
+                const key = PersistState.key;
+                try {
+                    let d = JSON.parse(sessionStorage.getItem(key)) || {};
+                    let cleaned = {};
+                    for (const [k, v] of Object.entries(d)) {
+                        if (!k.startsWith('tt-')) {
+                            cleaned[k] = v;
+                        }
+                    }
+                    sessionStorage.setItem(key, JSON.stringify(cleaned));
+                } catch(e) {}
+            }
+            
             if (!container) return;
             if (!activeClass) {
                 container.innerHTML = '<div class="py-8 text-center text-slate-400 text-xs font-bold">Select a class above to edit its timetable</div>';
                 if (tabsContainer) tabsContainer.innerHTML = '';
                 if (desktopHeader) desktopHeader.classList.add('hidden');
+                if (toolbar) toolbar.classList.add('hidden');
                 return;
             }
             if (desktopHeader) desktopHeader.classList.remove('hidden');
+            if (toolbar) toolbar.classList.remove('hidden');
             const periodCount = parseInt(document.getElementById('tt-periods-count')?.value || '6');
+
+            // Populate subject autocompletion datalist from managerState.teachers
+            let dl = document.getElementById('subjects-list');
+            if (!dl) {
+                dl = document.createElement('datalist');
+                dl.id = 'subjects-list';
+                document.body.appendChild(dl);
+            }
+            const uniqueSubjects = [...new Set((managerState.teachers || []).map(t => t.subject))].filter(Boolean);
+            dl.innerHTML = uniqueSubjects.map(s => `<option value="${s}">`).join('');
  
             // Fetch current timetable entries for this class
             let existing = {};
@@ -2448,7 +2706,7 @@
                             
                             <div class="col-span-1 md:col-span-4 w-full">
                                 <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Subject</label>
-                                <input type="text" id="tt-${day}-P${p}-subject" value="${entry.subject || ''}" placeholder="e.g. Mathematics" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
+                                <input type="text" id="tt-${day}-P${p}-subject" list="subjects-list" value="${entry.subject || ''}" placeholder="e.g. Mathematics" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
                             </div>
 
                             <div class="col-span-1 md:col-span-3 w-full">
@@ -2478,6 +2736,9 @@
 
             // Sync navigation active class
             switchTTDay(activeTTDay);
+
+            // Restore any cached/uncommitted form inputs (like typed subjects, times etc.)
+            PersistState.restore();
         };
 
         // ── Approve student profile ────────────────────────────────────────────
@@ -2490,7 +2751,6 @@
 
         function logout() {
             localStorage.removeItem('token'); localStorage.removeItem('user'); localStorage.removeItem('role');
-            document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
             window.location.href = '/login_page.html?role=owner';
         }
         function generateTempPassword(inputId) {
@@ -2795,19 +3055,19 @@
 
                 tbody.innerHTML = Object.values(studentGroups).map(student => {
                     const attPct = student.totalCount > 0 ? ((student.presentCount / student.totalCount) * 100).toFixed(1) : '0.0';
-                    let badgeColor = "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20";
+                    let badgeColor = "text-rose-600 dark:text-rose-455 bg-rose-50 dark:bg-rose-500/10";
                     const attPercent = parseFloat(attPct) || 0;
                     if (attPercent >= 90) {
-                        badgeColor = "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20";
+                        badgeColor = "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10";
                     } else if (attPercent >= 75) {
-                        badgeColor = "text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-950/20";
+                        badgeColor = "text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-500/10";
                     }
 
                     const rowsHtml = student.records.map(r => {
                         let statusBadge = '';
-                        if (r.status === 'PRESENT') statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-[10px]">Present</span>';
-                        else if (r.status === 'ABSENT') statusBadge = '<span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 rounded-md font-bold text-[10px]">Absent</span>';
-                        else statusBadge = '<span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-955 text-amber-700 dark:text-amber-400 rounded-md font-bold text-[10px]">Late</span>';
+                        if (r.status === 'PRESENT') statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-[10px]">Present</span>';
+                        else if (r.status === 'ABSENT') statusBadge = '<span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 rounded-md font-bold text-[10px]">Absent</span>';
+                        else statusBadge = '<span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-md font-bold text-[10px]">Late</span>';
                         return `
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20">
                                 <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200">${r.subject}</td>
@@ -2859,7 +3119,11 @@
         }
 
         const _origOnLoad = window.onload;
-        window.onload = async function() { if (_origOnLoad) _origOnLoad(); await loadOwnerData(); };
+        window.onload = async function() { 
+            if (_origOnLoad) _origOnLoad(); 
+            await loadOwnerData(); 
+            PersistState.init();
+        };
         // ======================== END API INTEGRATION ========================
 
         function toggleDarkMode() {

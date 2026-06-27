@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sunrise Access Hub — Access Management System</title>
+    <title>Student Management System — Access Management System</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons for clean visuals -->
@@ -12,19 +12,19 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
         
         :root {
-            /* Role Colors */
-            --role-rgb-student: 99, 102, 241;   /* Indigo */
-            --role-rgb-parent: 16, 185, 129;   /* Emerald */
-            --role-rgb-teacher: 245, 158, 11;   /* Amber */
-            --role-rgb-owner: 244, 63, 94;      /* Rose */
+            /* Gemini Theme Accent Colors (RGB) */
+            --role-rgb-student: 99, 102, 241;   /* Electric Indigo */
+            --role-rgb-parent: 37, 99, 235;     /* Cosmic Blue */
+            --role-rgb-teacher: 124, 58, 237;   /* Soft Cosmic Violet */
+            --role-rgb-owner: 219, 39, 119;     /* Deep Orchid Magenta */
             
-            /* Active accent, defaults to student (indigo) */
+            /* Defaults to Student (Indigo) */
             --accent-color: var(--role-rgb-student);
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #030712; /* slate-950 */
+            background-color: #03050b; /* Gemini Deep Obsidian */
         }
 
         /* Accent classes dynamically mapping to --accent-color */
@@ -37,16 +37,17 @@
         }
 
         .bg-accent-light {
-            background-color: rgba(var(--accent-color), 0.08);
+            background-color: rgba(var(--accent-color), 0.06);
         }
 
+        /* Glowing primary button using dynamic portal color */
         .btn-accent {
-            background-color: rgb(var(--accent-color));
+            background: rgb(var(--accent-color));
             box-shadow: 0 4px 20px -2px rgba(var(--accent-color), 0.4);
         }
 
         .btn-accent:hover:not(:disabled) {
-            background-color: rgba(var(--accent-color), 0.9);
+            background: rgba(var(--accent-color), 0.9);
             box-shadow: 0 6px 24px -2px rgba(var(--accent-color), 0.6);
             transform: translateY(-1px);
         }
@@ -70,14 +71,14 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Animated Glowing Background Blobs */
+        /* Animated Glowing Background Blobs mimicking cosmic space */
         .bg-glow-blob {
             position: absolute;
-            width: 450px;
-            height: 450px;
+            width: 500px;
+            height: 500px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(var(--accent-color), 0.12) 0%, transparent 70%);
-            filter: blur(80px);
+            background: radial-gradient(circle, rgba(var(--accent-color), 0.15) 0%, transparent 70%);
+            filter: blur(100px);
             pointer-events: none;
             z-index: 0;
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -85,20 +86,20 @@
 
         @keyframes float {
             0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(5deg); }
+            50% { transform: translateY(-20px) rotate(6deg); }
             100% { transform: translateY(0px) rotate(0deg); }
         }
         @keyframes float-delayed {
             0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(12px) rotate(-4deg); }
+            50% { transform: translateY(15px) rotate(-5deg); }
             100% { transform: translateY(0px) rotate(0deg); }
         }
         
         .animate-float {
-            animation: float 6s ease-in-out infinite;
+            animation: float 8s ease-in-out infinite;
         }
         .animate-float-delayed {
-            animation: float-delayed 8s ease-in-out infinite;
+            animation: float-delayed 10s ease-in-out infinite;
         }
     </style>
 </head>
@@ -122,8 +123,8 @@
                     <i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
-                    <span class="font-extrabold tracking-tight text-white block uppercase text-sm leading-none">SUNRISE</span>
-                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 block">PUBLIC SCHOOL</span>
+                    <span class="font-extrabold tracking-tight text-white block uppercase text-sm leading-none">STUDENT</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 block">MANAGEMENT SYSTEM</span>
                 </div>
             </div>
 
@@ -141,7 +142,7 @@
                         <span class="text-accent transition-accent" id="brand-tag-text">Access Management System</span>
                     </div>
                     <h1 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
-                        One Unified Workspace for <br/>
+                        One Unified space for <br/>
                         <span class="text-accent transition-accent" id="brand-accent-text">Student Portal</span>
                     </h1>
                     <p class="text-slate-455 text-sm leading-relaxed max-w-sm font-medium">
@@ -165,7 +166,7 @@
 
             <!-- Footer links -->
             <div class="text-xs text-slate-500 flex items-center justify-between relative z-10">
-                <span>&copy; 2026 Sunrise Public School.</span>
+                <span>&copy; 2026 Student Management System.</span>
                 <a href="/" class="hover:text-white transition-colors flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-500 bg-slate-900/50 hover:bg-slate-800 text-slate-300">
                     <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to Home
                 </a>
@@ -182,7 +183,7 @@
                         <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-extrabold text-white tracking-tight">SUNRISE PUBLIC SCHOOL</h2>
+                        <h2 class="text-xl font-extrabold text-white tracking-tight">STUDENT MANAGEMENT SYSTEM</h2>
                         <p class="text-xs text-slate-450 font-bold uppercase tracking-wider">Access Management System</p>
                     </div>
                 </div>
@@ -198,23 +199,23 @@
                             <p id="login-hint" class="text-xs text-slate-400 mt-2 font-medium leading-relaxed transition-accent">Please enter your credentials to access the student console.</p>
                         </div>
 
-                        <!-- Modern Segmented Tab Role Selector -->
-                        <div class="grid grid-cols-4 gap-1 p-1 bg-slate-950 border border-slate-900 rounded-2xl relative" id="role-selector-bar">
-                            <button onclick="switchRole('student')" id="btn-student" class="role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-white">
+                        <!-- Modern Segmented Tab Role Selector (minimum height 44px) -->
+                        <div class="grid grid-cols-4 gap-1 p-1 bg-slate-950 border border-slate-900 rounded-2xl relative min-h-[48px]" id="role-selector-bar">
+                            <button onclick="switchRole('student')" id="btn-student" class="role-btn py-3 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-white min-h-[44px] flex items-center justify-center">
                                 <span class="block sm:hidden">Stu</span>
                                 <span class="hidden sm:block">Student</span>
                             </button>
-                            <button onclick="switchRole('parent')" id="btn-parent" class="role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200">
+                            <button onclick="switchRole('parent')" id="btn-parent" class="role-btn py-3 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200 min-h-[44px] flex items-center justify-center">
                                 <span class="block sm:hidden">Par</span>
                                 <span class="hidden sm:block">Parent</span>
                             </button>
-                            <button onclick="switchRole('teacher')" id="btn-teacher" class="role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200">
+                            <button onclick="switchRole('teacher')" id="btn-teacher" class="role-btn py-3 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200 min-h-[44px] flex items-center justify-center">
                                 <span class="block sm:hidden">Tea</span>
                                 <span class="hidden sm:block">Teacher</span>
                             </button>
-                            <button onclick="switchRole('owner')" id="btn-owner" class="role-btn py-2.5 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200">
-                                <span class="block sm:hidden">Own</span>
-                                <span class="hidden sm:block">Owner</span>
+                            <button onclick="switchRole('manager')" id="btn-manager" class="role-btn py-3 text-xs font-bold rounded-xl text-center transition-all duration-300 relative z-10 text-slate-450 hover:text-slate-200 min-h-[44px] flex items-center justify-center">
+                                <span class="block sm:hidden">Mgr</span>
+                                <span class="hidden sm:block">Manager</span>
                             </button>
                             
                             <!-- Sliding pill indicator -->
@@ -222,8 +223,11 @@
                         </div>
 
                         <!-- Login Input Form -->
-                        <form onsubmit="handleLogin(event)" class="space-y-5">
-                            
+                        <form onsubmit="handleLogin(event)" class="space-y-5" autocomplete="off">
+                            <!-- Decoys to satisfy aggressive browser autofill and block Suggest Strong Password prompts -->
+                            <input type="text" name="dummy_username" style="display:none" />
+                            <input type="password" name="dummy_password" style="display:none" autocomplete="current-password" />
+
                             <!-- Identifier / Email Input -->
                             <div class="space-y-2">
                                 <label class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">ID / Email Address</label>
@@ -231,7 +235,7 @@
                                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 group-focus-within:text-accent transition-colors duration-300" id="id-icon-container">
                                         <i data-lucide="mail" class="w-4 h-4 text-slate-500 group-focus-within:text-accent transition-accent" id="id-icon"></i>
                                     </span>
-                                    <input type="text" required id="login-identifier" placeholder="Enter ID or Email Address" class="w-full bg-slate-950 border border-slate-900 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-650 focus:outline-none focus-accent transition-all duration-300">
+                                    <input type="text" required id="login-identifier" placeholder="Enter ID or Email Address" class="w-full bg-slate-950 border border-slate-900 rounded-xl pl-10 pr-4 py-3 min-h-[44px] text-sm text-white placeholder-slate-650 focus:outline-none focus-accent transition-all duration-300" autocomplete="off" onkeydown="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('login-password').focus(); }">
                                 </div>
                             </div>
 
@@ -242,16 +246,17 @@
                                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 group-focus-within:text-accent transition-colors duration-300">
                                         <i data-lucide="lock" class="w-4 h-4 text-slate-500 group-focus-within:text-accent transition-accent" id="lock-icon"></i>
                                     </span>
-                                    <input type="password" required id="login-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-900 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-slate-650 focus:outline-none focus-accent transition-all duration-300">
-                                    <!-- Eye toggle utility -->
-                                    <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-350 transition-colors">
+                                    <!-- Readonly + focus remove hack completely blocks suggested password popups -->
+                                    <input type="password" required id="login-password" placeholder="••••••••" readonly onfocus="this.removeAttribute('readonly');" autocomplete="current-password" class="w-full bg-slate-950 border border-slate-900 rounded-xl pl-10 pr-12 py-3 min-h-[44px] text-sm text-white placeholder-slate-650 focus:outline-none focus-accent transition-all duration-300">
+                                    <!-- Eye toggle utility (tactile 44x44px hitbox) -->
+                                    <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-slate-500 hover:text-slate-350 transition-colors" style="min-width: 44px; min-height: 44px;">
                                         <i data-lucide="eye" class="w-4 h-4" id="eye-icon"></i>
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- Action button -->
-                            <button type="submit" id="submit-btn" class="w-full py-3.5 text-white font-bold text-sm rounded-xl transition-accent btn-accent mt-2 flex items-center justify-center gap-2">
+                            <!-- Action button (minimum height 44px) -->
+                            <button type="submit" id="submit-btn" class="w-full py-3.5 min-h-[44px] text-white font-bold text-sm rounded-xl transition-accent btn-accent mt-2 flex items-center justify-center gap-2">
                                 <span>Login as Student</span>
                                 <i data-lucide="arrow-right" class="w-4 h-4"></i>
                             </button>
@@ -281,6 +286,54 @@
         const API_BASE = window.location.origin.startsWith('file://') || !window.location.origin ? 'http://localhost:3001' : window.location.origin;
         let selectedRole = 'student';
 
+        // Persistent Form State Utility
+        const PersistState = {
+            key: `persist_form_${window.location.pathname}`,
+            init() {
+                this.restore();
+                document.addEventListener('input', (e) => {
+                    if (e.target.id && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                        if (e.target.type === 'password') return;
+                        this.saveField(e.target.id, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+                    }
+                });
+                document.addEventListener('change', (e) => {
+                    if (e.target.id && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                        if (e.target.type === 'password') return;
+                        this.saveField(e.target.id, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+                    }
+                });
+            },
+            saveField(id, value) {
+                let data = {};
+                try {
+                    data = JSON.parse(sessionStorage.getItem(this.key)) || {};
+                } catch(e) {}
+                data[id] = value;
+                sessionStorage.setItem(this.key, JSON.stringify(data));
+            },
+            restore() {
+                let data = {};
+                try {
+                    data = JSON.parse(sessionStorage.getItem(this.key)) || {};
+                } catch(e) { return; }
+                for (const [id, value] of Object.entries(data)) {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.type === 'checkbox') {
+                            el.checked = (value === 'true' || value === true);
+                        } else {
+                            el.value = value;
+                        }
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            },
+            clear() {
+                sessionStorage.removeItem(this.key);
+            }
+        };
+
         // Custom config mapping containing themes, layout text assets and placeholders
         const roles = {
             student: { 
@@ -304,11 +357,11 @@
                 desc: 'Log marks, edit lesson plans, configure timetables, and audit attendance.',
                 placeholder: 'Enter ID or Email Address'
             },
-            owner: { 
-                title: 'Owner Login', 
+            manager: { 
+                title: 'Manager Login', 
                 rgb: '244, 63, 94', 
                 icon: 'shield', 
-                desc: 'Manage institute settings, add courses, inspect finances, and supervise users.',
+                desc: 'Manage institute settings, add courses, and supervise users.',
                 placeholder: 'Enter ID or Email Address'
             }
         };
@@ -324,6 +377,8 @@
             if (roleParam && roles[roleParam]) {
                 switchRole(roleParam);
             }
+            // Initialize form state persistence
+            PersistState.init();
         });
 
         // Toggle text/password field visibility
@@ -350,7 +405,7 @@
 
             // 2. Animate sliding pill indicator
             const indicator = document.getElementById('role-indicator-pill');
-            const roleKeys = ['student', 'parent', 'teacher', 'owner'];
+            const roleKeys = ['student', 'parent', 'teacher', 'manager'];
             const index = roleKeys.indexOf(roleKey);
             indicator.style.left = `calc(${index * 25}% + 4px)`;
 
@@ -435,16 +490,18 @@
                         : `Logged in successfully`;
                     statusMsg.className = `text-xs text-center p-3 rounded-xl border border-accent/25 bg-accent-light text-accent block mt-4 transition-all duration-300`;
                     
+                    // Clear persistence on successful submit
+                    PersistState.clear();
+
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('role', selectedRole);
-                    document.cookie = `token=${data.token}; path=/; max-age=28800; SameSite=Strict`;
                     
                     let redirectUrl = '/login_page.html';
                     if (selectedRole === 'student') redirectUrl = '/student_page.html';
                     if (selectedRole === 'parent') redirectUrl = '/parent_page.html';
                     if (selectedRole === 'teacher') redirectUrl = '/teacher_page.html';
-                    if (selectedRole === 'owner') redirectUrl = '/owner_page.html';
+                    if (selectedRole === 'manager') redirectUrl = '/owner_page.html';
                     
                     setTimeout(() => {
                         window.location.href = redirectUrl;

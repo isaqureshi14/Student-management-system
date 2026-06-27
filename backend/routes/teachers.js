@@ -19,7 +19,7 @@ router.get('/', authenticate, (req, res) => {
 
 router.get('/:id', authenticate, requireRole('OWNER', 'TEACHER'), (req, res) => {
   const teacher = db.prepare('SELECT * FROM teachers WHERE id = ?').get(req.params.id);
-  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+  if (!teacher) return res.status(404).json({ error: 'Record not found' });
   return res.json(teacher);
 });
 
@@ -32,15 +32,16 @@ router.post('/', authenticate, requireRole('OWNER'), (req, res) => {
   if (!email || !email.trim()) {
     return res.status(400).json({ error: 'email is required for teacher login' });
   }
+  if (!temp_password || !temp_password.trim()) {
+    return res.status(400).json({ error: 'temp_password is required' });
+  }
 
   const teacherEmail = email.trim();
   if (db.prepare('SELECT id FROM users WHERE username = ?').get(teacherEmail)) {
-    return res.status(409).json({ error: `Email "${teacherEmail}" is already registered` });
+    return res.status(409).json({ error: 'This email is already in use' });
   }
 
-  const rawPassword = (temp_password && temp_password.trim())
-    ? temp_password.trim()
-    : Math.random().toString(36).slice(-8).toUpperCase().replace(/[^A-Z0-9]/g, 'X').padEnd(8, '0');
+  const rawPassword = temp_password.trim();
 
   const finalLastName = (last_name !== undefined && last_name !== null) ? last_name : '';
   const result = db.prepare(
@@ -59,7 +60,7 @@ router.post('/', authenticate, requireRole('OWNER'), (req, res) => {
 
 router.put('/:id', authenticate, requireRole('OWNER'), (req, res) => {
   const teacher = db.prepare('SELECT id, first_name, last_name FROM teachers WHERE id = ?').get(req.params.id);
-  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+  if (!teacher) return res.status(404).json({ error: 'Record not found' });
 
   const oldFullName = `${teacher.first_name} ${teacher.last_name}`.trim();
   const { first_name, last_name, subject, email, phone } = req.body;
@@ -69,7 +70,7 @@ router.put('/:id', authenticate, requireRole('OWNER'), (req, res) => {
     const existing = db.prepare("SELECT id FROM users WHERE username = ? AND NOT (role = 'TEACHER' AND linked_id = ?)")
       .get(trimmedEmail, req.params.id);
     if (existing) {
-      return res.status(409).json({ error: `Email "${trimmedEmail}" is already registered to another account` });
+      return res.status(409).json({ error: 'This email is already in use' });
     }
     db.prepare("UPDATE users SET username = ? WHERE role = 'TEACHER' AND linked_id = ?")
       .run(trimmedEmail, req.params.id);
