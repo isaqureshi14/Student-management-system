@@ -733,7 +733,13 @@
                                 <div class="flex flex-wrap items-end gap-3">
                                     <div class="flex flex-col">
                                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Start Time</label>
-                                        <input id="tt-auto-start" type="time" value="08:00" class="px-3.5 py-2 min-h-[44px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 w-28">
+                                        <div class="flex items-center gap-1 min-h-[44px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5">
+                                            <select id="tt-auto-start-h" class="bg-transparent text-sm font-bold text-slate-800 dark:text-white focus:outline-none cursor-pointer w-9 py-2" onchange="syncTimePicker12h('tt-auto-start')"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8" selected>8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select>
+                                            <span class="text-sm font-bold text-slate-400 select-none">:</span>
+                                            <select id="tt-auto-start-m" class="bg-transparent text-sm font-bold text-slate-800 dark:text-white focus:outline-none cursor-pointer w-12 py-2" onchange="syncTimePicker12h('tt-auto-start')"><option value="00" selected>00</option><option value="05">05</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option><option value="55">55</option></select>
+                                            <select id="tt-auto-start-ampm" class="bg-transparent text-sm font-bold text-rose-600 dark:text-rose-400 focus:outline-none cursor-pointer w-14 py-2" onchange="syncTimePicker12h('tt-auto-start')"><option value="AM" selected>AM</option><option value="PM">PM</option></select>
+                                            <input type="hidden" id="tt-auto-start" value="08:00">
+                                        </div>
                                     </div>
                                     <div class="flex flex-col">
                                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Duration (m)</label>
@@ -1853,6 +1859,8 @@
             // Hide credentials section, show reset section
             const credSection = document.getElementById('teacher-credential-section');
             if (credSection) credSection.classList.add('hidden');
+            const emailEl = document.getElementById('teacher-email-input');
+            if (emailEl) emailEl.required = false;
             const passEl = document.getElementById('teacher-password-input');
             if (passEl) passEl.required = false;
             const resetSection = document.getElementById('teacher-reset-password-section');
@@ -1874,6 +1882,8 @@
             document.getElementById('teacher-config-form').reset();
             const credSection = document.getElementById('teacher-credential-section');
             if (credSection) credSection.classList.remove('hidden');
+            const emailEl2 = document.getElementById('teacher-email-input');
+            if (emailEl2) emailEl2.required = true;
             const passEl = document.getElementById('teacher-password-input');
             if (passEl) passEl.required = true;
             const resetSection = document.getElementById('teacher-reset-password-section');
@@ -1916,8 +1926,8 @@
                     const entry = schedule[day][slot] || {subject:"", start_time:"", end_time:""};
                     cells += `
                         <td class="py-2 px-1"><input type="text" id="tt-${day}-${slot}-subject" value="${entry.subject || ''}" placeholder="Subject" class="w-full px-1.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500"></td>
-                        <td class="py-2 px-1"><input type="time" id="tt-${day}-${slot}-start" value="${entry.start_time || ''}" class="w-full px-1.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500"></td>
-                        <td class="py-2 px-1"><input type="time" id="tt-${day}-${slot}-end" value="${entry.end_time || ''}" class="w-full px-1.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500"></td>
+                        <td class="py-2 px-1">${buildTimePicker12h(`tt-${day}-${slot}-start`, entry.start_time || '')}</td>
+                        <td class="py-2 px-1">${buildTimePicker12h(`tt-${day}-${slot}-end`, entry.end_time || '')}</td>
                     `;
                 });
                 tr.innerHTML = cells;
@@ -2417,9 +2427,8 @@
                     if (!res.ok) { triggerToastNotification(data.error || 'Failed.', 'rose'); return; }
                     triggerToastNotification('Teacher updated.', 'emerald');
                 }
+                resetTeacherForm();
                 PersistState.clear();
-                managerState.activeEditingTeacherId = null;
-                document.getElementById('teacher-config-form').reset();
                 await loadOwnerData();
             } catch(err) { triggerToastNotification(err.message, 'rose'); }
         };
@@ -2516,6 +2525,70 @@
             });
         };
 
+        // ─── 12h Time Picker Utilities ─────────────────────────────────────────
+        function buildTimePicker12h(id, initVal, onchangeExtra) {
+            var h12 = 8, m = '00', ampm = 'AM';
+            if (initVal) {
+                var parts = initVal.split(':').map(Number);
+                var hh = isNaN(parts[0]) ? 0 : parts[0];
+                var mm = isNaN(parts[1]) ? 0 : parts[1];
+                ampm = hh >= 12 ? 'PM' : 'AM';
+                h12 = hh === 0 ? 12 : (hh > 12 ? hh - 12 : hh);
+                m = String(mm).padStart(2, '0');
+            }
+            var hourOpts = '';
+            for (var i = 1; i <= 12; i++) hourOpts += '<option value="' + i + '"' + (h12 === i ? ' selected' : '') + '>' + i + '</option>';
+            var mins = ['00','05','10','15','20','25','30','35','40','45','50','55'];
+            var minOpts = mins.map(function(mv) { return '<option value="' + mv + '"' + (m === mv ? ' selected' : '') + '>' + mv + '</option>'; }).join('');
+            var sc = 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 rounded-lg py-1.5 cursor-pointer px-1';
+            var onch = onchangeExtra
+                ? 'onchange="syncTimePicker12h(\'' + id + '\'); ' + onchangeExtra + '"'
+                : 'onchange="syncTimePicker12h(\'' + id + '\')"';
+            return '<div class="flex items-center gap-0.5">' +
+                '<select id="' + id + '-h" class="' + sc + ' w-10" ' + onch + '>' + hourOpts + '</select>' +
+                '<span class="text-xs font-bold text-slate-400 mx-0.5 select-none">:</span>' +
+                '<select id="' + id + '-m" class="' + sc + ' w-14" ' + onch + '>' + minOpts + '</select>' +
+                '<select id="' + id + '-ampm" class="' + sc + ' w-14 text-rose-600 dark:text-rose-400" ' + onch + '>' +
+                    '<option value="AM"' + (ampm === 'AM' ? ' selected' : '') + '>AM</option>' +
+                    '<option value="PM"' + (ampm === 'PM' ? ' selected' : '') + '>PM</option>' +
+                '</select>' +
+                '<input type="hidden" id="' + id + '" value="' + (initVal || '') + '">' +
+                '</div>';
+        }
+
+        function setTimePicker12h(id, val24h) {
+            var hidden = document.getElementById(id);
+            if (!hidden) return;
+            hidden.value = val24h || '';
+            if (!val24h) return;
+            var parts = val24h.split(':').map(Number);
+            var hh = isNaN(parts[0]) ? 0 : parts[0];
+            var mm = isNaN(parts[1]) ? 0 : parts[1];
+            var ampm = hh >= 12 ? 'PM' : 'AM';
+            var h12 = hh === 0 ? 12 : (hh > 12 ? hh - 12 : hh);
+            var hSel = document.getElementById(id + '-h');
+            var mSel = document.getElementById(id + '-m');
+            var aSel = document.getElementById(id + '-ampm');
+            if (hSel) hSel.value = String(h12);
+            if (mSel) mSel.value = String(mm).padStart(2, '0');
+            if (aSel) aSel.value = ampm;
+        }
+
+        window.syncTimePicker12h = function(id) {
+            var hSel = document.getElementById(id + '-h');
+            var mSel = document.getElementById(id + '-m');
+            var aSel = document.getElementById(id + '-ampm');
+            if (!hSel || !mSel || !aSel) return;
+            var h = parseInt(hSel.value);
+            var m = mSel.value;
+            var ampm = aSel.value;
+            if (ampm === 'AM' && h === 12) h = 0;
+            if (ampm === 'PM' && h !== 12) h += 12;
+            var hidden = document.getElementById(id);
+            if (hidden) hidden.value = String(h).padStart(2, '0') + ':' + m;
+        };
+        // ────────────────────────────────────────────────────────────────────────
+
         window.autoSetEndTime = function(day, period, hours) {
             const startEl = document.getElementById(`tt-${day}-${period}-start`);
             const endEl = document.getElementById(`tt-${day}-${period}-end`);
@@ -2529,6 +2602,7 @@
             const endHStr = String(endH).padStart(2, '0');
             const endMStr = String(m).padStart(2, '0');
             endEl.value = `${endHStr}:${endMStr}`;
+            setTimePicker12h(`tt-${day}-${period}-end`, `${endHStr}:${endMStr}`);
         };
 
         window.generateAutoTimings = function() {
@@ -2547,6 +2621,7 @@
                 const startHStr = String(h).padStart(2, '0');
                 const startMStr = String(m).padStart(2, '0');
                 startEl.value = `${startHStr}:${startMStr}`;
+                setTimePicker12h(`tt-${activeTTDay}-P${p}-start`, `${startHStr}:${startMStr}`);
                 
                 let endTotalMin = h * 60 + m + durationVal;
                 let endH = Math.floor(endTotalMin / 60) % 24;
@@ -2555,6 +2630,7 @@
                 const endHStr = String(endH).padStart(2, '0');
                 const endMStr = String(endM).padStart(2, '0');
                 endEl.value = `${endHStr}:${endMStr}`;
+                setTimePicker12h(`tt-${activeTTDay}-P${p}-end`, `${endHStr}:${endMStr}`);
                 
                 h = endH;
                 m = endM;
@@ -2573,8 +2649,8 @@
                     const dstStart = document.getElementById(`tt-${day}-P${p}-start`);
                     const dstEnd = document.getElementById(`tt-${day}-P${p}-end`);
                     
-                    if (srcStart && dstStart) dstStart.value = srcStart.value;
-                    if (srcEnd && dstEnd) dstEnd.value = srcEnd.value;
+                    if (srcStart && dstStart) { dstStart.value = srcStart.value; setTimePicker12h(`tt-${day}-P${p}-start`, srcStart.value); }
+                    if (srcEnd && dstEnd) { dstEnd.value = srcEnd.value; setTimePicker12h(`tt-${day}-P${p}-end`, srcEnd.value); }
                 }
             });
             triggerToastNotification('Applied active day timings to all other days.', 'emerald');
@@ -2599,8 +2675,8 @@
                     const dstPreset = document.getElementById(`tt-${day}-P${p}-preset`);
                     
                     if (srcSub && dstSub) dstSub.value = srcSub.value;
-                    if (srcStart && dstStart) dstStart.value = srcStart.value;
-                    if (srcEnd && dstEnd) dstEnd.value = srcEnd.value;
+                    if (srcStart && dstStart) { dstStart.value = srcStart.value; setTimePicker12h(`tt-${day}-P${p}-start`, srcStart.value); }
+                    if (srcEnd && dstEnd) { dstEnd.value = srcEnd.value; setTimePicker12h(`tt-${day}-P${p}-end`, srcEnd.value); }
                     if (srcPreset && dstPreset) dstPreset.value = srcPreset.value;
                 }
             });
@@ -2720,12 +2796,12 @@
 
                             <div class="col-span-1 md:col-span-2 w-full">
                                 <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Start Time</label>
-                                <input type="time" id="tt-${day}-P${p}-start" value="${entry.start_time || ''}" onchange="autoSetEndTime('${day}', 'P${p}')" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
+                                ${buildTimePicker12h(`tt-${day}-P${p}-start`, entry.start_time || '', `autoSetEndTime('${day}', 'P${p}')`)}
                             </div>
 
                             <div class="col-span-1 md:col-span-2 w-full">
                                 <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">End Time</label>
-                                <input type="time" id="tt-${day}-P${p}-end" value="${entry.end_time || ''}" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
+                                ${buildTimePicker12h(`tt-${day}-P${p}-end`, entry.end_time || '')}
                             </div>
                         </div>
                     `;

@@ -1022,7 +1022,7 @@
                 borderColor = 'border-primary-100 dark:border-primary-900/60';
             }
 
-            toast.classList.add(borderColor);
+            toast.classList.add(...borderColor.split(' '));
             toast.innerHTML = `
                 <i class="fa-solid ${iconClass} ${iconColor} text-lg mt-0.5 shrink-0"></i>
                 <div class="flex-1 space-y-0.5">
