@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 
 // ─── Initialize DB (runs schema + seed) ──────────────────────────────────────
-const { db } = require('./db');
+const db = require('./db');
 
 // ─── Route Imports ────────────────────────────────────────────────────────────
 const authRoutes       = require('./routes/auth');
@@ -104,22 +104,31 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ error: `File upload error: ${err.message}` });
   }
 
-  if (err.message && err.message.includes('UNIQUE constraint failed')) {
+  // PostgreSQL unique violation error code is 23505
+  if (err.code === '23505' || (err.message && err.message.includes('UNIQUE constraint failed'))) {
     return res.status(409).json({ error: 'A record with this value already exists' });
   }
 
   return res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🏫 School Management System Backend`);
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`🔐 Login page: http://localhost:${PORT}/login_page.html`);
-  console.log(`\nDefault credentials:`);
-  console.log(`  Manager  → manager / manager1234`);
-  console.log(`  Students → student_<id>@school.com / student123`);
-  console.log(`  Parents  → parent_<id>@school.com  / parent123`);
-  console.log(`  Teachers → teacher_<id>@school.com / teacher123`);
-});
+// Initialize database and then start the server
+db.initDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`\n🏫 School Management System Backend`);
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
+      console.log(`🔐 Login page: http://localhost:${PORT}/login_page.html`);
+      console.log(`\nDefault credentials:`);
+      console.log(`  Manager  → manager / manager1234`);
+      console.log(`  Students → student_<id>@school.com / student123`);
+      console.log(`  Parents  → parent_<id>@school.com  / parent123`);
+      console.log(`  Teachers → teacher_<id>@school.com / teacher123`);
+    });
+  })
+  .catch(err => {
+    console.error('❌ Failed to initialize database:', err);
+    process.exit(1);
+  });
 
 module.exports = app;

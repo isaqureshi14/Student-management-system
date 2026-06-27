@@ -1,13 +1,13 @@
 const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const db = require('../db');
+const multer  = require('multer');
+const path    = require('path');
+const fs      = require('fs');
+const db      = require('../db');
 const { authenticate, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
-// ─── Multer setup for notes file uploads ─────────────────────────────────────
+// ─── Multer setup ─────────────────────────────────────────────────────────────
 const notesDir = path.join(__dirname, '..', 'uploads', 'notes');
 if (!fs.existsSync(notesDir)) fs.mkdirSync(notesDir, { recursive: true });
 
@@ -19,92 +19,71 @@ const notesStorage = multer.diskStorage({
     cb(null, `${safeName}_${Date.now()}${ext}`);
   },
 });
-
 const ALLOWED_NOTE_TYPES = /pdf|doc|docx|txt|ppt|pptx|xls|xlsx|png|jpg|jpeg/;
 const noteFileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
-  if (ALLOWED_NOTE_TYPES.test(ext)) {
-    cb(null, true);
-  } else {
-    cb(new Error('File type not allowed. Permitted: pdf, doc, docx, txt, ppt, xls, png, jpg'));
-  }
+  if (ALLOWED_NOTE_TYPES.test(ext)) cb(null, true);
+  else cb(new Error('File type not allowed. Permitted: pdf, doc, docx, txt, ppt, xls, png, jpg'));
 };
 const uploadNote = multer({ storage: notesStorage, fileFilter: noteFileFilter, limits: { fileSize: 20 * 1024 * 1024 } });
 
 // ─── GET /api/notes ───────────────────────────────────────────────────────────
-router.get('/', authenticate, (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   const { class: cls, subject } = req.query;
-
-  let query = `
-    SELECT n.*, u.username AS uploaded_by_username
-    FROM notes n
-    LEFT JOIN users u ON n.uploaded_by = u.id
-    WHERE 1=1
-  `;
-  const params = [];
-
-  if (cls) {
-    query += ' AND n.class = ?';
-    params.push(cls);
-  }
-  if (subject) {
-    query += ' AND n.subject = ?';
-    params.push(subject);
-  }
-
-  query += ' ORDER BY n.uploaded_at DESC';
-
-  const notes = db.prepare(query).all(...params);
-  return res.json(notes);
+  try {
+    const params = [];
+    let query = `SELECT n.*, u.username AS uploaded_by_username
+                 FROM notes n LEFT JOIN users u ON n.uploaded_by = u.id
+                 WHERE 1=1`;
+    if (cls)     { params.push(cls);     query += ` AND n.class = $${params.length}`; }
+    if (subject) { params.push(subject); query += ` AND n.subject = $${params.length}`; }
+    query += ' ORDER BY n.uploaded_at DESC';
+    const { rows } = await db.query(query, params);
+    return res.json(rows);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 // ─── POST /api/notes ──────────────────────────────────────────────────────────
-router.post('/', authenticate, requireRole('TEACHER', 'OWNER'), uploadNote.single('file'), (req, res) => {
+router.post('/', authenticate, requireRole('TEACHER', 'OWNER'), uploadNote.single('file'), async (req, res) => {
   const { title, content, subject, class: cls } = req.body;
-
-  if (!title || !subject || !cls) {
+  if (!title || !subject || !cls)
     return res.status(400).json({ error: 'title, subject, and class are required' });
-  }
 
-  let fileUrl = null;
-  let fileName = null;
+  let fileUrl = null, fileName = null;
   if (req.file) {
-    fileUrl = `/uploads/notes/${req.file.filename}`;
+    fileUrl  = `/uploads/notes/${req.file.filename}`;
     fileName = req.file.originalname;
   }
 
-  const result = db.prepare(`
-    INSERT INTO notes (title, content, file_url, file_name, subject, class, uploaded_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(title, content || null, fileUrl, fileName, subject, cls, req.user.id);
-
-  const note = db.prepare('SELECT * FROM notes WHERE id = ?').get(result.lastInsertRowid);
-  return res.status(201).json(note);
+  try {
+    const { rows: [note] } = await db.query(`
+      INSERT INTO notes (title, content, file_url, file_name, subject, class, uploaded_by)
+      VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *
+    `, [title, content||null, fileUrl, fileName, subject, cls, req.user.id]);
+    return res.status(201).json(note);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 // ─── DELETE /api/notes/:id ────────────────────────────────────────────────────
-router.delete('/:id', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) => {
+router.delete('/:id', authenticate, requireRole('TEACHER', 'OWNER'), async (req, res) => {
   const { id } = req.params;
   const { role, id: userId } = req.user;
+  try {
+    const { rows } = await db.query('SELECT * FROM notes WHERE id = $1', [id]);
+    const note = rows[0];
+    if (!note) return res.status(404).json({ error: 'Record not found' });
 
-  const note = db.prepare('SELECT * FROM notes WHERE id = ?').get(id);
-   if (!note) return res.status(404).json({ error: 'Record not found' });
+    if (role === 'TEACHER' && note.uploaded_by !== userId)
+      return res.status(403).json({ error: 'You can only delete your own notes' });
 
-  // TEACHER can only delete their own notes; OWNER can delete any
-  if (role === 'TEACHER' && note.uploaded_by !== userId) {
-    return res.status(403).json({ error: 'You can only delete your own notes' });
-  }
-
-  // Optionally delete the file from disk
-  if (note.file_url) {
-    const filePath = path.join(__dirname, '..', note.file_url);
-    if (fs.existsSync(filePath)) {
-      try { fs.unlinkSync(filePath); } catch (_) { /* ignore */ }
+    if (note.file_url) {
+      const filePath = path.join(__dirname, '..', note.file_url);
+      if (fs.existsSync(filePath)) { try { fs.unlinkSync(filePath); } catch (_) {} }
     }
-  }
 
-  db.prepare('DELETE FROM notes WHERE id = ?').run(id);
-  return res.json({ message: 'Note deleted successfully' });
+    await db.query('DELETE FROM notes WHERE id = $1', [id]);
+    return res.json({ message: 'Note deleted successfully' });
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;

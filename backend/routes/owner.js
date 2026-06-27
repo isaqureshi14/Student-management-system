@@ -1,152 +1,110 @@
 const express = require('express');
-const db = require('../db');
+const bcrypt  = require('bcryptjs');
+const db      = require('../db');
 const { authenticate, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
 // ─── GET /api/owner/stats ─────────────────────────────────────────────────────
-router.get('/stats', authenticate, requireRole('OWNER'), (req, res) => {
-  // Total students
-  const totalStudents = db.prepare('SELECT COUNT(*) AS count FROM students').get().count;
+router.get('/stats', authenticate, requireRole('OWNER'), async (req, res) => {
+  try {
+    const [students, teachers, marksRow, attendanceRow, pendingLeaves, pendingApprovals] = await Promise.all([
+      db.query('SELECT COUNT(*) AS count FROM students'),
+      db.query('SELECT COUNT(*) AS count FROM teachers'),
+      db.query('SELECT AVG(score::REAL / max_score::REAL * 100) AS avg FROM marks'),
+      db.query(`SELECT
+                  SUM(CASE WHEN status='PRESENT' THEN 1 ELSE 0 END)::REAL /
+                  NULLIF(COUNT(*),0) * 100 AS avg
+                FROM attendance`),
+      db.query("SELECT COUNT(*) AS count FROM leave_requests WHERE status='PENDING'"),
+      db.query("SELECT COUNT(*) AS count FROM students WHERE profile_status='PENDING'"),
+    ]);
 
-  // Total teachers
-  const totalTeachers = db.prepare('SELECT COUNT(*) AS count FROM teachers').get().count;
+    const avg = (row, key) => row.rows[0][key] !== null ? Math.round(row.rows[0][key] * 100) / 100 : null;
 
-  // Average marks score (as percentage)
-  const marksRow = db.prepare(
-    'SELECT AVG(CAST(score AS REAL) / CAST(max_score AS REAL) * 100) AS avg FROM marks'
-  ).get();
-  const avgMarks = marksRow.avg !== null ? Math.round(marksRow.avg * 100) / 100 : null;
-
-  // Average attendance (% of PRESENT records)
-  const attendanceRow = db.prepare(`
-    SELECT
-      CAST(SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) AS REAL) /
-      NULLIF(COUNT(*), 0) * 100 AS avg
-    FROM attendance
-  `).get();
-  const avgAttendance = attendanceRow.avg !== null ? Math.round(attendanceRow.avg * 100) / 100 : null;
-
-  // Pending leave requests
-  const pendingLeaves = db.prepare(
-    "SELECT COUNT(*) AS count FROM leave_requests WHERE status = 'PENDING'"
-  ).get().count;
-
-  // Pending profile approvals
-  const pendingApprovals = db.prepare(
-    "SELECT COUNT(*) AS count FROM students WHERE profile_status = 'PENDING'"
-  ).get().count;
-
-  return res.json({
-    totalStudents,
-    totalTeachers,
-    avgMarks,
-    avgAttendance,
-    pendingLeaves,
-    pendingApprovals,
-  });
+    return res.json({
+      totalStudents:   parseInt(students.rows[0].count),
+      totalTeachers:   parseInt(teachers.rows[0].count),
+      avgMarks:        avg(marksRow, 'avg'),
+      avgAttendance:   avg(attendanceRow, 'avg'),
+      pendingLeaves:   parseInt(pendingLeaves.rows[0].count),
+      pendingApprovals:parseInt(pendingApprovals.rows[0].count),
+    });
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 // ─── GET /api/owner/marks ─────────────────────────────────────────────────────
-// Owner can view all marks with optional filters
-router.get('/marks', authenticate, requireRole('OWNER'), (req, res) => {
+router.get('/marks', authenticate, requireRole('OWNER'), async (req, res) => {
   const { student_id, exam_name, class: cls } = req.query;
-
-  let query = `
-    SELECT m.*, s.first_name, s.last_name, s.class, s.roll_number,
-           u.username AS uploaded_by_username
-    FROM marks m
-    JOIN students s ON m.student_id = s.id
-    LEFT JOIN users u ON m.uploaded_by = u.id
-    WHERE 1=1
-  `;
-  const params = [];
-
-  if (student_id) {
-    query += ' AND m.student_id = ?';
-    params.push(student_id);
-  }
-  if (exam_name) {
-    query += ' AND m.exam_name = ?';
-    params.push(exam_name);
-  }
-  if (cls) {
-    query += ' AND s.class = ?';
-    params.push(cls);
-  }
-
-  query += ' ORDER BY m.uploaded_at DESC';
-
-  return res.json(db.prepare(query).all(...params));
+  try {
+    const params = [];
+    let query = `SELECT m.*, s.first_name, s.last_name, s.class, s.roll_number,
+                        u.username AS uploaded_by_username
+                 FROM marks m
+                 JOIN students s ON m.student_id = s.id
+                 LEFT JOIN users u ON m.uploaded_by = u.id
+                 WHERE 1=1`;
+    if (student_id) { params.push(student_id); query += ` AND m.student_id = $${params.length}`; }
+    if (exam_name)  { params.push(exam_name);  query += ` AND m.exam_name = $${params.length}`; }
+    if (cls)        { params.push(cls);         query += ` AND s.class = $${params.length}`; }
+    query += ' ORDER BY m.uploaded_at DESC';
+    const { rows } = await db.query(query, params);
+    return res.json(rows);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 // ─── GET /api/owner/attendance ────────────────────────────────────────────────
-// Owner can view all attendance with optional filters
-router.get('/attendance', authenticate, requireRole('OWNER'), (req, res) => {
+router.get('/attendance', authenticate, requireRole('OWNER'), async (req, res) => {
   const { student_id, subject, date, class: cls } = req.query;
-
-  let query = `
-    SELECT a.*, s.first_name, s.last_name, s.class, s.roll_number,
-           u.username AS marked_by_username
-    FROM attendance a
-    JOIN students s ON a.student_id = s.id
-    LEFT JOIN users u ON a.marked_by = u.id
-    WHERE 1=1
-  `;
-  const params = [];
-
-  if (student_id) {
-    query += ' AND a.student_id = ?';
-    params.push(student_id);
-  }
-  if (subject) {
-    query += ' AND a.subject = ?';
-    params.push(subject);
-  }
-  if (date) {
-    query += ' AND a.date = ?';
-    params.push(date);
-  }
-  if (cls) {
-    query += ' AND s.class = ?';
-    params.push(cls);
-  }
-
-  query += ' ORDER BY a.date DESC, a.subject';
-
-  return res.json(db.prepare(query).all(...params));
+  try {
+    const params = [];
+    let query = `SELECT a.*, s.first_name, s.last_name, s.class, s.roll_number,
+                        u.username AS marked_by_username
+                 FROM attendance a
+                 JOIN students s ON a.student_id = s.id
+                 LEFT JOIN users u ON a.marked_by = u.id
+                 WHERE 1=1`;
+    if (student_id) { params.push(student_id); query += ` AND a.student_id = $${params.length}`; }
+    if (subject)    { params.push(subject);    query += ` AND a.subject = $${params.length}`; }
+    if (date)       { params.push(date);        query += ` AND a.date = $${params.length}`; }
+    if (cls)        { params.push(cls);         query += ` AND s.class = $${params.length}`; }
+    query += ' ORDER BY a.date DESC, a.subject';
+    const { rows } = await db.query(query, params);
+    return res.json(rows);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 // ─── GET /api/owner/students ──────────────────────────────────────────────────
-// Get all students with their basic info for owner dashboard
-router.get('/students', authenticate, requireRole('OWNER'), (req, res) => {
-  const students = db.prepare(`
-    SELECT id, first_name, last_name, class, section, roll_number,
-           class_teacher, profile_status, photo_url
-    FROM students
-    ORDER BY class, roll_number
-  `).all();
-  return res.json(students);
+router.get('/students', authenticate, requireRole('OWNER'), async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT id, first_name, last_name, class, section, roll_number,
+             class_teacher, profile_status, photo_url
+      FROM students ORDER BY class, roll_number
+    `);
+    return res.json(rows);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 // ─── POST /api/owner/reset-password ──────────────────────────────────────────
-// Reset password for any student or teacher account by username
-router.post('/reset-password', authenticate, requireRole('OWNER'), (req, res) => {
+router.post('/reset-password', authenticate, requireRole('OWNER'), async (req, res) => {
   const { username, new_password } = req.body;
-  if (!username || !new_password) {
+  if (!username || !new_password)
     return res.status(400).json({ error: 'username and new_password are required' });
-  }
 
-  const user = db.prepare('SELECT * FROM users WHERE username = ? OR username = ?').get(username, username + '@school.com');
-  if (!user) {
-    return res.status(404).json({ error: 'Record not found' });
-  }
+  try {
+    const { rows } = await db.query(
+      'SELECT * FROM users WHERE username = $1 OR username = $2',
+      [username, username + '@school.com']
+    );
+    const user = rows[0];
+    if (!user) return res.status(404).json({ error: 'Record not found' });
 
-  const bcrypt = require('bcryptjs');
-  const passwordHash = bcrypt.hashSync(new_password.trim(), 10);
-  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(passwordHash, user.id);
+    const passwordHash = bcrypt.hashSync(new_password.trim(), 10);
+    await db.query('UPDATE users SET password = $1 WHERE id = $2', [passwordHash, user.id]);
 
-  return res.json({ message: `Password for ${user.username} reset successfully.` });
+    return res.json({ message: `Password for ${user.username} reset successfully.` });
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;

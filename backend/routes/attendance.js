@@ -12,134 +12,92 @@ function canAccessStudent(user, studentId) {
 }
 
 // ─── GET /api/attendance ──────────────────────────────────────────────────────
-router.get('/', authenticate, (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   const { student_id, subject, date } = req.query;
+  if (!student_id) return res.status(400).json({ error: 'student_id query parameter is required' });
+  if (!canAccessStudent(req.user, student_id)) return res.status(403).json({ error: 'Access denied' });
 
-  if (!student_id) {
-    return res.status(400).json({ error: 'student_id query parameter is required' });
-  }
-
-  if (!canAccessStudent(req.user, student_id)) {
-    return res.status(403).json({ error: 'Access denied' });
-  }
-
-  let query = `
-    SELECT a.*, u.username AS marked_by_username
-    FROM attendance a
-    LEFT JOIN users u ON a.marked_by = u.id
-    WHERE a.student_id = ?
-  `;
-  const params = [student_id];
-
-  if (subject) {
-    query += ' AND a.subject = ?';
-    params.push(subject);
-  }
-  if (date) {
-    query += ' AND a.date = ?';
-    params.push(date);
-  }
-
-  query += ' ORDER BY a.date DESC, a.subject';
-
-  const records = db.prepare(query).all(...params);
-  return res.json(records);
+  try {
+    const params = [student_id];
+    let query = `SELECT a.*, u.username AS marked_by_username
+                 FROM attendance a LEFT JOIN users u ON a.marked_by = u.id
+                 WHERE a.student_id = $1`;
+    if (subject) { params.push(subject); query += ` AND a.subject = $${params.length}`; }
+    if (date)    { params.push(date);    query += ` AND a.date = $${params.length}`; }
+    query += ' ORDER BY a.date DESC, a.subject';
+    const { rows } = await db.query(query, params);
+    return res.json(rows);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 // ─── POST /api/attendance ─────────────────────────────────────────────────────
-router.post('/', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) => {
+router.post('/', authenticate, requireRole('TEACHER', 'OWNER'), async (req, res) => {
   const { student_id, subject, date, status } = req.body;
-
-  if (!student_id || !subject || !date || !status) {
+  if (!student_id || !subject || !date || !status)
     return res.status(400).json({ error: 'student_id, subject, date, and status are required' });
-  }
 
   const validStatuses = ['PRESENT', 'ABSENT', 'LATE'];
-  if (!validStatuses.includes(status.toUpperCase())) {
+  if (!validStatuses.includes(status.toUpperCase()))
     return res.status(400).json({ error: 'status must be PRESENT, ABSENT, or LATE' });
-  }
-
-   const student = db.prepare('SELECT id FROM students WHERE id = ?').get(student_id);
-   if (!student) return res.status(404).json({ error: 'Record not found' });
 
   try {
-    const existing = db.prepare('SELECT id FROM attendance WHERE student_id = ? AND subject = ? AND date = ?')
-                       .get(student_id, subject, date);
-    if (existing) {
-      db.prepare('UPDATE attendance SET status = ?, marked_by = ? WHERE id = ?')
-        .run(status.toUpperCase(), req.user.id, existing.id);
-      const record = db.prepare('SELECT * FROM attendance WHERE id = ?').get(existing.id);
-      return res.status(200).json(record);
-    }
+    const s = await db.query('SELECT id FROM students WHERE id = $1', [student_id]);
+    if (!s.rows[0]) return res.status(404).json({ error: 'Record not found' });
 
-    const result = db.prepare(`
+    // Upsert using ON CONFLICT
+    const { rows: [record] } = await db.query(`
       INSERT INTO attendance (student_id, subject, date, status, marked_by)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(student_id, subject, date, status.toUpperCase(), req.user.id);
+      VALUES ($1,$2,$3,$4,$5)
+      ON CONFLICT (student_id, subject, date)
+      DO UPDATE SET status = EXCLUDED.status, marked_by = EXCLUDED.marked_by
+      RETURNING *
+    `, [student_id, subject, date, status.toUpperCase(), req.user.id]);
 
-    const record = db.prepare('SELECT * FROM attendance WHERE id = ?').get(result.lastInsertRowid);
-    return res.status(201).json(record);
-  } catch (err) {
-    if (err.message && err.message.includes('UNIQUE')) {
-      db.prepare('UPDATE attendance SET status = ?, marked_by = ? WHERE student_id = ? AND subject = ? AND date = ?')
-        .run(status.toUpperCase(), req.user.id, student_id, subject, date);
-      const record = db.prepare('SELECT * FROM attendance WHERE student_id = ? AND subject = ? AND date = ?')
-                       .get(student_id, subject, date);
-      return res.status(200).json(record);
-    }
-    throw err;
-  }
+    return res.status(200).json(record);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 // ─── PUT /api/attendance/:id ──────────────────────────────────────────────────
-router.put('/:id', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) => {
+router.put('/:id', authenticate, requireRole('TEACHER', 'OWNER'), async (req, res) => {
   const { id } = req.params;
-   const record = db.prepare('SELECT * FROM attendance WHERE id = ?').get(id);
-   if (!record) return res.status(404).json({ error: 'Record not found' });
+  try {
+    const { rows } = await db.query('SELECT * FROM attendance WHERE id = $1', [id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Record not found' });
 
-  const { subject, date, status } = req.body;
-
-  if (status) {
-    const validStatuses = ['PRESENT', 'ABSENT', 'LATE'];
-    if (!validStatuses.includes(status.toUpperCase())) {
+    const { subject, date, status } = req.body;
+    if (status && !['PRESENT','ABSENT','LATE'].includes(status.toUpperCase()))
       return res.status(400).json({ error: 'status must be PRESENT, ABSENT, or LATE' });
-    }
-  }
 
-  db.prepare(`
-    UPDATE attendance SET
-      subject = COALESCE(?, subject),
-      date = COALESCE(?, date),
-      status = COALESCE(?, status)
-    WHERE id = ?
-  `).run(
-    subject || null,
-    date || null,
-    status ? status.toUpperCase() : null,
-    id
-  );
+    await db.query(`
+      UPDATE attendance SET
+        subject = COALESCE($1, subject),
+        date    = COALESCE($2, date),
+        status  = COALESCE($3, status)
+      WHERE id = $4
+    `, [subject||null, date||null, status?status.toUpperCase():null, id]);
 
-  const updated = db.prepare('SELECT * FROM attendance WHERE id = ?').get(id);
-  return res.json(updated);
+    const updated = (await db.query('SELECT * FROM attendance WHERE id = $1', [id])).rows[0];
+    return res.json(updated);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
-// POST /api/attendance/bulk-reset — reset/delete attendance for a subject, class, and date
-router.post('/bulk-reset', authenticate, requireRole('TEACHER', 'OWNER'), (req, res) => {
+// POST /api/attendance/bulk-reset
+router.post('/bulk-reset', authenticate, requireRole('TEACHER', 'OWNER'), async (req, res) => {
   const { date, subject, class: cls } = req.body;
-  if (!date || !subject || !cls) {
+  if (!date || !subject || !cls)
     return res.status(400).json({ error: 'date, subject, and class are required' });
-  }
-  const students = db.prepare('SELECT id FROM students WHERE class = ?').all(cls);
-  const studentIds = students.map(s => s.id);
-  if (studentIds.length === 0) return res.json({ deleted: 0 });
+  try {
+    const { rows: students } = await db.query('SELECT id FROM students WHERE class = $1', [cls]);
+    if (students.length === 0) return res.json({ deleted: 0 });
 
-  const placeholders = studentIds.map(() => '?').join(',');
-  const result = db.prepare(`
-    DELETE FROM attendance
-    WHERE date = ? AND subject = ? AND student_id IN (${placeholders})
-  `).run(date, subject, ...studentIds);
-
-  return res.json({ deleted: result.changes });
+    const ids = students.map(s => s.id);
+    const placeholders = ids.map((_, i) => `$${i + 3}`).join(',');
+    const result = await db.query(
+      `DELETE FROM attendance WHERE date=$1 AND subject=$2 AND student_id IN (${placeholders})`,
+      [date, subject, ...ids]
+    );
+    return res.json({ deleted: result.rowCount });
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;

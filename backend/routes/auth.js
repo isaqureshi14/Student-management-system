@@ -1,21 +1,21 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const { db, hashPassword, verifyPassword, needsRehash } = require('../db');
+const db = require('../db');
 const { JWT_SECRET, authenticate } = require('../middleware/auth');
-const { validate, loginSchema, updateCredentialsSchema, sanitizeObject } = require('../middleware/validation');
+const { validate, loginSchema, updateCredentialsSchema } = require('../middleware/validation');
 const { loginRateLimiter, accountLockoutMiddleware, applyProgressiveDelay, handleLoginResult } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
 const GENERIC_ERROR = 'Incorrect email or password';
-const SERVER_ERROR = 'Authentication failed. Please try again.';
+const SERVER_ERROR  = 'Authentication failed. Please try again.';
 
 // POST /api/auth/login
 router.post('/login', loginRateLimiter(), accountLockoutMiddleware, applyProgressiveDelay, validate(loginSchema), async (req, res) => {
   const { identifier, password, role } = req.body;
   const roleUpper = role.toUpperCase();
   const validRoles = ['STUDENT', 'TEACHER', 'PARENT', 'OWNER', 'MANAGER'];
-  
+
   if (!validRoles.includes(roleUpper)) {
     console.warn(`Invalid role attempted: ${role} from IP: ${req.ip}`);
     return res.status(400).json({ error: GENERIC_ERROR });
@@ -24,9 +24,15 @@ router.post('/login', loginRateLimiter(), accountLockoutMiddleware, applyProgres
   const dbRole = roleUpper === 'MANAGER' ? 'OWNER' : roleUpper;
 
   try {
-    const user = db
-      .prepare('SELECT * FROM users WHERE (username = ? OR username = ? OR username = ? OR username = ?) AND role = ?')
-      .get(identifier, identifier + '@school.com', identifier.toLowerCase(), identifier.toLowerCase() + '@school.com', dbRole);
+    const { rows } = await db.query(
+      `SELECT * FROM users
+       WHERE (username = $1 OR username = $2 OR username = $3 OR username = $4)
+         AND role = $5`,
+      [identifier, identifier + '@school.com',
+       identifier.toLowerCase(), identifier.toLowerCase() + '@school.com',
+       dbRole]
+    );
+    const user = rows[0];
 
     if (!user) {
       console.warn(`Login failed - user not found: ${identifier} (role: ${roleUpper}) from IP: ${req.ip}`);
@@ -34,17 +40,17 @@ router.post('/login', loginRateLimiter(), accountLockoutMiddleware, applyProgres
       return res.status(401).json({ error: GENERIC_ERROR });
     }
 
-    const passwordMatch = verifyPassword(password, user.password);
+    const passwordMatch = db.verifyPassword(password, user.password);
     if (!passwordMatch) {
       console.warn(`Login failed - invalid password for: ${identifier} from IP: ${req.ip}`);
       handleLoginResult(identifier, false);
       return res.status(401).json({ error: GENERIC_ERROR });
     }
 
-    if (needsRehash(user.password)) {
-      const newHash = hashPassword(password);
-      db.prepare('UPDATE users SET password = ? WHERE id = ?').run(newHash, user.id);
-      console.info(`Rehashed password for user: ${user.id} (was using weak rounds)`);
+    if (db.needsRehash(user.password)) {
+      const newHash = db.hashPassword(password);
+      await db.query('UPDATE users SET password = $1 WHERE id = $2', [newHash, user.id]);
+      console.info(`Rehashed password for user: ${user.id}`);
     }
 
     handleLoginResult(identifier, true);
@@ -57,16 +63,17 @@ router.post('/login', loginRateLimiter(), accountLockoutMiddleware, applyProgres
     let name = 'User';
     try {
       if (user.role === 'STUDENT') {
-        const student = db.prepare('SELECT first_name, last_name FROM students WHERE id = ?').get(user.linked_id);
-        if (student) name = `${student.first_name} ${student.last_name}`;
+        const r = await db.query('SELECT first_name, last_name FROM students WHERE id = $1', [user.linked_id]);
+        if (r.rows[0]) name = `${r.rows[0].first_name} ${r.rows[0].last_name}`;
       } else if (user.role === 'PARENT') {
-        const student = db.prepare('SELECT father_name, mother_name FROM students WHERE id = ?').get(user.linked_id);
-        if (student && student.father_name) name = student.father_name;
-        else if (student && student.mother_name) name = student.mother_name;
+        const r = await db.query('SELECT father_name, mother_name FROM students WHERE id = $1', [user.linked_id]);
+        const s = r.rows[0];
+        if (s && s.father_name) name = s.father_name;
+        else if (s && s.mother_name) name = s.mother_name;
         else name = 'Guardian';
       } else if (user.role === 'TEACHER') {
-        const teacher = db.prepare('SELECT first_name, last_name FROM teachers WHERE id = ?').get(user.linked_id);
-        if (teacher) name = `${teacher.first_name} ${teacher.last_name}`;
+        const r = await db.query('SELECT first_name, last_name FROM teachers WHERE id = $1', [user.linked_id]);
+        if (r.rows[0]) name = `${r.rows[0].first_name} ${r.rows[0].last_name}`;
       } else if (user.role === 'OWNER') {
         name = 'Manager';
       }
@@ -82,24 +89,26 @@ router.post('/login', loginRateLimiter(), accountLockoutMiddleware, applyProgres
 });
 
 // PUT /api/auth/update-credentials
-router.put('/update-credentials', authenticate, validate(updateCredentialsSchema), (req, res) => {
+router.put('/update-credentials', authenticate, validate(updateCredentialsSchema), async (req, res) => {
   const { username, password } = req.body;
   const userId = req.user.id;
-
   const trimmedUsername = username.trim().toLowerCase();
 
-  const existing = db.prepare("SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND id != ?").get(trimmedUsername, userId);
-  if (existing) {
-    console.warn(`Username conflict: ${trimmedUsername} attempted by user ${userId}`);
-    return res.status(409).json({ error: 'This username is already in use' });
-  }
-
   try {
+    const existing = await db.query(
+      'SELECT id FROM users WHERE LOWER(username) = LOWER($1) AND id != $2',
+      [trimmedUsername, userId]
+    );
+    if (existing.rows[0]) {
+      return res.status(409).json({ error: 'This username is already in use' });
+    }
+
     if (password && password.trim()) {
-      const hashedPassword = hashPassword(password.trim());
-      db.prepare("UPDATE users SET username = ?, password = ? WHERE id = ?").run(trimmedUsername, hashedPassword, userId);
+      const hashedPassword = db.hashPassword(password.trim());
+      await db.query('UPDATE users SET username = $1, password = $2 WHERE id = $3',
+        [trimmedUsername, hashedPassword, userId]);
     } else {
-      db.prepare("UPDATE users SET username = ? WHERE id = ?").run(trimmedUsername, userId);
+      await db.query('UPDATE users SET username = $1 WHERE id = $2', [trimmedUsername, userId]);
     }
 
     console.info(`Credentials updated for user: ${userId}`);

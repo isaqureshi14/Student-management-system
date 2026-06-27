@@ -1,111 +1,122 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
-const db = require('../db');
+const bcrypt  = require('bcryptjs');
+const db      = require('../db');
 const { authenticate, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/', authenticate, (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   const { role, linked_id } = req.user;
-  if (role === 'OWNER') {
-    return res.json(db.prepare('SELECT * FROM teachers ORDER BY created_at DESC').all());
-  }
-  if (role === 'TEACHER') {
-    const t = db.prepare('SELECT * FROM teachers WHERE id = ?').get(linked_id);
-    return res.json(t ? [t] : []);
-  }
-  return res.status(403).json({ error: 'Access denied' });
+  try {
+    if (role === 'OWNER') {
+      const { rows } = await db.query('SELECT * FROM teachers ORDER BY created_at DESC');
+      return res.json(rows);
+    }
+    if (role === 'TEACHER') {
+      const { rows } = await db.query('SELECT * FROM teachers WHERE id = $1', [linked_id]);
+      return res.json(rows);
+    }
+    return res.status(403).json({ error: 'Access denied' });
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
-router.get('/:id', authenticate, requireRole('OWNER', 'TEACHER'), (req, res) => {
-  const teacher = db.prepare('SELECT * FROM teachers WHERE id = ?').get(req.params.id);
-  if (!teacher) return res.status(404).json({ error: 'Record not found' });
-  return res.json(teacher);
+router.get('/:id', authenticate, requireRole('OWNER', 'TEACHER'), async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM teachers WHERE id = $1', [req.params.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Record not found' });
+    return res.json(rows[0]);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
-router.post('/', authenticate, requireRole('OWNER'), (req, res) => {
+router.post('/', authenticate, requireRole('OWNER'), async (req, res) => {
   const { first_name, last_name, subject, email, phone, temp_password } = req.body;
 
-  if (!first_name || !subject) {
+  if (!first_name || !subject)
     return res.status(400).json({ error: 'first_name and subject are required' });
-  }
-  if (!email || !email.trim()) {
+  if (!email || !email.trim())
     return res.status(400).json({ error: 'email is required for teacher login' });
-  }
-  if (!temp_password || !temp_password.trim()) {
+  if (!temp_password || !temp_password.trim())
     return res.status(400).json({ error: 'temp_password is required' });
-  }
 
   const teacherEmail = email.trim();
-  if (db.prepare('SELECT id FROM users WHERE username = ?').get(teacherEmail)) {
-    return res.status(409).json({ error: 'This email is already in use' });
-  }
-
-  const rawPassword = temp_password.trim();
-
+  const rawPassword  = temp_password.trim();
   const finalLastName = (last_name !== undefined && last_name !== null) ? last_name : '';
-  const result = db.prepare(
-    'INSERT INTO teachers (first_name, last_name, subject, email, phone) VALUES (?, ?, ?, ?, ?)'
-  ).run(first_name, finalLastName, subject, teacherEmail, phone || null);
 
-  const teacherId = result.lastInsertRowid;
-  db.prepare('INSERT INTO users (username, password, role, linked_id) VALUES (?, ?, ?, ?)')
-    .run(teacherEmail, bcrypt.hashSync(rawPassword, 10), 'TEACHER', teacherId);
+  try {
+    const ex = await db.query('SELECT id FROM users WHERE username = $1', [teacherEmail]);
+    if (ex.rows[0]) return res.status(409).json({ error: 'This email is already in use' });
 
-  return res.status(201).json({
-    teacher: db.prepare('SELECT * FROM teachers WHERE id = ?').get(teacherId),
-    account: { username: teacherEmail, password: rawPassword },
-  });
+    const { rows: [teacher] } = await db.query(
+      'INSERT INTO teachers (first_name, last_name, subject, email, phone) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+      [first_name, finalLastName, subject, teacherEmail, phone||null]
+    );
+
+    await db.query(
+      'INSERT INTO users (username, password, role, linked_id) VALUES ($1,$2,$3,$4)',
+      [teacherEmail, bcrypt.hashSync(rawPassword, 10), 'TEACHER', teacher.id]
+    );
+
+    return res.status(201).json({
+      teacher,
+      account: { username: teacherEmail, password: rawPassword },
+    });
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
-router.put('/:id', authenticate, requireRole('OWNER'), (req, res) => {
-  const teacher = db.prepare('SELECT id, first_name, last_name FROM teachers WHERE id = ?').get(req.params.id);
-  if (!teacher) return res.status(404).json({ error: 'Record not found' });
+router.put('/:id', authenticate, requireRole('OWNER'), async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT id, first_name, last_name FROM teachers WHERE id = $1', [req.params.id]);
+    const teacher = rows[0];
+    if (!teacher) return res.status(404).json({ error: 'Record not found' });
 
-  const oldFullName = `${teacher.first_name} ${teacher.last_name}`.trim();
-  const { first_name, last_name, subject, email, phone } = req.body;
+    const oldFullName = `${teacher.first_name} ${teacher.last_name}`.trim();
+    const { first_name, last_name, subject, email, phone } = req.body;
 
-  if (email && email.trim()) {
-    const trimmedEmail = email.trim();
-    const existing = db.prepare("SELECT id FROM users WHERE username = ? AND NOT (role = 'TEACHER' AND linked_id = ?)")
-      .get(trimmedEmail, req.params.id);
-    if (existing) {
-      return res.status(409).json({ error: 'This email is already in use' });
+    if (email && email.trim()) {
+      const trimmedEmail = email.trim();
+      const ex = await db.query(
+        "SELECT id FROM users WHERE username = $1 AND NOT (role = 'TEACHER' AND linked_id = $2)",
+        [trimmedEmail, req.params.id]
+      );
+      if (ex.rows[0]) return res.status(409).json({ error: 'This email is already in use' });
+      await db.query("UPDATE users SET username = $1 WHERE role = 'TEACHER' AND linked_id = $2",
+        [trimmedEmail, req.params.id]);
     }
-    db.prepare("UPDATE users SET username = ? WHERE role = 'TEACHER' AND linked_id = ?")
-      .run(trimmedEmail, req.params.id);
-  }
 
-  db.prepare(`UPDATE teachers SET
-    first_name = COALESCE(?, first_name), last_name = COALESCE(?, last_name),
-    subject = COALESCE(?, subject), email = COALESCE(?, email), phone = COALESCE(?, phone)
-    WHERE id = ?
-  `).run(
-    first_name !== undefined ? first_name : null,
-    last_name !== undefined ? last_name : null,
-    subject !== undefined ? subject : null,
-    email !== undefined ? email : null,
-    phone !== undefined ? phone : null,
-    req.params.id
-  );
+    await db.query(`
+      UPDATE teachers SET
+        first_name = COALESCE($1, first_name),
+        last_name  = COALESCE($2, last_name),
+        subject    = COALESCE($3, subject),
+        email      = COALESCE($4, email),
+        phone      = COALESCE($5, phone)
+      WHERE id = $6
+    `, [first_name!==undefined?first_name:null,
+        last_name!==undefined?last_name:null,
+        subject!==undefined?subject:null,
+        email!==undefined?email:null,
+        phone!==undefined?phone:null,
+        req.params.id]);
 
-  const updatedTeacher = db.prepare('SELECT first_name, last_name FROM teachers WHERE id = ?').get(req.params.id);
-  const newFullName = `${updatedTeacher.first_name} ${updatedTeacher.last_name}`.trim();
-  if (oldFullName !== newFullName) {
-    db.prepare("UPDATE timetable SET teacher_name = ? WHERE teacher_name = ?")
-      .run(newFullName, oldFullName);
-  }
+    const updated = (await db.query('SELECT first_name, last_name FROM teachers WHERE id = $1', [req.params.id])).rows[0];
+    const newFullName = `${updated.first_name} ${updated.last_name}`.trim();
+    if (oldFullName !== newFullName) {
+      await db.query('UPDATE timetable SET teacher_name = $1 WHERE teacher_name = $2', [newFullName, oldFullName]);
+    }
 
-  return res.json(db.prepare('SELECT * FROM teachers WHERE id = ?').get(req.params.id));
+    const full = (await db.query('SELECT * FROM teachers WHERE id = $1', [req.params.id])).rows[0];
+    return res.json(full);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
-router.delete('/:id', authenticate, requireRole('OWNER'), (req, res) => {
-  if (!db.prepare('SELECT id FROM teachers WHERE id = ?').get(req.params.id)) {
-    return res.status(404).json({ error: 'Teacher not found' });
-  }
-  db.prepare('DELETE FROM teachers WHERE id = ?').run(req.params.id);
-  db.prepare("DELETE FROM users WHERE linked_id = ? AND role = 'TEACHER'").run(req.params.id);
-  return res.json({ message: 'Teacher deleted' });
+router.delete('/:id', authenticate, requireRole('OWNER'), async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT id FROM teachers WHERE id = $1', [req.params.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Teacher not found' });
+    await db.query('DELETE FROM teachers WHERE id = $1', [req.params.id]);
+    await db.query("DELETE FROM users WHERE linked_id = $1 AND role = 'TEACHER'", [req.params.id]);
+    return res.json({ message: 'Teacher deleted' });
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;
