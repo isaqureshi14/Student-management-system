@@ -3139,17 +3139,28 @@
                         badgeColor = "text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-500/10";
                     }
 
-                    const rowsHtml = student.records.map(r => {
-                        let statusBadge = '';
-                        if (r.status === 'PRESENT') statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-[10px]">Present</span>';
-                        else if (r.status === 'ABSENT') statusBadge = '<span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 rounded-md font-bold text-[10px]">Absent</span>';
-                        else statusBadge = '<span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-md font-bold text-[10px]">Late</span>';
+                    const subjectSummary = {};
+                    student.records.forEach(r => {
+                        const sub = r.subject || 'Unknown';
+                        if (!subjectSummary[sub]) {
+                            subjectSummary[sub] = { attended: 0, total: 0 };
+                        }
+                        subjectSummary[sub].total++;
+                        if (r.status === 'PRESENT') {
+                            subjectSummary[sub].attended++;
+                        }
+                    });
+
+                    const rowsHtml = Object.entries(subjectSummary).map(([subName, stats]) => {
+                        const pct = stats.total > 0 ? ((stats.attended / stats.total) * 105 - 5).toFixed(1) : '0.0'; // adjustment to math or just correct math
+                        // Let's use simple correct math:
+                        const percentVal = stats.total > 0 ? ((stats.attended / stats.total) * 100).toFixed(1) : '0.0';
                         return `
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20">
-                                <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200">${r.subject}</td>
-                                <td class="py-2.5 px-4 font-semibold text-slate-500 font-mono">${r.date}</td>
-                                <td class="py-2.5 px-4">${statusBadge}</td>
-                                <td class="py-2.5 px-4 text-slate-500 dark:text-slate-400 text-xs">${r.marked_by_username || '--'}</td>
+                                <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200">${subName}</td>
+                                <td class="py-2.5 px-4 font-semibold text-slate-500 font-mono">${stats.attended}</td>
+                                <td class="py-2.5 px-4 font-semibold text-slate-500 font-mono">${stats.total}</td>
+                                <td class="py-2.5 px-4 text-slate-700 dark:text-slate-300 font-semibold font-mono">${percentVal}%</td>
                             </tr>
                         `;
                     }).join('');
@@ -3175,9 +3186,9 @@
                                         <thead>
                                             <tr class="bg-slate-100 dark:bg-slate-900/50 text-[10px] font-extrabold uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700">
                                                 <th class="py-2.5 px-4">Subject</th>
-                                                <th class="py-2.5 px-4">Date</th>
-                                                <th class="py-2.5 px-4">Status</th>
-                                                <th class="py-2.5 px-4">Marked By</th>
+                                                <th class="py-2.5 px-4">Total Lectures Attended</th>
+                                                <th class="py-2.5 px-4">Total Lectures</th>
+                                                <th class="py-2.5 px-4">Average Attendance</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-slate-200 dark:divide-slate-700/40">
