@@ -3040,6 +3040,26 @@
             }
         };
 
+        window.switchAttView = function(studentId, view) {
+            const summaryTable = document.getElementById(`att-summary-table-${studentId}`);
+            const logTable = document.getElementById(`att-log-table-${studentId}`);
+            const summaryBtn = document.getElementById(`att-btn-summary-${studentId}`);
+            const logBtn = document.getElementById(`att-btn-log-${studentId}`);
+            if (!summaryTable || !logTable || !summaryBtn || !logBtn) return;
+            
+            if (view === 'summary') {
+                summaryTable.classList.remove('hidden');
+                logTable.classList.add('hidden');
+                summaryBtn.className = "px-3 py-1 text-[10px] font-bold rounded-lg bg-rose-600 text-white shadow-sm transition-all";
+                logBtn.className = "px-3 py-1 text-[10px] font-bold rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all bg-transparent border-0";
+            } else {
+                summaryTable.classList.add('hidden');
+                logTable.classList.remove('hidden');
+                summaryBtn.className = "px-3 py-1 text-[10px] font-bold rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all bg-transparent border-0";
+                logBtn.className = "px-3 py-1 text-[10px] font-bold rounded-lg bg-rose-600 text-white shadow-sm transition-all";
+            }
+        };
+
         async function loadOwnerAttendanceReport() {
             const classFilter = document.getElementById('att-report-class-filter').value;
             const subjectFilter = document.getElementById('att-report-subject-filter').value;
@@ -3151,9 +3171,7 @@
                         }
                     });
 
-                    const rowsHtml = Object.entries(subjectSummary).map(([subName, stats]) => {
-                        const pct = stats.total > 0 ? ((stats.attended / stats.total) * 105 - 5).toFixed(1) : '0.0'; // adjustment to math or just correct math
-                        // Let's use simple correct math:
+                    const summaryRowsHtml = Object.entries(subjectSummary).map(([subName, stats]) => {
                         const percentVal = stats.total > 0 ? ((stats.attended / stats.total) * 100).toFixed(1) : '0.0';
                         return `
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20">
@@ -3161,6 +3179,21 @@
                                 <td class="py-2.5 px-4 font-semibold text-slate-500 font-mono">${stats.attended}</td>
                                 <td class="py-2.5 px-4 font-semibold text-slate-500 font-mono">${stats.total}</td>
                                 <td class="py-2.5 px-4 text-slate-700 dark:text-slate-300 font-semibold font-mono">${percentVal}%</td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    const logRowsHtml = student.records.map(r => {
+                        let statusBadge = '';
+                        if (r.status === 'PRESENT') statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-[10px]">Present</span>';
+                        else if (r.status === 'ABSENT') statusBadge = '<span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 rounded-md font-bold text-[10px]">Absent</span>';
+                        else statusBadge = '<span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-md font-bold text-[10px]">Late</span>';
+                        return `
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20">
+                                <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200">${r.subject}</td>
+                                <td class="py-2.5 px-4 font-semibold text-slate-500 font-mono">${r.date}</td>
+                                <td class="py-2.5 px-4">${statusBadge}</td>
+                                <td class="py-2.5 px-4 text-slate-500 dark:text-slate-400 text-xs">${r.marked_by_username || '--'}</td>
                             </tr>
                         `;
                     }).join('');
@@ -3181,7 +3214,15 @@
                         </tr>
                         <tr id="att-detail-${student.student_id}" class="hidden bg-slate-50/20 dark:bg-slate-900/10 border-b border-slate-100 dark:border-slate-700">
                             <td colspan="5" class="py-4 px-6">
-                                <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Attendance Details</span>
+                                    <div class="flex items-center bg-slate-100 dark:bg-slate-905 p-1 rounded-xl gap-1 border border-slate-200 dark:border-slate-800">
+                                        <button type="button" id="att-btn-summary-${student.student_id}" onclick="event.stopPropagation(); switchAttView('${student.student_id}', 'summary')" class="px-3 py-1 text-[10px] font-bold rounded-lg bg-rose-600 text-white shadow-sm transition-all">Subject Summary</button>
+                                        <button type="button" id="att-btn-log-${student.student_id}" onclick="event.stopPropagation(); switchAttView('${student.student_id}', 'log')" class="px-3 py-1 text-[10px] font-bold rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all bg-transparent border-0">Daily Log</button>
+                                    </div>
+                                </div>
+
+                                <div id="att-summary-table-${student.student_id}" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800">
                                     <table class="w-full text-left border-collapse text-xs">
                                         <thead>
                                             <tr class="bg-slate-100 dark:bg-slate-900/50 text-[10px] font-extrabold uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700">
@@ -3192,7 +3233,23 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-slate-200 dark:divide-slate-700/40">
-                                            ${rowsHtml}
+                                            ${summaryRowsHtml}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div id="att-log-table-${student.student_id}" class="hidden border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800">
+                                    <table class="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr class="bg-slate-100 dark:bg-slate-900/50 text-[10px] font-extrabold uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                                                <th class="py-2.5 px-4">Subject</th>
+                                                <th class="py-2.5 px-4">Date</th>
+                                                <th class="py-2.5 px-4">Status</th>
+                                                <th class="py-2.5 px-4">Marked By</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700/40">
+                                            ${logRowsHtml}
                                         </tbody>
                                     </table>
                                 </div>
