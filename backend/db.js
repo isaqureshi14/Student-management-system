@@ -155,14 +155,14 @@ async function initDb() {
     await client.query(`
       INSERT INTO users (username, password, role)
       VALUES ($1, $2, 'OWNER')
-      ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password
+      ON CONFLICT (username) DO NOTHING
     `, ['manager', ownerHash1]);
 
     const ownerHash2 = hashPassword('owner123');
     await client.query(`
       INSERT INTO users (username, password, role)
       VALUES ($1, $2, 'OWNER')
-      ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password
+      ON CONFLICT (username) DO NOTHING
     `, ['owner@school.com', ownerHash2]);
 
     await client.query('COMMIT');
