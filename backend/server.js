@@ -37,9 +37,7 @@ const notesDir   = path.join(uploadsDir, 'notes');
 const isProduction = process.env.NODE_ENV === 'production';
 
 if (isProduction && !process.env.ALLOWED_ORIGINS) {
-  console.error('❌ FATAL: ALLOWED_ORIGINS env variable is not set in production.');
-  console.error('   Set it to your Render app URL, e.g.: https://your-app.onrender.com');
-  process.exit(1);
+  console.warn('⚠️  WARNING: ALLOWED_ORIGINS env variable is not set. CORS will fall back to localhost.');
 }
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
