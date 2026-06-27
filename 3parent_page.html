@@ -452,6 +452,36 @@
                         <!-- Populated dynamically via Javascript based on selected test -->
                     </div>
                 </div>
+
+                <!-- Exam Marks Log / History -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-rose-500"></i>
+                            Complete Exam Marks History Log
+                        </h3>
+                        <p class="text-xs text-slate-400">Chronological history log of all exams and marks scored.</p>
+                    </div>
+                    <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100 dark:bg-slate-900/50 text-[10px] font-extrabold uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                                        <th class="py-2.5 px-4">Exam Name</th>
+                                        <th class="py-2.5 px-4">Subject</th>
+                                        <th class="py-2.5 px-4">Marks Obtained</th>
+                                        <th class="py-2.5 px-4">Max Marks</th>
+                                        <th class="py-2.5 px-4">Percentage</th>
+                                        <th class="py-2.5 px-4">Marked By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="parent-marks-log-body" class="divide-y divide-slate-200 dark:divide-slate-700/40">
+                                    <tr><td colspan="6" class="py-4 text-center text-slate-400 text-xs">No marks records loaded.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Page 3 Container: Attendance & Leave tracker -->
@@ -561,6 +591,34 @@
                         </div>
 
                         <div class="hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Detailed Attendance Logs -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-clipboard-list text-primary-500"></i>
+                            Attendance Logs History
+                        </h3>
+                        <p class="text-xs text-slate-400">Detailed day-by-day logs of your student's attendance records.</p>
+                    </div>
+                    <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100 dark:bg-slate-900/50 text-[10px] font-extrabold uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                                        <th class="py-2.5 px-4">Subject</th>
+                                        <th class="py-2.5 px-4">Date</th>
+                                        <th class="py-2.5 px-4">Status</th>
+                                        <th class="py-2.5 px-4">Marked By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="parent-attendance-log-body" class="divide-y divide-slate-200 dark:divide-slate-700/40">
+                                    <tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">No attendance records loaded.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -835,7 +893,9 @@
             leaves: [],
             classAvg: {},
             selectedTestIndex: 0,
-            activePage: "parent-dashboard"
+            activePage: "parent-dashboard",
+            rawAttendance: [],
+            rawMarks: []
         };
 
         window.onload = function() {
@@ -898,6 +958,18 @@
                 appState.leaves = JSON.parse(JSON.stringify(profileData.leaves));
             } else {
                 appState.leaves = [];
+            }
+
+            if (profileData.rawMarks) {
+                appState.rawMarks = JSON.parse(JSON.stringify(profileData.rawMarks));
+            } else {
+                appState.rawMarks = [];
+            }
+
+            if (profileData.rawAttendance) {
+                appState.rawAttendance = JSON.parse(JSON.stringify(profileData.rawAttendance));
+            } else {
+                appState.rawAttendance = [];
             }
 
             // Calculate aggregations & render
@@ -998,6 +1070,8 @@
             renderSelectedTestReport();
             renderAttendanceData();
             renderLeavesRegistry();
+            renderParentAttendanceLogs();
+            renderParentMarksLogs();
         }
 
         // Custom notification framework
@@ -1540,6 +1614,60 @@
             });
         }
 
+        function renderParentAttendanceLogs() {
+            const body = document.getElementById('parent-attendance-log-body');
+            if (!body) return;
+            const data = appState.rawAttendance || [];
+            if (data.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">No attendance records found.</td></tr>';
+                return;
+            }
+            // Sort by date descending
+            const sorted = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+            body.innerHTML = sorted.map(r => {
+                let statusBadge = '';
+                if (r.status === 'PRESENT') statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-[10px]">Present</span>';
+                else if (r.status === 'ABSENT') statusBadge = '<span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 rounded-md font-bold text-[10px]">Absent</span>';
+                else statusBadge = '<span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-md font-bold text-[10px]">Late</span>';
+                return `
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 text-[11px]">
+                        <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200">${r.subject}</td>
+                        <td class="py-2.5 px-4 font-semibold text-slate-550 font-mono">${r.date}</td>
+                        <td class="py-2.5 px-4">${statusBadge}</td>
+                        <td class="py-2.5 px-4 text-slate-500 dark:text-slate-400 text-xs">${r.marked_by_username || '--'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderParentMarksLogs() {
+            const body = document.getElementById('parent-marks-log-body');
+            if (!body) return;
+            const data = appState.rawMarks || [];
+            if (data.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-slate-400 text-xs">No marks records found.</td></tr>';
+                return;
+            }
+            // Sort by exam_name, then subject
+            const sorted = [...data].sort((a, b) => {
+                if (a.exam_name !== b.exam_name) return a.exam_name.localeCompare(b.exam_name);
+                return a.subject.localeCompare(b.subject);
+            });
+            body.innerHTML = sorted.map(m => {
+                const pct = m.max_score > 0 ? ((m.score / m.max_score) * 100).toFixed(1) : '0.0';
+                return `
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 text-[11px]">
+                        <td class="py-2.5 px-4 font-semibold text-slate-900 dark:text-white">${m.exam_name}</td>
+                        <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200">${m.subject}</td>
+                        <td class="py-2.5 px-4 font-semibold text-slate-550 font-mono">${m.score}</td>
+                        <td class="py-2.5 px-4 font-semibold text-slate-550 font-mono">${m.max_score}</td>
+                        <td class="py-2.5 px-4 text-slate-700 dark:text-slate-300 font-semibold font-mono">${pct}%</td>
+                        <td class="py-2.5 px-4 text-slate-500 dark:text-slate-400 text-xs">${m.uploaded_by_username || '--'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
         async function deleteLeaveRequest(id) {
             if (!confirm('Are you sure you want to delete this leave request permanently?')) return;
             try {
@@ -1812,6 +1940,8 @@
                 });
 
                 profileData.attendance.subjects = subjectsList;
+                profileData.rawMarks = marksData || [];
+                profileData.rawAttendance = attData || [];
 
                 window.loadStudentProfile(profileData);
 
