@@ -28,6 +28,55 @@ A comprehensive, responsive, and feature-rich institutional portal designed for 
 
 ---
 
+## 💾 Database Schema & Architecture
+
+The system uses a database initialized and managed through `backend/db.js`. Below are the primary entities and relations:
+
+### 1. Account Administration & Users (`users`)
+- Stores user credentials, hashed passwords (using `bcryptjs` with 12 rounds), and access levels.
+- **Roles**: `STUDENT`, `TEACHER`, `PARENT`, `OWNER`.
+- **Relationship**: Connects to specific demographic logs via `linked_id`.
+
+### 2. Student Directory (`students`)
+- Stores complete demographic records, contact details, address records, and profile photos.
+- **Approval System**: Implements a pending review state for parent demographic edits (`profile_status` of `PENDING` or `APPROVED`) which require owner approval.
+
+### 3. Faculty Directory (`teachers`)
+- Stores first/last name, subject specialty, email, phone, and photo.
+
+### 4. Performance Registry (`marks`)
+- Connects evaluations to students. Stores:
+  - `student_id` (foreign key pointing to students)
+  - `exam_name`, `subject`
+  - `score`, `max_score`
+  - `uploaded_by` (foreign key pointing to users)
+
+### 5. Attendance Log (`attendance`)
+- Tracks daily class attendance states (`PRESENT`, `ABSENT`, `LATE`) per subject per day.
+- Implements a composite unique index on `(student_id, subject, date)` to enforce single daily entries.
+
+### 6. Timetable Scheduler (`timetable`)
+- Maps periods 1 to 8 for weekdays Monday to Saturday per class.
+- Stores: `class`, `day`, `period`, `subject`, `teacher_name`, `start_time`, `end_time`.
+- Composite unique index on `(class, day, period)`.
+
+### 7. Leave Petitions (`leave_requests`)
+- Tracks leave requests submitted by parents for student absences.
+- Statuses: `PENDING`, `APPROVED`, `REJECTED`. Reviewable by Owners.
+
+### 8. Lecture Material & Notes (`notes`)
+- Stores file reference URLs, titles, subjects, and classes of shared resources uploaded by teachers.
+
+---
+
+## ⚙️ Backend Working & API Flow
+
+1. **Authentication**: Handled via secure credentials. The client passes authentication tokens in headers for API validation.
+2. **Dashboard Syncing**: Upon loading any portal page, the client reads the current user's profile and populates subject attendance indices, evaluation records, and timetables.
+3. **Real-time Synchronization**: Changes made in the scheduling and grade pages are transmitted to the database via REST endpoints, refreshing the parent and student dashboards instantly.
+
+---
+
 ## 🛠️ Technology Stack
 - **Frontend**: Vanilla HTML5, JavaScript (ES6+), CSS3 styled with the Tailwind CSS framework, FontAwesome Icons.
 - **Backend API**: Connected via REST integration (handles authentication, profiles, attendance data, leaves, and marks).
