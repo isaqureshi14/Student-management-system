@@ -1955,96 +1955,6 @@
         }
 
 
-        /* --- TIMETABLE SCHEDULER SYSTEM --- */
-
-        // Loads and configures the interactive editable timetable scheduling matrix
-        function loadTimetableSchedulerGrid() {
-            const activeClass = document.getElementById('tt-class-selector').value;
-            const tbody = document.getElementById('tt-grid-tbody');
-            if (!tbody) return;
-            
-            tbody.innerHTML = '';
-
-            // Pull or initialize timetable division blueprint
-            if (!managerState.timetables[activeClass]) {
-                managerState.timetables[activeClass] = {
-                    "Monday":    { P1: {subject:"", start_time:"08:30", end_time:"09:30"}, P2: {subject:"", start_time:"09:30", end_time:"10:30"}, P3: {subject:"", start_time:"10:45", end_time:"11:45"}, P4: {subject:"", start_time:"11:45", end_time:"12:45"}, P5: {subject:"", start_time:"13:30", end_time:"14:30"}, P6: {subject:"", start_time:"14:30", end_time:"15:30"} },
-                    "Tuesday":   { P1: {subject:"", start_time:"08:30", end_time:"09:30"}, P2: {subject:"", start_time:"09:30", end_time:"10:30"}, P3: {subject:"", start_time:"10:45", end_time:"11:45"}, P4: {subject:"", start_time:"11:45", end_time:"12:45"}, P5: {subject:"", start_time:"13:30", end_time:"14:30"}, P6: {subject:"", start_time:"14:30", end_time:"15:30"} },
-                    "Wednesday": { P1: {subject:"", start_time:"08:30", end_time:"09:30"}, P2: {subject:"", start_time:"09:30", end_time:"10:30"}, P3: {subject:"", start_time:"10:45", end_time:"11:45"}, P4: {subject:"", start_time:"11:45", end_time:"12:45"}, P5: {subject:"", start_time:"13:30", end_time:"14:30"}, P6: {subject:"", start_time:"14:30", end_time:"15:30"} },
-                    "Thursday":  { P1: {subject:"", start_time:"08:30", end_time:"09:30"}, P2: {subject:"", start_time:"09:30", end_time:"10:30"}, P3: {subject:"", start_time:"10:45", end_time:"11:45"}, P4: {subject:"", start_time:"11:45", end_time:"12:45"}, P5: {subject:"", start_time:"13:30", end_time:"14:30"}, P6: {subject:"", start_time:"14:30", end_time:"15:30"} },
-                    "Friday":    { P1: {subject:"", start_time:"08:30", end_time:"09:30"}, P2: {subject:"", start_time:"09:30", end_time:"10:30"}, P3: {subject:"", start_time:"10:45", end_time:"11:45"}, P4: {subject:"", start_time:"11:45", end_time:"12:45"}, P5: {subject:"", start_time:"13:30", end_time:"14:30"}, P6: {subject:"", start_time:"14:30", end_time:"15:30"} },
-                    "Saturday":  { P1: {subject:"", start_time:"08:30", end_time:"09:30"}, P2: {subject:"", start_time:"09:30", end_time:"10:30"}, P3: {subject:"", start_time:"10:45", end_time:"11:45"}, P4: {subject:"", start_time:"11:45", end_time:"12:45"}, P5: {subject:"", start_time:"13:30", end_time:"14:30"}, P6: {subject:"", start_time:"14:30", end_time:"15:30"} }
-                };
-            }
-
-            const schedule = managerState.timetables[activeClass];
-            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            const slots = ["P1", "P2", "P3", "P4", "P5", "P6"];
-
-            days.forEach(day => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100 dark:border-slate-700/60";
-
-                let cells = `<td class="py-3 px-3 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">${day}</td>`;
-                slots.forEach(slot => {
-                    const entry = schedule[day][slot] || {subject:"", start_time:"", end_time:""};
-                    cells += `
-                        <td class="py-2 px-1"><input type="text" id="tt-${day}-${slot}-subject" value="${entry.subject || ''}" placeholder="Subject" class="w-full px-1.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500"></td>
-                        <td class="py-2 px-1">${buildTimePicker12h(`tt-${day}-${slot}-start`, entry.start_time || '')}</td>
-                        <td class="py-2 px-1">${buildTimePicker12h(`tt-${day}-${slot}-end`, entry.end_time || '')}</td>
-                    `;
-                });
-                tr.innerHTML = cells;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Commits scheduler grid values back to memory state
-        async function commitTimetableGrid() {
-            const activeClass = document.getElementById('tt-class-selector').value;
-            if (!activeClass) { triggerToastNotification('Select a class first.', 'rose'); return; }
- 
-            const days  = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-            const periodCount = parseInt(document.getElementById('tt-periods-count')?.value || '6');
-            const entries = [];
-            days.forEach(day => {
-                for (let period = 1; period <= 8; period++) {
-                    if (period <= periodCount) {
-                        const subjectEl = document.getElementById(`tt-${day}-P${period}-subject`);
-                        const startEl = document.getElementById(`tt-${day}-P${period}-start`);
-                        const endEl = document.getElementById(`tt-${day}-P${period}-end`);
-                        entries.push({ 
-                            day, 
-                            period, 
-                            subject: subjectEl ? subjectEl.value.trim() : '',
-                            start_time: startEl ? startEl.value : '',
-                            end_time: endEl ? endEl.value : ''
-                        });
-                    } else {
-                        entries.push({ 
-                            day, 
-                            period, 
-                            subject: 'N/A',
-                            start_time: '',
-                            end_time: ''
-                        });
-                    }
-                }
-            });
-            try {
-                const res = await fetch(`${API}/timetable/bulk`, {
-                    method: 'POST', headers: authHeaders(),
-                    body: JSON.stringify({ class: activeClass, entries })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    PersistState.clear();
-                    triggerToastNotification(`Timetable saved (${data.saved} slots).`, 'emerald');
-                }
-                else triggerToastNotification(data.error || 'Failed.', 'rose');
-            } catch(err) { triggerToastNotification(err.message, 'rose'); }
-        }
-
 
         /* --- STREAMING_CHUNK: Global dynamic hydration and parent approvals synchronization --- */
 
@@ -2529,7 +2439,6 @@
         };
 
         // ── Override commitTimetableGrid — bulk save ───────────────────────────
-        const _origCommitTimetable = commitTimetableGrid;
         window.commitTimetableGrid = async function() {
             const activeClass = document.getElementById('tt-class-selector').value;
             if (!activeClass) { triggerToastNotification('Select a class first.', 'rose'); return; }
@@ -2773,6 +2682,26 @@
             });
             triggerToastNotification(`Copied schedule from ${activeTTDay} to ${target === 'all' ? 'all other days' : target}!`, 'emerald');
         };
+
+        function getDatesOfCurrentWeek() {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + distanceToMonday);
+
+            const dates = {};
+            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                dates[days[i]] = `${yyyy}-${mm}-${dd}`;
+            }
+            return dates;
+        }
 
         window.loadTimetableSchedulerGrid = async function() {
             const activeClass = document.getElementById('tt-class-selector').value;
