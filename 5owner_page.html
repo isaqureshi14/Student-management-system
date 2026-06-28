@@ -73,6 +73,28 @@
         .dark ::-webkit-scrollbar-thumb {
             background: #475569;
         }
+        
+        /* Timetable time picker custom style overrides for ultra compact display */
+        .time-picker-select {
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            text-align: center !important;
+            text-align-last: center !important;
+            padding-left: 2px !important;
+            padding-right: 2px !important;
+            font-size: 11px !important;
+            height: 32px !important;
+            line-height: 1.2 !important;
+        }
+        .time-picker-select::-ms-expand {
+            display: none !important;
+        }
+        .time-picker-container {
+            width: fit-content;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body class="h-full text-slate-800 dark:text-slate-100 transition-colors duration-200">
@@ -795,11 +817,11 @@
                         </div>
                         
                         <!-- Desktop Header -->
-                        <div id="tt-desktop-header" class="hidden md:grid grid-cols-12 gap-4 px-4 py-2.5 text-[10px] font-extrabold uppercase text-slate-400 border-b border-slate-100 dark:border-slate-700/60 mt-4">
+                        <div id="tt-desktop-header" class="hidden md:grid grid-cols-12 gap-3 px-4 py-2.5 text-[10px] font-extrabold uppercase text-slate-400 border-b border-slate-100 dark:border-slate-700/60 mt-4">
                             <div class="col-span-1">Slot</div>
-                            <div class="col-span-4">Subject</div>
-                            <div class="col-span-3">Duration Preset</div>
-                            <div class="col-span-2">Start Time</div>
+                            <div class="col-span-4">Subject & Teacher</div>
+                            <div class="col-span-2">Duration Preset</div>
+                            <div class="col-span-3">Start Time</div>
                             <div class="col-span-2">End Time</div>
                         </div>
                         
@@ -2540,15 +2562,15 @@
             for (var i = 1; i <= 12; i++) hourOpts += '<option value="' + i + '"' + (h12 === i ? ' selected' : '') + '>' + i + '</option>';
             var mins = ['00','05','10','15','20','25','30','35','40','45','50','55'];
             var minOpts = mins.map(function(mv) { return '<option value="' + mv + '"' + (m === mv ? ' selected' : '') + '>' + mv + '</option>'; }).join('');
-            var sc = 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 rounded-lg py-1.5 cursor-pointer px-1';
+            var sc = 'time-picker-select bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 rounded-lg cursor-pointer';
             var onch = onchangeExtra
                 ? 'onchange="syncTimePicker12h(\'' + id + '\'); ' + onchangeExtra + '"'
                 : 'onchange="syncTimePicker12h(\'' + id + '\')"';
-            return '<div class="flex items-center gap-0.5">' +
-                '<select id="' + id + '-h" class="' + sc + ' w-10" ' + onch + '>' + hourOpts + '</select>' +
+            return '<div class="time-picker-container flex items-center gap-0.5">' +
+                '<select id="' + id + '-h" class="' + sc + ' w-[34px] py-1 text-center" ' + onch + '>' + hourOpts + '</select>' +
                 '<span class="text-xs font-bold text-slate-400 mx-0.5 select-none">:</span>' +
-                '<select id="' + id + '-m" class="' + sc + ' w-14" ' + onch + '>' + minOpts + '</select>' +
-                '<select id="' + id + '-ampm" class="' + sc + ' w-14 text-rose-600 dark:text-rose-400" ' + onch + '>' +
+                '<select id="' + id + '-m" class="' + sc + ' w-[40px] py-1 text-center" ' + onch + '>' + minOpts + '</select>' +
+                '<select id="' + id + '-ampm" class="' + sc + ' w-[44px] py-1 text-center text-rose-600 dark:text-rose-455" ' + onch + '>' +
                     '<option value="AM"' + (ampm === 'AM' ? ' selected' : '') + '>AM</option>' +
                     '<option value="PM"' + (ampm === 'PM' ? ' selected' : '') + '>PM</option>' +
                 '</select>' +
@@ -2829,7 +2851,7 @@
                                 </div>
                                 
                                 <!-- Subject + Teacher stacked in the same column -->
-                                <div class="col-span-1 md:col-span-6 w-full space-y-2">
+                                <div class="col-span-1 md:col-span-4 w-full space-y-2">
                                     <div>
                                         <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Subject</label>
                                         <input type="text" id="tt-${day}-P${p}-subject" list="subjects-list"
@@ -2855,7 +2877,7 @@
                                         </div>
                                     </div>
                                 </div>
-
+ 
                                 <div class="col-span-1 md:col-span-2 w-full">
                                     <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Duration Preset</label>
                                     <select id="tt-${day}-P${p}-preset" onchange="autoSetEndTime('${day}', 'P${p}', this.value)" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
@@ -2864,13 +2886,13 @@
                                         <option value="2" ${currentHours==='2'?'selected':''}>2 Hours</option>
                                     </select>
                                 </div>
-
-                                <div class="col-span-1 md:col-span-2 w-full">
+ 
+                                <div class="col-span-1 md:col-span-3 w-full">
                                     <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Start Time</label>
                                     ${buildTimePicker12h(`tt-${day}-P${p}-start`, entry.start_time || '', `autoSetEndTime('${day}', 'P${p}')`)}
                                 </div>
-
-                                <div class="col-span-1 md:col-span-1 w-full">
+ 
+                                <div class="col-span-1 md:col-span-2 w-full">
                                     <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">End Time</label>
                                     ${buildTimePicker12h(`tt-${day}-P${p}-end`, entry.end_time || '')}
                                 </div>
