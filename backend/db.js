@@ -84,6 +84,7 @@ async function initDb() {
         email      TEXT,
         phone      TEXT,
         photo_url  TEXT,
+        subjects   TEXT[],
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
 
@@ -148,6 +149,12 @@ async function initDb() {
         submitted_at   TIMESTAMPTZ DEFAULT NOW(),
         reviewed_at    TIMESTAMPTZ
       );
+    `);
+
+    // ─── Non-breaking column migrations ──────────────────────────────────────
+    // Add subjects[] array column to teachers if it doesn't exist (existing installs)
+    await client.query(`
+      ALTER TABLE teachers ADD COLUMN IF NOT EXISTS subjects TEXT[];
     `);
 
     // ─── Seed owner accounts ─────────────────────────────────────────────────

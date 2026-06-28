@@ -44,6 +44,20 @@ router.post('/', authenticate, requireRole('OWNER'), async (req, res) => {
       if (r.rows[0]) resolvedTeacherName = `${r.rows[0].first_name} ${r.rows[0].last_name}`.trim();
     }
 
+    // ── Conflict check: same teacher already assigned to a DIFFERENT class at this slot
+    if (resolvedTeacherName) {
+      const conflict = await db.query(
+        'SELECT id, class FROM timetable WHERE teacher_name = $1 AND day = $2 AND period = $3 AND class != $4',
+        [resolvedTeacherName, day, period, cls]
+      );
+      if (conflict.rows.length > 0) {
+        const conflictClass = conflict.rows[0].class;
+        return res.status(400).json({
+          error: `Error: The teacher is not available at this time slot. Already assigned to class "${conflictClass}" on ${day}, Period ${period}.`
+        });
+      }
+    }
+
     const { rows: [entry] } = await db.query(`
       INSERT INTO timetable (class, day, period, subject, teacher_name, start_time, end_time, created_by, updated_at)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())
@@ -78,6 +92,21 @@ router.post('/bulk', authenticate, requireRole('OWNER'), async (req, res) => {
           const r = await client.query('SELECT first_name, last_name FROM teachers WHERE LOWER(subject) = LOWER($1)', [e.subject.trim()]);
           if (r.rows[0]) resolvedTeacherName = `${r.rows[0].first_name} ${r.rows[0].last_name}`.trim();
         }
+
+        // ── Conflict check: same teacher already assigned to a DIFFERENT class at this slot
+        if (resolvedTeacherName) {
+          const conflict = await client.query(
+            'SELECT id, class FROM timetable WHERE teacher_name = $1 AND day = $2 AND period = $3 AND class != $4',
+            [resolvedTeacherName, e.day, e.period, cls]
+          );
+          if (conflict.rows.length > 0) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({
+              error: `Error: The teacher "${resolvedTeacherName}" is not available at this time slot. Already assigned to class "${conflict.rows[0].class}" on ${e.day}, Period ${e.period}.`
+            });
+          }
+        }
+
         await client.query(`
           INSERT INTO timetable (class, day, period, subject, teacher_name, start_time, end_time, created_by, updated_at)
           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())
