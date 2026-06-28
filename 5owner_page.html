@@ -2472,12 +2472,14 @@
                 for (let period = 1; period <= 8; period++) {
                     if (period <= periodCount) {
                         const subjectEl = document.getElementById(`tt-${day}-P${period}-subject`);
+                        const teacherEl = document.getElementById(`tt-${day}-P${period}-teacher`);
                         const startEl = document.getElementById(`tt-${day}-P${period}-start`);
                         const endEl = document.getElementById(`tt-${day}-P${period}-end`);
                         entries.push({ 
                             day, 
                             period, 
                             subject: subjectEl ? subjectEl.value.trim() : '',
+                            teacher_name: teacherEl ? teacherEl.value : '',
                             start_time: startEl ? startEl.value : '',
                             end_time: endEl ? endEl.value : ''
                         });
@@ -2486,6 +2488,7 @@
                             day, 
                             period, 
                             subject: 'N/A',
+                            teacher_name: '',
                             start_time: '',
                             end_time: ''
                         });
