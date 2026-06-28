@@ -2816,7 +2816,13 @@
                 dl.id = 'subjects-list';
                 document.body.appendChild(dl);
             }
-            const uniqueSubjects = [...new Set((managerState.teachers || []).map(t => t.subject))].filter(Boolean);
+            const uniqueSubjects = [...new Set(
+                (managerState.teachers || []).flatMap(t => {
+                    const arr = Array.isArray(t.subjects) && t.subjects.length > 0
+                        ? t.subjects : (t.subject ? [t.subject] : []);
+                    return arr;
+                })
+            )].filter(Boolean);
             dl.innerHTML = uniqueSubjects.map(s => `<option value="${s}">`).join('');
  
             // Fetch current timetable entries for this class
@@ -2828,7 +2834,8 @@
                     existing[`${e.day}-${e.period}`] = {
                         subject: e.subject,
                         start_time: e.start_time,
-                        end_time: e.end_time
+                        end_time: e.end_time,
+                        teacher_name: e.teacher_name
                     };
                 });
             } catch(_) {}
@@ -2843,6 +2850,7 @@
                 `).join('');
             }
 
+            const datesMap = getDatesOfCurrentWeek();
             container.innerHTML = '';
             days.forEach(day => {
                 const dayGrid = document.createElement('div');
@@ -2850,54 +2858,98 @@
                 dayGrid.className = 'space-y-4';
                 if (day !== activeTTDay) dayGrid.classList.add('hidden');
 
-                let rowsHtml = '';
-                for (let p = 1; p <= periodCount; p++) {
-                    const entry = existing[`${day}-${p}`] || {subject:'', start_time:'', end_time:''};
-                    
-                    // Detect if it is currently 1 or 2 hours
-                    let currentHours = "";
-                    if (entry.start_time && entry.end_time) {
-                        const [sH, sM] = entry.start_time.split(':').map(Number);
-                        const [eH, eM] = entry.end_time.split(':').map(Number);
-                        const diffMin = (eH * 60 + eM) - (sH * 60 + sM);
-                        if (diffMin === 60) currentHours = "1";
-                        else if (diffMin === 120) currentHours = "2";
-                    }
+                const dateStr = datesMap[day];
+                const holiday = (managerState._holidays || []).find(h => h.date === dateStr);
 
-                    rowsHtml += `
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all hover:border-rose-500/20">
-                            <div class="col-span-1 flex items-center gap-2">
-                                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-455 font-bold text-xs">P${p}</span>
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider md:hidden">Period ${p}</span>
+                if (holiday) {
+                    dayGrid.innerHTML = `
+                        <div class="p-8 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-2xl space-y-3">
+                            <div class="w-16 h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center text-3xl">
+                                <i class="fa-solid fa-umbrella-beach text-amber-600 dark:text-amber-400 animate-bounce"></i>
                             </div>
-                            
-                            <div class="col-span-1 md:col-span-4 w-full">
-                                <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Subject</label>
-                                <input type="text" id="tt-${day}-P${p}-subject" list="subjects-list" value="${entry.subject || ''}" placeholder="e.g. Mathematics" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
-                            </div>
-
-                            <div class="col-span-1 md:col-span-3 w-full">
-                                <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Duration Preset</label>
-                                <select id="tt-${day}-P${p}-preset" onchange="autoSetEndTime('${day}', 'P${p}', this.value)" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
-                                    <option value="">Custom Duration</option>
-                                    <option value="1" ${currentHours==='1'?'selected':''}>1 Hour Lecture</option>
-                                    <option value="2" ${currentHours==='2'?'selected':''}>2 Hour Lecture</option>
-                                </select>
-                            </div>
-
-                            <div class="col-span-1 md:col-span-2 w-full">
-                                <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Start Time</label>
-                                ${buildTimePicker12h(`tt-${day}-P${p}-start`, entry.start_time || '', `autoSetEndTime('${day}', 'P${p}')`)}
-                            </div>
-
-                            <div class="col-span-1 md:col-span-2 w-full">
-                                <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">End Time</label>
-                                ${buildTimePicker12h(`tt-${day}-P${p}-end`, entry.end_time || '')}
-                            </div>
+                            <h3 class="text-lg font-bold text-amber-800 dark:text-amber-300">It's a School Holiday!</h3>
+                            <p class="text-xs text-amber-600 dark:text-amber-400 font-semibold">${holiday.label || 'No classes scheduled today.'}</p>
+                            <p class="text-[10px] text-slate-400 italic">Timetable editing for this day is locked. Remove holiday below to edit.</p>
                         </div>
                     `;
+                } else {
+                    let rowsHtml = '';
+                    for (let p = 1; p <= periodCount; p++) {
+                        const entry = existing[`${day}-${p}`] || {subject:'', start_time:'', end_time:'', teacher_name:''};
+                        
+                        // Detect if it is currently 1 or 2 hours
+                        let currentHours = "";
+                        if (entry.start_time && entry.end_time) {
+                            const [sH, sM] = entry.start_time.split(':').map(Number);
+                            const [eH, eM] = entry.end_time.split(':').map(Number);
+                            const diffMin = (eH * 60 + eM) - (sH * 60 + sM);
+                            if (diffMin === 60) currentHours = "1";
+                            else if (diffMin === 120) currentHours = "2";
+                        }
+
+                        // Build teacher options — include all teachers for override capability
+                        const teacherOptions = (managerState.teachers || []).map(t =>
+                            `<option value="${t.name}" ${t.name === (entry.teacher_name||'') ? 'selected' : ''}>${t.name} (${(t.subjects&&t.subjects[0])||t.subject||''})</option>`
+                        ).join('');
+
+                        rowsHtml += `
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start p-4 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all hover:border-rose-500/20" id="tt-row-${day}-P${p}">
+                                <div class="col-span-1 flex items-center gap-2 pt-1">
+                                    <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-455 font-bold text-xs">P${p}</span>
+                                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider md:hidden">Period ${p}</span>
+                                </div>
+                                
+                                <!-- Subject + Teacher stacked in the same column -->
+                                <div class="col-span-1 md:col-span-6 w-full space-y-2">
+                                    <div>
+                                        <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Subject</label>
+                                        <input type="text" id="tt-${day}-P${p}-subject" list="subjects-list"
+                                            value="${entry.subject || ''}"
+                                            placeholder="e.g. Mathematics"
+                                            oninput="resolveTeacherForSlot('${day}','P${p}', this.value)"
+                                            class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">
+                                            <i class="fa-solid fa-chalkboard-user text-indigo-400 mr-1"></i>Teacher
+                                            <span class="font-normal text-slate-300 ml-1">(auto or override)</span>
+                                        </label>
+                                        <div class="relative" id="tt-${day}-P${p}-teacher-wrap">
+                                            <select id="tt-${day}-P${p}-teacher"
+                                                class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 appearance-none pr-8">
+                                                <option value="">— no teacher —</option>
+                                                ${teacherOptions}
+                                            </select>
+                                            <span id="tt-${day}-P${p}-teacher-badge" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-emerald-500 hidden">
+                                                <i class="fa-solid fa-circle-check"></i> Auto
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-span-1 md:col-span-2 w-full">
+                                    <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Duration Preset</label>
+                                    <select id="tt-${day}-P${p}-preset" onchange="autoSetEndTime('${day}', 'P${p}', this.value)" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
+                                        <option value="">Custom</option>
+                                        <option value="1" ${currentHours==='1'?'selected':''}>1 Hour</option>
+                                        <option value="2" ${currentHours==='2'?'selected':''}>2 Hours</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-span-1 md:col-span-2 w-full">
+                                    <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">Start Time</label>
+                                    ${buildTimePicker12h(`tt-${day}-P${p}-start`, entry.start_time || '', `autoSetEndTime('${day}', 'P${p}')`)}
+                                </div>
+
+                                <div class="col-span-1 md:col-span-1 w-full">
+                                    <label class="block md:hidden text-[9px] font-bold text-slate-400 uppercase mb-1">End Time</label>
+                                    ${buildTimePicker12h(`tt-${day}-P${p}-end`, entry.end_time || '')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    dayGrid.innerHTML = rowsHtml;
                 }
-                dayGrid.innerHTML = rowsHtml;
                 container.appendChild(dayGrid);
             });
 
@@ -2906,6 +2958,153 @@
 
             // Restore any cached/uncommitted form inputs (like typed subjects, times etc.)
             PersistState.restore();
+
+            // After grid renders, load holidays so tabs get styled correctly
+            loadHolidays();
+        };
+
+        // ─── Auto-resolve teacher when subject is typed ───────────────────────────
+        const _teacherResolveTimers = {};
+        window.resolveTeacherForSlot = function(day, period, subjectValue) {
+            const key = `${day}-${period}`;
+            clearTimeout(_teacherResolveTimers[key]);
+
+            const teacherSel   = document.getElementById(`tt-${day}-${period}-teacher`);
+            const teacherBadge = document.getElementById(`tt-${day}-${period}-teacher-badge`);
+            if (!teacherSel) return;
+
+            const trimmed = (subjectValue || '').trim();
+            if (!trimmed) {
+                teacherSel.value = '';
+                if (teacherBadge) teacherBadge.classList.add('hidden');
+                return;
+            }
+
+            _teacherResolveTimers[key] = setTimeout(async () => {
+                try {
+                    // 1. Local match first (instant, no network)
+                    const localMatch = (managerState.teachers || []).find(t => {
+                        const arr = Array.isArray(t.subjects) && t.subjects.length > 0
+                            ? t.subjects : (t.subject ? [t.subject] : []);
+                        return arr.some(s => s.toLowerCase() === trimmed.toLowerCase());
+                    });
+                    if (localMatch) {
+                        teacherSel.value = localMatch.name;
+                        if (teacherBadge) teacherBadge.classList.remove('hidden');
+                        return;
+                    }
+                    // 2. API fallback
+                    const res = await fetch(`${API}/timetable/teacher-by-subject?subject=${encodeURIComponent(trimmed)}`, { headers: authHeaders() });
+                    if (!res.ok) return;
+                    const matches = await res.json();
+                    if (matches.length > 0) {
+                        teacherSel.value = matches[0].name;
+                        if (teacherBadge) teacherBadge.classList.remove('hidden');
+                    } else {
+                        teacherSel.value = '';
+                        if (teacherBadge) teacherBadge.classList.add('hidden');
+                    }
+                } catch (_) {}
+            }, 350);
+        };
+
+        // ─── Holiday Manager functions ────────────────────────────────────────────
+        managerState._holidays = managerState._holidays || [];
+
+        async function loadHolidays() {
+            try {
+                const res = await fetch(`${API}/timetable/holidays`, { headers: authHeaders() });
+                if (!res.ok) return;
+                managerState._holidays = await res.json();
+                renderHolidaysList();
+                applyHolidayStyleToTabs();
+            } catch(_) {}
+        }
+
+        function renderHolidaysList() {
+            const listEl = document.getElementById('holidays-list');
+            if (!listEl) return;
+            const holidays = managerState._holidays || [];
+            if (holidays.length === 0) {
+                listEl.innerHTML = '<span class="text-xs text-slate-400 font-medium italic">No holidays scheduled yet.</span>';
+                return;
+            }
+            listEl.innerHTML = holidays.map(h => {
+                const d   = new Date(h.date + 'T00:00:00');
+                const fmt = d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+                const dn  = d.toLocaleDateString('en-GB', { weekday: 'short' });
+                return `
+                    <div class="flex items-center gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl text-xs font-bold text-amber-800 dark:text-amber-300 group">
+                        <i class="fa-solid fa-calendar-xmark text-amber-500"></i>
+                        <span>${dn}, ${fmt}</span>
+                        <span class="text-amber-500 font-normal">·</span>
+                        <span class="text-amber-600 dark:text-amber-400 font-semibold">${h.label}</span>
+                        <button onclick="unmarkHoliday('${h.date}')" title="Remove holiday"
+                            class="ml-1 w-5 h-5 flex items-center justify-center rounded-full bg-amber-200 dark:bg-amber-900 hover:bg-rose-200 dark:hover:bg-rose-900 text-amber-600 hover:text-rose-600 transition-colors opacity-0 group-hover:opacity-100">
+                            <i class="fa-solid fa-xmark text-[10px]"></i>
+                        </button>
+                    </div>`;
+            }).join('');
+        }
+
+        function applyHolidayStyleToTabs() {
+            const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            const holidayDayNames = new Set(
+                (managerState._holidays || []).map(h => {
+                    return new Date(h.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long' });
+                })
+            );
+            days.forEach(day => {
+                const tab = document.getElementById(`tt-tab-${day}`);
+                if (!tab) return;
+                const old = tab.querySelector('.holiday-dot');
+                if (old) old.remove();
+                if (holidayDayNames.has(day)) {
+                    const dot = document.createElement('span');
+                    dot.className = 'holiday-dot inline-block w-1.5 h-1.5 rounded-full bg-amber-500 ml-1 mb-0.5 align-middle';
+                    dot.title = 'Holiday scheduled this day';
+                    tab.appendChild(dot);
+                }
+            });
+        }
+
+        window.markHoliday = async function() {
+            const dateEl  = document.getElementById('holiday-date-input');
+            const labelEl = document.getElementById('holiday-label-input');
+            const date    = dateEl?.value || '';
+            const label   = (labelEl?.value || '').trim() || 'Holiday';
+            if (!date) { triggerToastNotification('Please pick a date first.', 'rose'); return; }
+            try {
+                const res = await fetch(`${API}/timetable/holiday`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ date, label })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    triggerToastNotification(`"${label}" marked on ${date}.`, 'amber');
+                    if (dateEl)  dateEl.value  = '';
+                    if (labelEl) labelEl.value = '';
+                    await loadHolidays();
+                    loadTimetableSchedulerGrid(); // Reload to refresh grid & lock editing
+                } else {
+                    triggerToastNotification(data.error || 'Failed to mark holiday.', 'rose');
+                }
+            } catch(err) { triggerToastNotification(err.message, 'rose'); }
+        };
+
+        window.unmarkHoliday = async function(date) {
+            if (!confirm(`Remove holiday on ${date}?`)) return;
+            try {
+                const res = await fetch(`${API}/timetable/holiday/${date}`, { method: 'DELETE', headers: authHeaders() });
+                if (res.ok) {
+                    triggerToastNotification(`Holiday on ${date} removed.`, 'emerald');
+                    await loadHolidays();
+                    loadTimetableSchedulerGrid(); // Reload to unlock editing
+                } else {
+                    const data = await res.json();
+                    triggerToastNotification(data.error || 'Failed.', 'rose');
+                }
+            } catch(err) { triggerToastNotification(err.message, 'rose'); }
         };
 
         // ── Approve student profile ────────────────────────────────────────────

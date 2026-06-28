@@ -157,6 +157,17 @@ async function initDb() {
       ALTER TABLE teachers ADD COLUMN IF NOT EXISTS subjects TEXT[];
     `);
 
+    // Add holidays table for tracking school holiday dates
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS holidays (
+        id         SERIAL PRIMARY KEY,
+        date       TEXT NOT NULL UNIQUE,
+        label      TEXT NOT NULL DEFAULT 'Holiday',
+        created_by INTEGER REFERENCES users(id),
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
     // ─── Seed owner accounts ─────────────────────────────────────────────────
     const ownerHash1 = hashPassword('manager1234');
     await client.query(`

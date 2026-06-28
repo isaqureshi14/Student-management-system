@@ -26,6 +26,69 @@ router.get('/classes', authenticate, async (req, res) => {
   } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
+// GET /api/timetable/teacher-by-subject?subject=
+// Returns the teacher(s) who teach a given subject — used by the auto-populate UI
+router.get('/teacher-by-subject', authenticate, async (req, res) => {
+  const { subject } = req.query;
+  if (!subject) return res.json([]);
+  try {
+    // Match by primary subject column OR any element in subjects array
+    const { rows } = await db.query(
+      `SELECT id, first_name, last_name, subject, subjects, email, phone
+       FROM teachers
+       WHERE LOWER(subject) = LOWER($1)
+          OR EXISTS (
+            SELECT 1 FROM unnest(subjects) AS s WHERE LOWER(s) = LOWER($1)
+          )
+       ORDER BY first_name`,
+      [subject.trim()]
+    );
+    return res.json(rows.map(t => ({
+      id: t.id,
+      name: `${t.first_name} ${t.last_name}`.trim(),
+      subject: t.subject,
+      subjects: t.subjects || [t.subject]
+    })));
+  } catch (err) { return res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/timetable/holidays
+router.get('/holidays', authenticate, async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM holidays ORDER BY date ASC');
+    return res.json(rows);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/timetable/holiday — mark a date as holiday
+router.post('/holiday', authenticate, requireRole('OWNER'), async (req, res) => {
+  const { date, label } = req.body;
+  if (!date) return res.status(400).json({ error: 'date is required (YYYY-MM-DD)' });
+  // Basic date format validation
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
+    return res.status(400).json({ error: 'date must be in YYYY-MM-DD format' });
+  try {
+    const { rows: [holiday] } = await db.query(
+      `INSERT INTO holidays (date, label, created_by)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (date) DO UPDATE SET label = EXCLUDED.label, created_by = EXCLUDED.created_by
+       RETURNING *`,
+      [date, (label || 'Holiday').trim(), req.user.id]
+    );
+    return res.status(201).json(holiday);
+  } catch (err) { return res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/timetable/holiday/:date — unmark a holiday
+router.delete('/holiday/:date', authenticate, requireRole('OWNER'), async (req, res) => {
+  const { date } = req.params;
+  try {
+    const { rowCount } = await db.query('DELETE FROM holidays WHERE date = $1', [date]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Holiday not found' });
+    return res.json({ message: `Holiday on ${date} removed` });
+  } catch (err) { return res.status(500).json({ error: err.message }); }
+});
+
 // POST /api/timetable — UPSERT
 router.post('/', authenticate, requireRole('OWNER'), async (req, res) => {
   const { class: cls, day, period, subject, teacher_name, start_time, end_time } = req.body;

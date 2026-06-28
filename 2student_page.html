@@ -698,6 +698,7 @@
             // Timetable day selection storage and blank arrays to receive future dynamic imports
             selectedTimetableDay: "Monday",
             timetable: [], // SKELETON: No hardcoded entries. Intended to be streamed.
+            holidays: [],  // School holiday dates
             
             // Notes array storage to collect data transmitted from classroom teachers
             notes: [],     // SKELETON: No hardcoded entries. Designed for instructor broadcasts.
@@ -1108,12 +1109,50 @@
             renderTimetableData();
         }
 
+        function getDatesOfCurrentWeek() {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + distanceToMonday);
+            
+            const dates = {};
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                dates[dayNames[i]] = `${yyyy}-${mm}-${dd}`;
+            }
+            return dates;
+        }
+
         // Renders timetable information. Includes stylized loading state skeletons if no data is present.
         function renderTimetableData() {
             const container = document.getElementById('timetable-list-container');
             if (!container) return;
 
             container.innerHTML = '';
+
+            // Check if selected day is marked as holiday
+            const datesMap = getDatesOfCurrentWeek();
+            const selectedDate = datesMap[appState.selectedTimetableDay];
+            const holiday = (appState.holidays || []).find(h => h.date === selectedDate);
+
+            if (holiday) {
+                container.innerHTML = `
+                    <div class="p-8 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-2xl space-y-3">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-500 flex items-center justify-center text-3xl">
+                            <i class="fa-solid fa-umbrella-beach text-amber-600 dark:text-amber-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-amber-800 dark:text-amber-300">It's a School Holiday!</h3>
+                        <p class="text-xs text-amber-600 dark:text-amber-400 font-semibold">${holiday.label || 'No classes scheduled today.'}</p>
+                    </div>
+                `;
+                return;
+            }
 
             // Filter timetable items assigned to the currently selected active weekday
             const filteredLectures = appState.timetable.filter(lecture => lecture.day === appState.selectedTimetableDay);
@@ -1449,16 +1488,18 @@
                 renderTestReportSelectors();
                 renderSelectedTestReport();
 
-                // Load attendance, leaves, and timetable in parallel
-                const [aRes, lRes, tRes] = await Promise.all([
+                // Load attendance, leaves, timetable, and holidays in parallel
+                const [aRes, lRes, tRes, hRes] = await Promise.all([
                     fetch(`${API}/attendance?student_id=${user.linked_id}`, { headers: authHeaders() }),
                     fetch(`${API}/leaves?student_id=${user.linked_id}`, { headers: authHeaders() }),
-                    student.class ? fetch(`${API}/timetable?class=${encodeURIComponent(student.class)}`, { headers: authHeaders() }) : Promise.resolve(null)
+                    student.class ? fetch(`${API}/timetable?class=${encodeURIComponent(student.class)}`, { headers: authHeaders() }) : Promise.resolve(null),
+                    fetch(`${API}/timetable/holidays`, { headers: authHeaders() })
                 ]);
 
                 const attData = await aRes.json();
                 const leavesData = await lRes.json();
                 const ttData = tRes ? await tRes.json() : [];
+                appState.holidays = hRes ? await hRes.json() : [];
 
                 const approvedLeaves = leavesData.filter(l => l.status === 'APPROVED');
                 const isDateWithinRange = (dateStr, fromStr, toStr) => {

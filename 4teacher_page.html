@@ -694,6 +694,7 @@
             
             // Timetable Base State (Empty by default, to be loaded from dynamic engine)
             timetable: {},
+            holidays: [], // School holiday dates
 
             // Teacher Notes Base State
             notes: [
@@ -1275,6 +1276,26 @@
 
         /* ------------------ NEW TIMETABLE SECTION CORES ------------------ */
 
+        function getDatesOfCurrentWeek() {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + distanceToMonday);
+            
+            const dates = {};
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                dates[dayNames[i]] = `${yyyy}-${mm}-${dd}`;
+            }
+            return dates;
+        }
+
         // Render dynamic schedule rows in table
         function renderTimetableMatrix() {
             const tbody = document.getElementById('timetable-matrix-tbody');
@@ -1282,28 +1303,42 @@
             tbody.innerHTML = '';
 
             const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const datesMap = getDatesOfCurrentWeek();
             
             days.forEach(day => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-slate-100 dark:border-slate-700/40 hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-all";
                 
-                const slots = teacherDb.timetable[day] || {};
-                const renderSlot = (slotText) => {
-                    if (slotText && slotText !== "N/A") {
-                        return `<span class="px-2.5 py-1 bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 rounded-lg font-bold">${slotText}</span>`;
-                    }
-                    return `<span class="text-slate-300 dark:text-slate-600 font-normal">—</span>`;
-                };
+                const dateStr = datesMap[day];
+                const holiday = (teacherDb.holidays || []).find(h => h.date === dateStr);
 
-                tr.innerHTML = `
-                    <td class="py-4 px-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider">${day}</td>
-                    <td class="py-4 px-4">${renderSlot(slots.P1)}</td>
-                    <td class="py-4 px-4">${renderSlot(slots.P2)}</td>
-                    <td class="py-4 px-4">${renderSlot(slots.P3)}</td>
-                    <td class="py-4 px-4">${renderSlot(slots.P4)}</td>
-                    <td class="py-4 px-4">${renderSlot(slots.P5)}</td>
-                    <td class="py-4 px-4">${renderSlot(slots.P6)}</td>
-                `;
+                if (holiday) {
+                    tr.className += " bg-amber-50/40 dark:bg-amber-950/10 text-amber-600 dark:text-amber-400";
+                    tr.innerHTML = `
+                        <td class="py-4 px-4 font-bold uppercase tracking-wider">${day}</td>
+                        <td colspan="6" class="py-4 px-4 font-bold text-center italic">
+                            <i class="fa-solid fa-umbrella-beach text-amber-500 mr-1.5 animate-bounce"></i> Holiday: ${holiday.label || 'School Holiday'}
+                        </td>
+                    `;
+                } else {
+                    const slots = teacherDb.timetable[day] || {};
+                    const renderSlot = (slotText) => {
+                        if (slotText && slotText !== "N/A") {
+                            return `<span class="px-2.5 py-1 bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 rounded-lg font-bold">${slotText}</span>`;
+                        }
+                        return `<span class="text-slate-300 dark:text-slate-600 font-normal">—</span>`;
+                    };
+
+                    tr.innerHTML = `
+                        <td class="py-4 px-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider">${day}</td>
+                        <td class="py-4 px-4">${renderSlot(slots.P1)}</td>
+                        <td class="py-4 px-4">${renderSlot(slots.P2)}</td>
+                        <td class="py-4 px-4">${renderSlot(slots.P3)}</td>
+                        <td class="py-4 px-4">${renderSlot(slots.P4)}</td>
+                        <td class="py-4 px-4">${renderSlot(slots.P5)}</td>
+                        <td class="py-4 px-4">${renderSlot(slots.P6)}</td>
+                    `;
+                }
                 tbody.appendChild(tr);
             });
         }
@@ -1710,9 +1745,14 @@
                 // All unique classes from students
                 const allClasses = [...new Set(allStudents.map(s => s.class).filter(Boolean))].sort();
 
-                // Timetable: get all timetable entries where teacher_name matches
-                const ttRes = await fetch(`${API}/timetable`, { headers: authHeaders() });
+                // Timetable & Holidays: get all timetable entries and school holidays
+                const [ttRes, hRes] = await Promise.all([
+                    fetch(`${API}/timetable`, { headers: authHeaders() }),
+                    fetch(`${API}/timetable/holidays`, { headers: authHeaders() })
+                ]);
                 const allTT = await ttRes.json();
+                const holidaysData = hRes ? await hRes.json() : [];
+                teacherDb.holidays = holidaysData;
                 const teacherFullName = `${teacher.first_name} ${teacher.last_name}`.trim();
                 const myTT = allTT.filter(e => {
                     if (!e.teacher_name) return false;
