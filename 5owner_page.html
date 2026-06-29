@@ -1172,7 +1172,8 @@
                     <td class="py-4 px-6 font-semibold">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700">
-                                ${photoSrc ? `<img src="${photoSrc}" alt="${student.firstName}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user-graduate"></i>`}
+                                <img src="${photoSrc}" alt="${student.firstName}" class="w-full h-full object-cover ${photoSrc ? '' : 'hidden'}" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                                <i class="fa-solid fa-user-graduate ${photoSrc ? 'hidden' : ''}"></i>
                             </div>
                             <div>
                                 <p class="text-slate-900 dark:text-white leading-tight font-bold">${fullName}</p>
@@ -1477,15 +1478,17 @@
                                     <p class="font-extrabold text-[10px] text-amber-800 dark:text-amber-400 uppercase tracking-wider mb-1">Profile Photo Update</p>
                                     <div class="flex items-center gap-3">
                                         <div class="text-center">
-                                            <div class="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">
-                                                ${oldPhoto ? `<img src="${oldPhoto}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-slate-400 mt-2"></i>`}
+                                            <div class="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+                                                <img src="${oldPhoto}" class="w-full h-full object-cover ${oldPhoto ? '' : 'hidden'}" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                                                <i class="fa-solid fa-user text-slate-400 ${oldPhoto ? 'hidden' : ''}"></i>
                                             </div>
                                             <span class="text-[9px] text-slate-400 font-bold">Current</span>
                                         </div>
                                         <i class="fa-solid fa-arrow-right text-slate-400 text-xs"></i>
                                         <div class="text-center">
-                                            <div class="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">
-                                                <img src="${newPhoto}" class="w-full h-full object-cover">
+                                            <div class="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+                                                <img src="${newPhoto}" class="w-full h-full object-cover ${newPhoto ? '' : 'hidden'}" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                                                <i class="fa-solid fa-user text-slate-400 ${newPhoto ? 'hidden' : ''}"></i>
                                             </div>
                                             <span class="text-[9px] text-amber-600 dark:text-amber-400 font-bold">Proposed</span>
                                         </div>

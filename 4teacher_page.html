@@ -1421,12 +1421,17 @@
                     }
                     
                     fileHtml = `
-                        <div class="pt-3.5 border-t border-slate-100 dark:border-slate-800/60">
+                        <div class="pt-3.5 border-t border-slate-100 dark:border-slate-800/60 space-y-2">
                             <a href="${note.fileUrl}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${fileColorTheme} shadow-sm">
                                 <i class="fa-solid ${fileIcon} text-sm"></i>
                                 <span class="truncate max-w-[140px]">${note.fileName || 'Attachment'}</span>
                                 <i class="fa-solid fa-arrow-down-to-line text-[10px] opacity-70"></i>
                             </a>
+                            ${['jpg','jpeg','png','gif','webp'].includes(ext) ? `
+                            <div class="mt-2 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 max-w-xs max-h-48 bg-slate-50 dark:bg-slate-900">
+                                <img src="${note.fileUrl}" alt="Attachment Preview" class="w-full h-full object-cover cursor-pointer" onclick="window.open(this.src, '_blank')" onerror="handleNoteImageLoadError(this, '${note.id}')">
+                            </div>
+                            ` : ''}
                         </div>
                     `;
                 }
@@ -1604,6 +1609,20 @@
             }
         }
 
+        async function handleNoteImageLoadError(imgElement, noteId) {
+            if (imgElement.dataset.retryAttempted) {
+                if (imgElement.parentElement) imgElement.parentElement.classList.add('hidden');
+                return;
+            }
+            imgElement.dataset.retryAttempted = "true";
+            console.warn("Note image load failed. Fetching fresh notes from server...");
+            try {
+                await loadTeacherData();
+            } catch (err) {
+                console.error("Failed to re-fetch teacher data:", err);
+            }
+        }
+
         // Deletes note ID from state (and API)
         async function deleteNote(id) {
             try {
@@ -1666,6 +1685,10 @@
                 const sub = teacherDb.teacherInfo.subject || 'Subject';
                 headerText.textContent = pageId === 'timetable'          ? `${sub} Timetable`
                                        : headerTitles[pageId] || 'Dashboard';
+            }
+
+            if (pageId === 'notes') {
+                loadTeacherData().catch(e => console.error("Error reloading notes:", e));
             }
 
             // Refresh bulk panels when navigated to

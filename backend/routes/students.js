@@ -198,12 +198,29 @@ router.put('/:id', authenticate, async (req, res) => {
   } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
+// ─── Safely delete file helper ────────────────────────────────────────────────
+const deleteFile = (relativeUrl) => {
+  if (!relativeUrl) return;
+  const filePath = path.join(__dirname, '..', relativeUrl);
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (_) {}
+  }
+};
+
 // ─── POST /api/students/:id/approve ──────────────────────────────────────────
 router.post('/:id/approve', authenticate, requireRole('OWNER'), async (req, res) => {
   const { id } = req.params;
   try {
-    const { rows } = await db.query('SELECT id FROM students WHERE id = $1', [id]);
-    if (!rows[0]) return res.status(404).json({ error: 'Record not found' });
+    const { rows } = await db.query('SELECT photo_url, pending_photo_url FROM students WHERE id = $1', [id]);
+    const student = rows[0];
+    if (!student) return res.status(404).json({ error: 'Record not found' });
+
+    // Clean up obsolete approved photo if it's being replaced
+    if (student.pending_photo_url && student.pending_photo_url !== student.photo_url) {
+      deleteFile(student.photo_url);
+    }
 
     await db.query(`
       UPDATE students SET
@@ -232,8 +249,14 @@ router.post('/:id/approve', authenticate, requireRole('OWNER'), async (req, res)
 router.delete('/:id', authenticate, requireRole('OWNER'), async (req, res) => {
   const { id } = req.params;
   try {
-    const { rows } = await db.query('SELECT id FROM students WHERE id = $1', [id]);
-    if (!rows[0]) return res.status(404).json({ error: 'Record not found' });
+    const { rows } = await db.query('SELECT photo_url, pending_photo_url FROM students WHERE id = $1', [id]);
+    const student = rows[0];
+    if (!student) return res.status(404).json({ error: 'Record not found' });
+
+    // Delete photo files from disk
+    deleteFile(student.photo_url);
+    deleteFile(student.pending_photo_url);
+
     await db.query('DELETE FROM students WHERE id = $1', [id]);
     await db.query("DELETE FROM users WHERE linked_id = $1 AND role IN ('STUDENT','PARENT')", [id]);
     return res.json({ message: 'Student deleted successfully' });
@@ -245,7 +268,7 @@ router.post('/:id/photo', authenticate, uploadPhoto.single('photo'), async (req,
   const { id } = req.params;
   const { role, linked_id } = req.user;
   try {
-    const { rows } = await db.query('SELECT id FROM students WHERE id = $1', [id]);
+    const { rows } = await db.query('SELECT id, photo_url, pending_photo_url FROM students WHERE id = $1', [id]);
     const student = rows[0];
     if (!student) return res.status(404).json({ error: 'Record not found' });
 
@@ -256,9 +279,17 @@ router.post('/:id/photo', authenticate, uploadPhoto.single('photo'), async (req,
 
     const photoUrl = `/uploads/photos/${req.file.filename}`;
     if (role === 'OWNER') {
+      const oldPhoto = student.photo_url;
       await db.query('UPDATE students SET photo_url = $1 WHERE id = $2', [photoUrl, id]);
+      if (oldPhoto && oldPhoto !== photoUrl) {
+        deleteFile(oldPhoto);
+      }
     } else {
+      const oldPending = student.pending_photo_url;
       await db.query("UPDATE students SET pending_photo_url = $1, profile_status = 'PENDING' WHERE id = $2", [photoUrl, id]);
+      if (oldPending && oldPending !== photoUrl) {
+        deleteFile(oldPending);
+      }
     }
 
     const updated = (await db.query('SELECT * FROM students WHERE id = $1', [id])).rows[0];

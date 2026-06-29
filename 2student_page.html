@@ -99,7 +99,7 @@
                 <div class="relative inline-block">
                     <div id="sidebar-photo-container" class="w-16 h-16 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center mx-auto bg-slate-50 dark:bg-slate-900 overflow-hidden">
                         <i id="sidebar-photo-placeholder" class="fa-solid fa-user text-slate-400 text-xl"></i>
-                        <img id="sidebar-photo" src="" alt="Student Profile" class="w-full h-full object-cover hidden" />
+                        <img id="sidebar-photo" src="" alt="Student Profile" class="w-full h-full object-cover hidden" onerror="handleImageLoadError(this)" />
                     </div>
                     <span class="absolute bottom-0 right-4 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></span>
                 </div>
@@ -259,7 +259,7 @@
                             <div class="relative group">
                                 <div id="front-photo-container" class="w-36 h-36 rounded-2xl border-4 border-white dark:border-slate-800 shadow-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden">
                                     <i id="front-photo-placeholder" class="fa-solid fa-user-tie text-slate-400 text-5xl animate-pulse"></i>
-                                    <img id="front-student-photo" src="" alt="Student Portrait" class="w-full h-full object-cover hidden" />
+                                    <img id="front-student-photo" src="" alt="Student Portrait" class="w-full h-full object-cover hidden" onerror="handleImageLoadError(this)" />
                                 </div>
                                 <span class="absolute -bottom-2 -right-2 bg-slate-400 text-white p-2 rounded-xl text-xs shadow-md"><i class="fa-solid fa-shield-halved"></i> Standby</span>
                             </div>
@@ -685,7 +685,9 @@
                 motherName: "",
                 motherPhone: "",
                 address: "",
-                photoUrl: ""
+                photoUrl: "",
+                pendingPhotoUrl: "",
+                profileStatus: ""
             },
             tests: [],
             attendance: {
@@ -826,8 +828,8 @@
                 renderAttendanceData();
             } else if (pageId === "timetable") {
                 renderTimetableData();
-            } else if (pageId === "notes") {
-                renderNotesData();
+            } else if (pageId === "notes" || pageId === "basic-info") {
+                loadStudentData().catch(e => console.error("Error reloading student data on switch:", e));
             }
         }
 
@@ -842,8 +844,11 @@
 
             const sidePhoto = document.getElementById('sidebar-photo');
             const sidePlaceholder = document.getElementById('sidebar-photo-placeholder');
-            if (s.photoUrl) {
-                sidePhoto.src = s.photoUrl.startsWith('http') || s.photoUrl.startsWith('data:') ? s.photoUrl : API_BASE + (s.photoUrl.startsWith('/') ? '' : '/') + s.photoUrl;
+            // If there's a pending photo and profile is pending, show pending photo for immediate feedback
+            const currentPhoto = (s.pendingPhotoUrl && s.profileStatus !== 'APPROVED') ? s.pendingPhotoUrl : s.photoUrl;
+
+            if (currentPhoto) {
+                sidePhoto.src = currentPhoto.startsWith('http') || currentPhoto.startsWith('data:') ? currentPhoto : API_BASE + (currentPhoto.startsWith('/') ? '' : '/') + currentPhoto;
                 sidePhoto.classList.remove('hidden');
                 sidePlaceholder.classList.add('hidden');
             } else {
@@ -857,8 +862,8 @@
             
             const frontPhoto = document.getElementById('front-student-photo');
             const frontPlaceholder = document.getElementById('front-photo-placeholder');
-            if (s.photoUrl) {
-                frontPhoto.src = s.photoUrl.startsWith('http') || s.photoUrl.startsWith('data:') ? s.photoUrl : API_BASE + (s.photoUrl.startsWith('/') ? '' : '/') + s.photoUrl;
+            if (currentPhoto) {
+                frontPhoto.src = currentPhoto.startsWith('http') || currentPhoto.startsWith('data:') ? currentPhoto : API_BASE + (currentPhoto.startsWith('/') ? '' : '/') + currentPhoto;
                 frontPhoto.classList.remove('hidden');
                 frontPlaceholder.classList.add('hidden');
             } else {
@@ -1332,12 +1337,17 @@
                     }
                     
                     fileHtml = `
-                        <div class="pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-700/60 space-y-2">
                             <a href="${note.fileUrl}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${fileColorTheme} shadow-sm">
                                 <i class="fa-solid ${fileIcon} text-sm"></i>
                                 <span class="truncate max-w-[200px]">${note.fileName || 'Attachment'}</span>
                                 <i class="fa-solid fa-arrow-down-to-line text-[10px] opacity-70"></i>
                             </a>
+                            ${['jpg','jpeg','png','gif','webp'].includes(ext) ? `
+                            <div class="mt-2 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 max-w-xs max-h-48 bg-slate-50 dark:bg-slate-900">
+                                <img src="${note.fileUrl}" alt="Attachment Preview" class="w-full h-full object-cover cursor-pointer" onclick="window.open(this.src, '_blank')" onerror="handleNoteImageLoadError(this, '${note.id}')">
+                            </div>
+                            ` : ''}
                         </div>
                     `;
                 }
@@ -1446,6 +1456,7 @@
                 appState.student.pendingMotherPhone  = student.pending_mother_phone;
                 appState.student.pendingAddress      = student.pending_address;
                 appState.student.pendingPhotoUrl     = student.pending_photo_url;
+                appState.student.profileStatus       = student.profile_status || '';
 
                 // Show profile approval status
                 const shieldEl = document.querySelector('.absolute.-bottom-2.-right-2');
@@ -1698,6 +1709,38 @@
                     await loadStudentData();
                 }
             } catch(err) { console.error(err); }
+        }
+
+        // Image Load Error Fallback for Auto URL Refreshing
+        async function handleImageLoadError(imgElement) {
+            if (imgElement.dataset.retryAttempted) {
+                imgElement.classList.add('hidden');
+                const placeholderId = imgElement.id === 'sidebar-photo' ? 'sidebar-photo-placeholder' : 'front-photo-placeholder';
+                const placeholder = document.getElementById(placeholderId);
+                if (placeholder) placeholder.classList.remove('hidden');
+                return;
+            }
+            imgElement.dataset.retryAttempted = "true";
+            console.warn("Profile image load failed. Fetching fresh URL from server...");
+            try {
+                await loadStudentData();
+            } catch (err) {
+                console.error("Failed to re-fetch student data:", err);
+            }
+        }
+
+        async function handleNoteImageLoadError(imgElement, noteId) {
+            if (imgElement.dataset.retryAttempted) {
+                if (imgElement.parentElement) imgElement.parentElement.classList.add('hidden');
+                return;
+            }
+            imgElement.dataset.retryAttempted = "true";
+            console.warn("Note image load failed. Fetching fresh notes from server...");
+            try {
+                await loadStudentData();
+            } catch (err) {
+                console.error("Failed to re-fetch notes data:", err);
+            }
         }
 
         let cropper = null;
